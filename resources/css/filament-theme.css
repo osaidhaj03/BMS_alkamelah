@@ -7,6 +7,8 @@
    - Danger: #BA4749 (أحمر/وردي)
    ========================================== */
 
+@source '../../vendor/andreia/filament-ui-switcher';
+
 :root {
     --primary-color: #2C6E4A;
     --secondary-color: #161E29;
