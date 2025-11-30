@@ -50,31 +50,11 @@ use Filament\Notifications\Notification;
 class BookResource extends Resource
 {
     protected static ?string $model = Book::class;
-    protected static ?string $navigationGroup = null;
+    protected static ?string $navigationGroup = 'المكتبة';
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
-    protected static ?string $navigationLabel = null;
-    protected static ?string $modelLabel = null;
-    protected static ?string $pluralModelLabel = null;
-
-    public static function getNavigationLabel(): string
-    {
-        return 'الكتب';
-    }
-
-    public static function getModelLabel(): string
-    {
-        return 'كتاب';
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return 'الكتب';
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'المكتبة';
-    }
+    protected static ?string $navigationLabel = 'الكتب';
+    protected static ?string $modelLabel = 'كتاب';
+    protected static ?string $pluralModelLabel = 'الكتب';
     
     protected static ?int $navigationSort = -10;
 
