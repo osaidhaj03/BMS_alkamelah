@@ -24,7 +24,7 @@ class BookResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
-    protected static string|UnitEnum|null $navigationGroup = 'إدارة المحتوى';
+    protected static ?string $navigationGroup = 'إدارة المحتوى';
 
     protected static ?int $navigationSort = 1;
 
