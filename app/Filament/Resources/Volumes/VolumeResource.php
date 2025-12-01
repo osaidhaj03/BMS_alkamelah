@@ -20,9 +20,26 @@ class VolumeResource extends Resource
 {
     protected static ?string $model = Volume::class;
 
-    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
-    protected static ?string $recordTitleAttribute = 'Volume';
+    protected static ?int $navigationSort = 5;
+
+    protected static ?string $recordTitleAttribute = 'volume_number';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'محتوى الكتب';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'مجلد';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'المجلدات';
+    }
 
     public static function form(Schema $schema): Schema
     {

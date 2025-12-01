@@ -20,9 +20,26 @@ class BookSectionResource extends Resource
 {
     protected static ?string $model = BookSection::class;
 
-    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
-    protected static ?string $recordTitleAttribute = 'Book';
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'إدارة المكتبة';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'قسم';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'أقسام الكتب';
+    }
 
     public static function form(Schema $schema): Schema
     {

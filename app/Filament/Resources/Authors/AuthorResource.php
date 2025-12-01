@@ -20,9 +20,26 @@ class AuthorResource extends Resource
 {
     protected static ?string $model = Author::class;
 
-    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static ?string $recordTitleAttribute = 'Author';
+    protected static ?int $navigationSort = 3;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'إدارة المكتبة';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'مؤلف';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'المؤلفين';
+    }
 
     public static function form(Schema $schema): Schema
     {

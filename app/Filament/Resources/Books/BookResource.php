@@ -20,9 +20,26 @@ class BookResource extends Resource
 {
     protected static ?string $model = Book::class;
 
-     // protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
-    protected static ?string $recordTitleAttribute = 'Book';
+    protected static ?int $navigationSort = 4;
+
+    protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'إدارة المكتبة';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'كتاب';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'الكتب';
+    }
 
     public static function form(Schema $schema): Schema
     {

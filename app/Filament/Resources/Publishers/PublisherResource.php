@@ -20,9 +20,26 @@ class PublisherResource extends Resource
 {
     protected static ?string $model = Publisher::class;
 
-    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
 
-    protected static ?string $recordTitleAttribute = 'Publisher';
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'إدارة المكتبة';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'ناشر';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'دور النشر';
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -20,9 +20,26 @@ class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
 
-    //protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static ?string $recordTitleAttribute = 'Page';
+    protected static ?int $navigationSort = 7;
+
+    protected static ?string $recordTitleAttribute = 'page_number';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'محتوى الكتب';
+    }
+
+    public static function getModelLabel(): string
+    {
+        return 'صفحة';
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return 'الصفحات';
+    }
 
     public static function form(Schema $schema): Schema
     {
