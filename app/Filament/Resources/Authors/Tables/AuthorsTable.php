@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Authors\Tables;
 
-use AlperenErsoy\Filament\Export\Actions\FilamentExportBulkAction;
-use AlperenErsoy\Filament\Export\Actions\FilamentExportHeaderAction;
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
+use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -11,8 +11,11 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AuthorsTable
 {
@@ -90,15 +93,41 @@ class AuthorsTable
                     ->default(0)
                     ->native(false),
 
-                SelectFilter::make('birth_date')
+                Filter::make('birth_date')
                     ->label('تاريخ الولادة')
-                    ->date()
-                    ->native(false),
+                    ->form([
+                        DatePicker::make('birth_from')->label('من تاريخ'),
+                        DatePicker::make('birth_until')->label('إلى تاريخ'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['birth_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('birth_date', '>=', $date),
+                            )
+                            ->when(
+                                $data['birth_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('birth_date', '<=', $date),
+                            );
+                    }),
 
-                SelectFilter::make('death_date')
+                Filter::make('death_date')
                     ->label('تاريخ الوفاة')
-                    ->date()
-                    ->native(false),
+                    ->form([
+                        DatePicker::make('death_from')->label('من تاريخ'),
+                        DatePicker::make('death_until')->label('إلى تاريخ'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['death_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('death_date', '>=', $date),
+                            )
+                            ->when(
+                                $data['death_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('death_date', '<=', $date),
+                            );
+                    }),
                     
             ])
             ->recordActions([
