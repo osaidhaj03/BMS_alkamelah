@@ -69,8 +69,6 @@ class AuthorsTable
                     ->toggleable(),
             ])
             ->filters([
-                //
-            
                 SelectFilter::make('madhhab')
                     ->label('المذهب')
                     ->options([
@@ -81,8 +79,8 @@ class AuthorsTable
                         'آخرون' => 'آخرون',
                     ])
                     ->default('المذهب الحنفي')
-                    ->native(false)
-//->live(),
+                    ->native(false),
+
                 SelectFilter::make('is_living')
                     ->label('على قيد الحياة')
                     ->options([
@@ -90,18 +88,17 @@ class AuthorsTable
                         0 => 'لا',
                     ])
                     ->default(0)
-                    ->native(false)
-                    //->live(),
+                    ->native(false),
+
                 SelectFilter::make('birth_date')
                     ->label('تاريخ الولادة')
                     ->date()
-                    ->native(false)
-                    //->live(),
+                    ->native(false),
+
                 SelectFilter::make('death_date')
                     ->label('تاريخ الوفاة')
                     ->date()
-                    ->native(false)
-                 //   ->live(),
+                    ->native(false),
                     
             ])
             ->recordActions([
