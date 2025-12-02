@@ -53,7 +53,7 @@ class AuthorForm
                                 'source-ai-transform',
                             ])
                             ->columnSpanFull()
-                            ->rows(10),
+                            ->minHeight('300px'),
                     ])
                      ->columnSpanFull(),
 
