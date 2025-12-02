@@ -17,33 +17,92 @@ class AuthorsTable
     {
         return $table
             ->columns([
-                TextColumn::make('full_name')
-                    ->searchable(),
-                ImageColumn::make('image'),
+
+                
+                TextColumn::make('first_name')
+                    ->label('الاسم الأول')
+                    ->toggleable(),
+                TextColumn::make('middle_name')
+                    ->label('الاسم الأوسط')
+                    ->toggleable(),
+                TextColumn::make('last_name')
+                    ->label('الاسم الأخير')
+                    ->toggleable(),
+                TextColumn::make('laqab')
+                    ->label('اللقب')
+                    ->toggleable()
+                    ->badge(),
+                TextColumn::make('kunyah')
+                    ->label('الكنية')
+                    ->toggleable()
+                    ->badge(),
                 TextColumn::make('madhhab')
+                    ->label('المذهب')
+                    ->toggleable()
                     ->badge(),
                 IconColumn::make('is_living')
+                    ->label('على قيد الحياة')
+                    ->toggleable()
                     ->boolean(),
                 TextColumn::make('birth_date')
+                    ->label('تاريخ الولادة')
+                    ->toggleable()
                     ->date()
                     ->sortable(),
                 TextColumn::make('death_date')
+                    ->label('تاريخ الوفاة')
+                    ->toggleable()
                     ->date()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('تاريخ الإنشاء')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('updated_at')
+                    ->label('تاريخ التحديث')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->filters([
                 //
+            
+                SelectFilter::make('madhhab')
+                    ->label('المذهب')
+                    ->options([
+                        'المذهب الحنفي' => 'المذهب الحنفي',
+                        'المذهب المالكي' => 'المذهب المالكي',
+                        'المذهب الشافعي' => 'المذهب الشافعي',
+                        'المذهب الحنبلي' => 'المذهب الحنبلي',
+                        'آخرون' => 'آخرون',
+                    ])
+                    ->default('المذهب الحنفي')
+                    ->native(false)
+                    ->live(),
+                SelectFilter::make('is_living')
+                    ->label('على قيد الحياة')
+                    ->options([
+                        1 => 'نعم',
+                        0 => 'لا',
+                    ])
+                    ->default(0)
+                    ->native(false)
+                    ->live(),
+                SelectFilter::make('birth_date')
+                    ->label('تاريخ الولادة')
+                    ->date()
+                    ->native(false)
+                    ->live(),
+                SelectFilter::make('death_date')
+                    ->label('تاريخ الوفاة')
+                    ->date()
+                    ->native(false)
+                    ->live(),
+                    
             ])
             ->recordActions([
-                ViewAction::make(),
+                //ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
