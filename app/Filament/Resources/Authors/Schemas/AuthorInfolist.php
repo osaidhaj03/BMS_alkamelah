@@ -31,11 +31,21 @@ class AuthorInfolist
                                 ])->columnSpan(1),
 
                                 Group::make([
-                                    TextEntry::make('full_name')
-                                        ->label('الاسم الكامل')
-                                        ->size(TextEntry\TextEntrySize::Large)
-                                        ->weight('bold')
-                                        ->placeholder('غير محدد'),
+                                    Grid::make(3)
+                                        ->schema([
+                                            TextEntry::make('first_name')
+                                                ->label('الاسم الأول')
+                                                ->weight('bold')
+                                                ->placeholder('غير محدد'),
+
+                                            TextEntry::make('middle_name')
+                                                ->label('الاسم الأوسط')
+                                                ->placeholder('غير محدد'),
+
+                                            TextEntry::make('last_name')
+                                                ->label('الاسم الأخير')
+                                                ->placeholder('غير محدد'),
+                                        ]),
 
                                     Grid::make(2)
                                         ->schema([
