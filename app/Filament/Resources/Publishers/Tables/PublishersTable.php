@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Publishers\Tables;
 
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
+use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -9,6 +11,8 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 
 class PublishersTable
@@ -96,9 +100,17 @@ class PublishersTable
                 //ViewAction::make(),
                 EditAction::make(),
             ])
+            ->headerActions([
+                FilamentExportHeaderAction::make('export')
+                    ->label('تصدير')
+                    ->color('success'),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    FilamentExportBulkAction::make('export')
+                        ->label('تصدير')
+                        ->color('success'),
                 ]),
             ]);
     }
