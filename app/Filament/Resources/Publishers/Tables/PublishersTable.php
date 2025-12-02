@@ -9,7 +9,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+
 
 class PublishersTable
 {
@@ -18,35 +18,82 @@ class PublishersTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('اسم الناشر')
+                    ->toggleable()
                     ->searchable(),
                 TextColumn::make('address')
+                    ->label('العنوان')
+                    ->toggleable()
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label('Email address')
+                    ->label('البريد الإلكتروني')
+                    ->toggleable()
                     ->searchable(),
                 TextColumn::make('phone')
+                    ->label('رقم الهاتف')
+                    ->toggleable()
                     ->searchable(),
                 TextColumn::make('website_url')
+                    ->label('الموقع الإلكتروني')
+                    ->toggleable()
                     ->searchable(),
-                ImageColumn::make('image'),
                 IconColumn::make('is_active')
+                    ->label('نشط')
+                    ->toggleable()
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('تاريخ الإنشاء')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('تاريخ التحديث')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('city')
+                TextColumn::make('country')
+                    ->label('الدولة')
+                    ->toggleable()
                     ->searchable(),
             ])
             ->filters([
+                SelectFilter::make('is_active')
+                    ->label('نشط')
+                    ->options([
+                        true => 'نعم',
+                        false => 'لا',
+                    ]),
+                SelectFilter::make('country')
+                    ->label('الدولة')
+                    ->options([
+                        'المملكة العربية السعودية' => 'المملكة العربية السعودية',
+                        'مصر' => 'مصر',
+                        'الإمارات العربية المتحدة' => 'الإمارات العربية المتحدة',
+                        'الكويت' => 'الكويت',
+                        'قطر' => 'قطر',
+                        'البحرين' => 'البحرين',
+                        'عمان' => 'عمان',
+                        'الأردن' => 'الأردن',
+                        'لبنان' => 'لبنان',
+                        'سوريا' => 'سوريا',
+                        'العراق' => 'العراق',
+                        'اليمن' => 'اليمن',
+                        'فلسطين' => 'فلسطين',
+                        'المغرب' => 'المغرب',
+                        'الجزائر' => 'الجزائر',
+                        'تونس' => 'تونس',
+                        'ليبيا' => 'ليبيا',
+                        'السودان' => 'السودان',
+                        'موريتانيا' => 'موريتانيا',
+                        'الصومال' => 'الصومال',
+                        'جيبوتي' => 'جيبوتي',
+                        'جزر القمر' => 'جزر القمر',
+                    ]),
+
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
+                //ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([

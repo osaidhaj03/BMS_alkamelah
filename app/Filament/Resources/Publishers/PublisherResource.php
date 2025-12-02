@@ -15,6 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+
 
 class PublisherResource extends Resource
 {
@@ -68,7 +70,7 @@ class PublisherResource extends Resource
         return [
             'index' => ListPublishers::route('/'),
             'create' => CreatePublisher::route('/create'),
-            'view' => ViewPublisher::route('/{record}'),
+            //'view' => ViewPublisher::route('/{record}'),
             'edit' => EditPublisher::route('/{record}/edit'),
         ];
     }

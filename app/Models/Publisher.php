@@ -13,7 +13,7 @@ class Publisher extends Model
     protected $fillable = [
         'name',
         'address',
-        'city',
+        'country',
         'email',
         'phone',
         'description',

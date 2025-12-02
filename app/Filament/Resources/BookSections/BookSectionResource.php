@@ -5,9 +5,7 @@ namespace App\Filament\Resources\BookSections;
 use App\Filament\Resources\BookSections\Pages\CreateBookSection;
 use App\Filament\Resources\BookSections\Pages\EditBookSection;
 use App\Filament\Resources\BookSections\Pages\ListBookSections;
-use App\Filament\Resources\BookSections\Pages\ViewBookSection;
 use App\Filament\Resources\BookSections\Schemas\BookSectionForm;
-use App\Filament\Resources\BookSections\Schemas\BookSectionInfolist;
 use App\Filament\Resources\BookSections\Tables\BookSectionsTable;
 use App\Models\BookSection;
 use BackedEnum;
@@ -46,10 +44,7 @@ class BookSectionResource extends Resource
         return BookSectionForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return BookSectionInfolist::configure($schema);
-    }
+
 
     public static function table(Table $table): Table
     {
@@ -68,7 +63,6 @@ class BookSectionResource extends Resource
         return [
             'index' => ListBookSections::route('/'),
             'create' => CreateBookSection::route('/create'),
-            'view' => ViewBookSection::route('/{record}'),
             'edit' => EditBookSection::route('/{record}/edit'),
         ];
     }
