@@ -142,7 +142,7 @@ class AuthorInfolist
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('created_at')
-                                    ->label('تاريخ الإنشاااء')
+                                    ->label('تاريخ الإنشاااء ')
                                     ->dateTime('Y-m-d H:i')
                                     ->icon('heroicon-o-clock'),
 
