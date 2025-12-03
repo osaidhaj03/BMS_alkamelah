@@ -31,8 +31,7 @@ class BookForm
                             ->columnSpanFull(),
 
                         TextInput::make('shamela_id')
-                            ->label('معرف الشاملة')
-                            ->numeric()
+                            ->label('رابط الكتاب من المكتبة الشاملة')
                             ->default(null),
 
                         Select::make('visibility')
@@ -45,7 +44,7 @@ class BookForm
                             ->default('public')
                             ->required(),
                     ])
-                    ->columns(2),
+                    ->columnSpanFull(),
 
                 Section::make('التصنيف')
                     ->schema([
@@ -55,6 +54,61 @@ class BookForm
                             ->searchable()
                             ->preload()
                             ->default(null),
+                    ]),
+
+                Section::make('المؤلفين')
+                    ->schema([
+                        Repeater::make('authorBooks')
+                            ->label('المؤلفين')
+                            ->relationship()
+                            ->schema([
+                                Select::make('author_id')
+                                    ->label('المؤلف')
+                                    ->relationship('author', 'first_name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(),
+                                
+                                Select::make('role')
+                                    ->label('الدور')
+                                    ->options([
+                                        'author' => 'مؤلف',
+                                        'co_author' => 'مؤلف مشارك',
+                                        'editor' => 'محقق',
+                                        'translator' => 'مترجم',
+                                        'reviewer' => 'مراجع',
+                                        'commentator' => 'معلق',
+                                    ])
+                                    ->default('author')
+                                    ->required(),
+                                
+                                Select::make('is_main')
+                                    ->label('مؤلف رئيسي')
+                                    ->options([
+                                        true => 'نعم',
+                                        false => 'لا',
+                                    ])
+                                    ->default(false)
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, $set, $get, $component) {
+                                        if ($state === true) {
+                                            $repeaterState = $get('../../authorBooks');
+                                            $currentPath = $component->getStatePath();
+                                            
+                                            foreach ($repeaterState as $key => $item) {
+                                                $itemPath = "../../authorBooks.{$key}.is_main";
+                                                if ($itemPath !== $currentPath && ($item['is_main'] ?? false) === true) {
+                                                    $set("../../authorBooks.{$key}.is_main", false);
+                                                }
+                                            }
+                                        }
+                                    }),
+                            ])
+                            ->columns(3)
+                            ->columnSpanFull()
+                            ->defaultItems(1)
+                            ->addActionLabel('إضافة مؤلف'),
                     ]),
 
                 Section::make('معلومات النشر')
