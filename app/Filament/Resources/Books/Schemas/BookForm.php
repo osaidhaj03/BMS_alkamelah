@@ -11,6 +11,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\RichEditor;
 
 class BookForm
 {
@@ -25,9 +26,28 @@ class BookForm
                             ->required()
                             ->columnSpanFull(),
                         
-                        Textarea::make('description')
-                            ->label('وصف الكتاب')
-                            ->default(null)
+
+
+                        RichEditor::make('description')
+                            ->label(' وصف الكتاب')
+                            ->placeholder('اكتب وصف الكتاب...')
+                            ->toolbarButtons([
+                                'blockquote',
+                                'bold',
+                                'bulletList',
+                                'h2',
+                                'h3',
+                                'italic',
+                                'link',
+                                'orderedList',
+                                'redo',
+                                'strike',
+                                'underline',
+                                'undo',
+                                'source-ai',
+                                'source-ai-transform',
+                            ])
+                            ->extraInputAttributes(['style' => 'min-height: 300px;'])
                             ->columnSpanFull(),
 
                         TextInput::make('shamela_id')
@@ -50,7 +70,7 @@ class BookForm
                 Section::make('معلومات الطبعة')
                     ->schema([
                         Select::make('has_original_pagination')
-                            ->label('يحتوي على ترقيم الصفحات الأصلي(وفق المطبوع)')
+                            ->label('وفق المطبوع')
                             ->options([
                                 'yes' => 'نعم',
                                 'no' => 'لا',
@@ -135,34 +155,87 @@ class BookForm
                     ->relationship('bookMetadata')
                     ->schema([
                         FileUpload::make('images')
-                            ->label('الصور')
+                            ->label('صور الكتاب')
                             ->multiple()
                             ->image()
+                            ->maxFiles(3)
                             ->directory('book-images')
                             ->columnSpanFull(),
 
                         Repeater::make('video_links')
-                            ->label('روابط الفيديو')
+                            ->label('إضافة رابط فيديو أو أكثر عن الكتاب')
                             ->schema([
-                                TextInput::make('title')->label('العنوان')->required(),
-                                TextInput::make('url')->label('الرابط')->url()->required(),
-                                TextInput::make('description')->label('الوصف'),
+                                TextInput::make('url')
+                                    ->label('رابط الفيديو')
+                                    ->required()
+                                    ->placeholder('https://youtube.com/watch?v=...')
+                                    ->columnSpan(2),
+
+                                TextInput::make('title')
+                                    ->label('عنوان الفيديو')
+                                    ->placeholder('مثال: شرح الكتاب')
+                                    ->columnSpan(2),
+
+                                Textarea::make('description')
+                                    ->label('وصف الفيديو')
+                                    ->rows(2)
+                                    ->placeholder('وصف مختصر للفيديو')
+                                    ->columnSpanFull(),
                             ])
-                            ->columnSpanFull(),
+                            ->columns(4)
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'فيديو جديد')
+                            ->addActionLabel('إضافة فيديو')
+                            ->reorderable()
+                            ->columnSpanFull()
+                            ->defaultItems(0),
 
 
 
                         Repeater::make('download_links')
                             ->label('روابط التحميل')
                             ->schema([
-                                TextInput::make('title')->label('العنوان')->required(),
-                                TextInput::make('url')->label('الرابط')->url()->required(),
-                                TextInput::make('type')->label('النوع (PDF, etc)'),
+                                TextInput::make('url')
+                                ->label('الرابط')
+                                ->url()
+                                ->required(),
+                                Select::make('platform')
+                                ->label('منصة التحميل')
+                                ->options([
+                                    'google_drive' => 'Google Drive',
+                                    'dropbox' => 'Dropbox',
+                                    'one_drive' => 'One Drive',
+                                    'telegram' => 'Telegram',
+                                    'alkamelah' => 'موقع المكتبةالكاملة',
+                                    'Mega' => 'Mega',
+                                    'archive_org' => 'Archive.org',
+                                    'other' => 'آخر',
+                                ])
+                                ->required(),
+                                Select::make('type')
+                                ->label('صيغة الملف')
+                                ->options([
+                                    'pdf' => 'PDF',
+                                    'word' => 'Word',
+                                    'web' => 'WEB(Html)',
+                                    'other' => 'آخر',
+                                ]),
+                                TextInput::make('notes')
+                                    ->label('ملاحظات إضافية')
+                                    ->placeholder('مثال: نسخة عالية الجودة، نسخة مصورة، ...')
+                                    ->columnSpanFull()
+                                    ->default(null),
                             ])
-                            ->columnSpanFull(),
+                            ->columns(3)
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'فيديو جديد')
+                            ->addActionLabel('إضافة فيديو')
+                            ->reorderable()
+                            ->columnSpanFull()
+                            ->defaultItems(0),
 
                         
-                    ]) ->columnSpanFull(),
+                    ])->columnSpanFull(),
                 Section::make('معلومات إضافية')
                     ->schema([
                         Textarea::make('additional_notes')
