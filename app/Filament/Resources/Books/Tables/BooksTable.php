@@ -25,8 +25,7 @@ class BooksTable
                 TextColumn::make('shamela_id')
                 ->label('رابط الكتاب من المكتبة الشاملة')
                     ->searchable()
-                    ->toggleable()
-                    ->url(),
+                    ->toggleable(),
                 TextColumn::make('visibility')
                 ->label('الظهور')
                 ->searchable()
