@@ -23,6 +23,7 @@ class BooksTable
                 TextColumn::make('title')
                 ->label('عنوان الكتاب')
                     ->searchable()
+                    ->sortable()
                     ->toggleable(),
                 TextColumn::make('shamela_id')
                 ->label('رابط الكتاب من المكتبة الشاملة')

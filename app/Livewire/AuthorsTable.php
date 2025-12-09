@@ -64,14 +64,16 @@ class AuthorsTable extends Component
         // تطبيق البحث
         if ($this->search) {
             $query->where(function (Builder $q) {
-                $q->where('full_name', 'like', '%' . $this->search . '%')
+                $q->where('first_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('middle_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('last_name', 'like', '%' . $this->search . '%')
                   ->orWhere('biography', 'like', '%' . $this->search . '%')
                   ->orWhere('madhhab', 'like', '%' . $this->search . '%');
             });
         }
 
         return $query->orderBy('books_count', 'desc')
-                    ->orderBy('full_name', 'asc')
+                    ->orderBy('first_name', 'asc')
                     ->paginate($this->perPage);
     }
 
