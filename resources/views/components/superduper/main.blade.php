@@ -9,8 +9,8 @@
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('superduper/img/favicon.png') }}" type="image/x-icon">
     
-    <!-- Theme CSS via Vite -->
-    @vite(['resources/css/app.css'])
+    <!-- Theme CSS -->
+    {{-- <link rel="stylesheet" href="{{ asset('css/app.css') }}"> --}}
     
     <!-- Icon Font -->
     <link rel="stylesheet" href="{{ asset('superduper/fonts/iconfonts/font-awesome/stylesheet.css') }}">
@@ -45,8 +45,8 @@
     {{-- الزر العائم ونموذج الملاحظات --}}
     @include('partials.feedback-panel')
 
-    <!-- Vite compiled JS -->
-    @vite(['resources/js/app.js'])
+    <!-- App JS -->
+    {{-- <script src="{{ asset('js/app.js') }}"></script> --}}
     
     <!--Vendor js-->
     <script src="{{ asset('superduper/js/vendors/swiper-bundle.min.js') }}"></script>
