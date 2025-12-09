@@ -108,4 +108,46 @@ class HomeController extends Controller
          */
         return view('components.superduper.pages.home', compact('sections', 'books', 'authors', 'stats'));
     }
+
+    /**
+     * عرض جميع الكتب أو المؤلفين مع إمكانية التصفية حسب القسم
+     * 
+     * @param Request $request
+     * @param string|null $type نوع المحتوى (books أو authors)
+     * @return \Illuminate\View\View
+     */
+    public function showAll(Request $request, ?string $type = 'books')
+    {
+        $section = $request->query('section');
+        
+        if ($type === 'authors') {
+            // جلب جميع المؤلفين مع عدد كتبهم
+            $authors = Author::withCount(['books' => function($query) {
+                $query->where('visibility', 'public');
+            }])
+                ->orderByDesc('books_count')
+                ->orderBy('first_name')
+                ->paginate(20);
+            
+            return view('components.superduper.pages.show-all-authors', compact('authors'));
+        }
+        
+        // الافتراضي: عرض الكتب
+        $query = Book::with(['authors', 'bookSection'])
+            ->public()
+            ->latest();
+        
+        // التصفية حسب القسم إذا تم تحديده
+        if ($section) {
+            $bookSection = BookSection::where('slug', $section)->first();
+            if ($bookSection) {
+                $query->where('book_section_id', $bookSection->id);
+            }
+        }
+        
+        $books = $query->paginate(20);
+        $currentSection = $section ? BookSection::where('slug', $section)->first() : null;
+        
+        return view('components.superduper.pages.show-all-books', compact('books', 'currentSection'));
+    }
 }
