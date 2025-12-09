@@ -89,7 +89,9 @@ class BooksTable extends Component
                 $q->where('title', 'like', '%' . $this->search . '%')
                   ->orWhere('description', 'like', '%' . $this->search . '%')
                   ->orWhereHas('authors', function (Builder $authorQuery) {
-                      $authorQuery->where('full_name', 'like', '%' . $this->search . '%');
+                      $authorQuery->where('first_name', 'like', '%' . $this->search . '%')
+                                  ->orWhere('middle_name', 'like', '%' . $this->search . '%')
+                                  ->orWhere('last_name', 'like', '%' . $this->search . '%');
                   });
             });
         }
