@@ -56,17 +56,6 @@ class BooksTable
                     ->toggleable(),
                 IconColumn::make('has_original_pagination')
                 ->label('وفق المطبوع')
-                ->searchable()
-                ->toggleable()
-                    ->boolean(),
-                IconColumn::make('edition')
-                ->label('رقم الطبعة')
-                ->searchable()
-                ->toggleable()
-                    ->boolean(),
-                IconColumn::make('edition_year')
-                ->label('سنة الطبعة')
-                ->searchable()
                 ->toggleable()
                     ->boolean(),
 

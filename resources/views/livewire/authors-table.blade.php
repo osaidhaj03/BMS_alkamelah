@@ -57,10 +57,10 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900" style="font-size: 1.3rem;">
-                                    <a href="{{ route('authors.details', $author->id) }}" 
-                                       class="text-green-700 hover:text-green-900 hover:underline transition-colors duration-200">
+                                    {{-- TODO: رابط المؤلف - يحتاج تفعيل route('authors.details') --}}
+                                    <span class="text-green-700">
                                         {!! $this->highlightText($author->full_name, $search) !!}
-                                    </a>
+                                    </span>
                                 </div>
                                 @if($author->biography)
                                     <div class="text-gray-500 truncate max-w-xs" style="font-size: 1.1rem;">{!! $this->highlightText(Str::limit($author->biography, 50), $search) !!}</div>

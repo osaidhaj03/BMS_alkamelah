@@ -56,10 +56,10 @@
                             </td>
                             <td class="px-6 py-4 w-2/5">
                                 <div class="font-medium text-gray-900" style="font-size: 1.3rem;">
-                                    <a href="{{ route('book.read', $book->id) }}" 
-                                       class="text-green-700 hover:text-green-900 hover:underline transition-colors duration-200">
+                                    {{-- TODO: رابط الكتاب - يحتاج تفعيل route('book.read') --}}
+                                    <span class="text-green-700">
                                         {!! $this->highlightText($book->title, $search) !!}
-                                    </a>
+                                    </span>
                                 </div>
                                 @if($book->subtitle)
                                     <div class="text-gray-500" style="font-size: 1.1rem;">{!! $this->highlightText($book->subtitle, $search) !!}</div>
@@ -68,10 +68,10 @@
                             <td class="px-6 py-4 whitespace-nowrap w-1/4">
                                 <div class="text-gray-900" style="font-size: 1.3rem;">
                                     @if($book->author)
-                                        <a href="{{ route('authors.details', $book->author->id) }}" 
-                                           class="text-green-700 hover:text-green-900 hover:underline transition-colors duration-200">
+                                        {{-- TODO: رابط المؤلف - يحتاج تفعيل route('authors.details') --}}
+                                        <span class="text-green-700">
                                             {!! $this->highlightText($book->author->full_name, $search) !!}
-                                        </a>
+                                        </span>
                                     @else
                                         <span class="text-gray-400">غير محدد</span>
                                     @endif
