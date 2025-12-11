@@ -22,12 +22,18 @@
     }
 
     .breadcrumbs {
-        display: flex;
+        display: none; /* Hidden by default (mobile) */
         align-items: center;
         gap: 0.5rem;
         font-size: 0.85rem;
         color: var(--text-secondary);
         margin-bottom: 1.5rem;
+    }
+    
+    @media (min-width: 1024px) {
+        .breadcrumbs {
+            display: flex;
+        }
     }
     .breadcrumbs .separator {
         color: #cbd5e1;
@@ -76,17 +82,28 @@
         display: block;
     }
 
+    /* Center: Search */
     .search-container {
-        flex: 1;
-        max-width: 600px;
-        display: flex;
-        align-items: center;
-        background: var(--bg-paper);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 4px;
-        box-shadow: var(--shadow-soft);
-        position: relative;
+        display: none; /* Hidden by default (mobile) */
+    }
+    
+    @media (min-width: 1024px) {
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            background: var(--bg-paper);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+        }
+        
+        #header-search-mobile-btn {
+            display: none !important;
+        }
     }
 
     .search-input {
@@ -238,6 +255,11 @@
                 <span>الإمام النووي</span>
             </div>
         </div>
+        
+        <!-- Mobile Search Icon (Visible only on mobile) -->
+        <button class="btn-menu lg:hidden" id="header-search-mobile-btn" style="margin-right: auto; color: var(--accent-color);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </button>
 
         <!-- Search Bar (New) -->
         <div class="search-container">
@@ -263,37 +285,7 @@
 
         <!-- More Actions (Three Dots) -->
         <div class="actions-container">
-            <button class="btn-more" id="btn-more-toggle">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-            </button>
-            
-            <!-- Main Menu Dropdown -->
-            <div class="dropdown-menu" id="more-menu">
-                <div style="padding: 10px 15px; font-weight: bold; color: var(--text-muted); font-size: 0.8rem;">العرض</div>
-                
-                <button class="dropdown-item" id="menu-increase">
-                    <svg viewBox="0 0 24 24"><path d="M12 4V20M4 12H20"/></svg>
-                    <span>تكبير الخط</span>
-                </button>
-                <button class="dropdown-item" id="menu-decrease">
-                    <svg viewBox="0 0 24 24"><path d="M5 12H19"/></svg>
-                    <span>تصغير الخط</span>
-                </button>
-                
-                <div class="dropdown-divider"></div>
-                
-                <button class="dropdown-item" id="menu-theme">
-                    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                    <span>الوضع الليلي</span>
-                </button>
-                
-                <div class="dropdown-divider"></div>
-                
-                <button class="dropdown-item" id="menu-share">
-                    <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                    <span>مشاركة الكتاب</span>
-                </button>
-            </div>
+
         </div>
     </div>
 </header>
