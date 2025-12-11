@@ -10,6 +10,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Book Reader Routes
 Route::get('/book/{book}/read', [BookReaderController::class, 'show'])->name('book.read');
 
+// Static Book Preview Route
+Route::get('/preview/book-static', function () {
+    return view('pages.book-preview');
+})->name('book.preview');
+
 // مسار مؤقت لمسح الـ Cache - احذفه بعد الاستخدام
 Route::get('/clear-cache-secret-2024', function () {
     // مسح الـ cache يدوياً بدون استخدام artisan commands

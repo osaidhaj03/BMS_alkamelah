@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آداب الفتوى والمفتي والمستفتي - الإمام النووي</title>
+    
+    <!-- تحميل الخطوط العربية -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- متغيرات الألوان --- */
+        :root {
+            /* التعديل: الخلفية بيضاء، الورقة كريمي */
+            --bg-body: #ffffff; 
+            --bg-paper: #fdfbf7; /* لون الورقة كما هو */
+            --bg-sidebar: #ffffff;
+            --bg-hover: #f5f5f5;
+            
+            /* النصوص */
+            --text-main: #2b2b2b;
+            --text-secondary: #666666;
+            --text-muted: #9ca3af;
+            
+            /* اللون الأخضر المميز */
+            --accent-color: #15803d; 
+            --accent-hover: #16a34a;
+            --accent-light: #dcfce7;
+            
+            --border-color: #e5e7eb; /* رمادي فاتح جداً */
+            --highlight-color: #ffeb3b80;
+            
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-paper: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            
+            --font-main: 'Amiri', serif;       
+            --font-ui: 'Tajawal', sans-serif;  
+            
+            --radius-main: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #111827;
+            --bg-paper: #1f2937;
+            --bg-sidebar: #1f2937;
+            --bg-hover: #374151;
+            --text-main: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-color: #4ade80;
+            --accent-light: #064e3b;
+            --border-color: #374151;
+            --shadow-paper: none;
+        }
+
+        /* --- Reset & Base --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background 0.4s ease, color 0.4s ease;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header Section --- */
+        header {
+            background: var(--bg-body);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 1.5rem;
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Breadcrumbs */
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .breadcrumbs a { text-decoration: none; color: inherit; transition: color 0.2s; }
+        .breadcrumbs a:hover { color: var(--accent-color); }
+        .breadcrumbs .separator { color: var(--text-muted); font-size: 0.8rem; }
+        .breadcrumbs .current { color: var(--accent-color); font-weight: 700; }
+
+        .header-main-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Identity (Right Side) */
+        .book-identity {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 250px;
+        }
+        
+        .book-icon-svg { width: 40px; height: 40px; }
+        .header-title h1 { font-size: 1.2rem; color: var(--accent-color); font-weight: 700; line-height: 1.2; }
+        .header-title span { font-size: 0.8rem; color: var(--text-secondary); }
+
+        /* Search Bar (Center) */
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px;
+            position: relative;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px 12px;
+            font-family: var(--font-ui);
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .btn-filter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: var(--font-ui);
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+        .btn-filter:hover { background: var(--bg-hover); color: var(--accent-color); }
+
+        .btn-search-action {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-search-action:hover { background: var(--accent-hover); }
+
+        /* Actions (Left Side - Three Dots) */
+        .actions-container {
+            position: relative;
+        }
+
+        .btn-more {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-more:hover, .btn-more.active { background-color: var(--accent-light); color: var(--accent-color); border-color: var(--accent-color); }
+
+        /* Dropdown Menus */
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            left: 0; /* Align left for RTL left-side buttons */
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 220px;
+            box-shadow: var(--shadow-dropdown);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            overflow: hidden;
+            padding: 5px;
+        }
+        
+        /* Adjust alignment for filter dropdown */
+        .dropdown-menu.filter-dropdown {
+            left: auto;
+            right: 0;
+            width: 180px;
+        }
+
+        .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            font-size: 0.9rem;
+            text-align: right;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.1s;
+        }
+        .dropdown-item:hover { background-color: var(--bg-hover); color: var(--accent-color); }
+        .dropdown-item svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+        .dropdown-divider { height: 1px; background: var(--border-color); margin: 5px 0; }
+
+        /* --- Workspace --- */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 20px;
+            gap: 20px;
+            background: var(--bg-body); /* خلفية بيضاء */
+        }
+
+        /* --- Sidebar --- */
+        aside.sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar); /* أبيض */
+            border-radius: 0; /* إزالة الحواف الدائرية للسايدبار ليكون أنظف مع الأبيض */
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header { padding: 1rem; border-bottom: 1px solid var(--border-color); }
+        .sidebar-title { font-weight: 700; color: var(--accent-color); margin-bottom: 10px; font-size: 1rem; }
+        .toc-list { list-style: none; overflow-y: auto; flex: 1; padding: 5px; }
+        
+        .toc-link {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; color: var(--text-main); text-decoration: none;
+            font-size: 0.9rem; border-radius: 8px; transition: all 0.2s;
+        }
+        .toc-link:hover { background-color: var(--bg-hover); }
+        .toc-link.active { background-color: var(--accent-light); color: var(--accent-color); font-weight: 700; }
+        .page-num { font-size: 0.75rem; color: var(--text-muted); background: var(--bg-hover); padding: 2px 6px; border-radius: 4px; }
+
+        /* --- Content Area --- */
+        main.content-area {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .paper-sheet {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--bg-paper); /* كريمي */
+            min-height: 800px;
+            padding: 60px 70px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-paper);
+            border-radius: 4px; /* زوايا أقل انحناءً للورقة */
+            border: 1px solid #eaeaea;
+            transition: transform 0.2s;
+        }
+
+        .paper-header {
+            display: flex; justify-content: space-between;
+            border-bottom: 1px solid #e0ddd5;
+            padding-bottom: 15px; margin-bottom: 30px;
+            color: var(--text-muted); font-size: 0.8rem;
+        }
+
+        .chapter-title { font-family: var(--font-ui); font-weight: 700; color: var(--accent-color); font-size: 1.6rem; margin-bottom: 20px; text-align: center; }
+        .chapter-text { font-family: var(--font-main); line-height: 2.2; font-size: 22px; text-align: justify; color: var(--text-main); }
+        .chapter-text p { margin-bottom: 1.5rem; }
+        .highlight { background-color: var(--highlight-color); padding: 0 2px; border-radius: 2px; }
+
+        .paper-footer { margin-top: 40px; text-align: center; font-size: 0.9rem; color: var(--text-muted); border-top: 1px solid #e0ddd5; padding-top: 15px; }
+
+        /* --- Floating UI --- */
+        .progress-pill {
+            position: fixed; bottom: 30px; right: 30px; /* Right for RTL */
+            background: var(--bg-body); border: 1px solid var(--border-color);
+            padding: 10px 20px; border-radius: 30px; box-shadow: var(--shadow-soft);
+            display: flex; align-items: center; gap: 10px; font-size: 0.9rem; z-index: 900;
+        }
+        .progress-circle { width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--border-color); border-top-color: var(--accent-color); transform: rotate(-45deg); }
+
+        /* --- Responsive --- */
+        @media (max-width: 900px) {
+            .header-main-row { flex-wrap: wrap; gap: 10px; }
+            .book-identity { order: 1; width: 100%; justify-content: space-between; }
+            .search-container { order: 3; width: 100%; max-width: 100%; order: 3; margin-top: 10px; }
+            .actions-container { order: 2; position: absolute; left: 1.5rem; top: 1.5rem; }
+            
+            aside.sidebar { position: fixed; top: 0; bottom: 0; right: 0; transform: translateX(100%); z-index: 2000; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
+            aside.sidebar.active { transform: translateX(0); }
+            .paper-sheet { padding: 30px 20px; margin-bottom: 15px; }
+            .workspace { padding: 10px; }
+            .breadcrumbs { display: none; }
+            .btn-menu { display: flex !important; }
+            
+            /* تعديل مكان القائمة المنسدلة في الموبايل */
+            .dropdown-menu { left: auto; right: 0; width: 200px; }
+        }
+        .btn-menu { display: none; background: transparent; border: none; width: 40px; height: 40px; }
+        .btn-menu svg { width: 24px; height: 24px; stroke: var(--text-main); }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs">
+            <a href="#">الرئيسية</a>
+            <span class="separator">/</span>
+            <a href="#">أقسام الكتاب</a>
+            <span class="separator">/</span>
+            <a href="#">أصول الفقه</a>
+            <span class="separator">/</span>
+            <span class="current">آداب الفتوى</span>
+        </nav>
+
+        <div class="header-main-row">
+            <!-- Identity -->
+            <div class="book-identity">
+                <button class="btn-menu" id="menu-toggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div class="book-icon-svg">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="48" fill="var(--bg-paper)" stroke="var(--accent-color)" stroke-width="2"/>
+                        <g transform="translate(50, 50)">
+                            <g stroke="var(--accent-color)" stroke-width="1.5">
+                                <line x1="0" y1="-20" x2="0" y2="20"/><line x1="-20" y1="0" x2="20" y2="0"/>
+                                <line x1="-14" y1="-14" x2="14" y2="14"/><line x1="-14" y1="14" x2="14" y2="-14"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+                <div class="header-title">
+                    <h1>آداب الفتوى</h1>
+                    <span>الإمام النووي</span>
+                </div>
+            </div>
+
+            <!-- Search Bar (New) -->
+            <div class="search-container">
+                <div class="actions-container">
+                    <button class="btn-filter" id="btn-filter">
+                        <span>تصفية</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M6 12h12M10 18h4"/></svg>
+                    </button>
+                    <!-- Filter Dropdown -->
+                    <div class="dropdown-menu filter-dropdown" id="filter-menu">
+                        <button class="dropdown-item">كل الكتاب</button>
+                        <button class="dropdown-item">العناوين فقط</button>
+                        <button class="dropdown-item">الصفحة الحالية</button>
+                    </div>
+                </div>
+                
+                <input type="text" class="search-input" id="header-search-input" placeholder="بحث داخل الكتاب...">
+                
+                <button class="btn-search-action" id="btn-search-go">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+            </div>
+
+            <!-- More Actions (Three Dots) -->
+            <div class="actions-container">
+                <button class="btn-more" id="btn-more-toggle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                </button>
+                
+                <!-- Main Menu Dropdown -->
+                <div class="dropdown-menu" id="more-menu">
+                    <div style="padding: 10px 15px; font-weight: bold; color: var(--text-muted); font-size: 0.8rem;">العرض</div>
+                    
+                    <button class="dropdown-item" id="menu-increase">
+                        <svg viewBox="0 0 24 24"><path d="M12 4V20M4 12H20"/></svg>
+                        <span>تكبير الخط</span>
+                    </button>
+                    <button class="dropdown-item" id="menu-decrease">
+                        <svg viewBox="0 0 24 24"><path d="M5 12H19"/></svg>
+                        <span>تصغير الخط</span>
+                    </button>
+                    
+                    <div class="dropdown-divider"></div>
+                    
+                    <button class="dropdown-item" id="menu-theme">
+                        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        <span>الوضع الليلي</span>
+                    </button>
+                    
+                    <div class="dropdown-divider"></div>
+                    
+                    <button class="dropdown-item" id="menu-share">
+                        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        <span>مشاركة الكتاب</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">فهرس المحتويات</div>
+            </div>
+            <ul class="toc-list" id="toc-container">
+                <!-- TOC Generated by JS -->
+            </ul>
+        </aside>
+
+        <!-- Content -->
+        <main class="content-area" id="content-scroll-area">
+            <div id="book-content-wrapper">
+                <!-- Pages Generated by JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-pill">
+        <div class="progress-circle" id="progress-indicator"></div>
+        <span id="page-counter">صفحة 1 / 120</span>
+    </div>
+
+    <script>
+        // --- البيانات ---
+        const bookData = [
+            { id: "intro", title: "المقدمة", page: 1, content: `<p class="text-center" style="color:var(--accent-color); font-weight:bold; margin-bottom:20px;">بسم الله الرحمن الرحيم</p><p>الحمد لله رب العالمين، والصلاة والسلام على أشرف الأنبياء والمرسلين، نبينا محمد وعلى آله وصحبه أجمعين.</p><p>أما بعد: فإن من أعظم ما يحتاج إليه طالب العلم معرفة آداب الفتوى والمفتي والمستفتي، وذلك لأن الفتوى أمر عظيم، وشأن خطير، إذ هي توقيع عن الله تبارك وتعالى.</p>` },
+            { id: "ch1", title: "شروط المفتي وأحكامه", page: 16, content: `<p>اعلم أن الفتوى منصب عظيم، لا يتصدر له إلا من اكتملت فيه آلة العلم، وتحلى بزي الورع.</p><p>ومن شروط المفتي: أن يكون مكلفاً مسلماً ثقة، مأموناً متنزهاً عن أسباب الفسق وخوارم المروءة.</p><p>وينبغي أن يكون فقيه النفس، سليم الذهن، رصين الفكر، صحيح التصرف والاستنباط.</p>` },
+            { id: "ch2", title: "آداب المستفتي", page: 31, content: `<p>يجب على المستفتي إذا نزلت به حادثة أن يبحث عن من يثق بعلمه ودينه ليسأله.</p><p>وينبغي للمستفتي أن يتأدب مع المفتي، ويجله ويوقره، ويعرف له قدره، فإن ذلك أعون له على الانتفاع بعلمه.</p>` },
+            { id: "ch3", title: "أصول الإفتاء والاجتهاد", page: 46, content: `<p>الاجتهاد هو بذل الوسع في نيل حكم شرعي عملي بطريق الاستنباط.</p><p>وللمجتهد شروط مبسوطة في كتب الأصول، منها: العلم بالقرآن والسنة، والعلم بمواقع الإجماع، والعلم باللغة العربية.</p>` },
+            { id: "ch4", title: "قواعد الفتوى والترجيح", page: 61, content: `<p>إذا تعارضت الأدلة في ذهن المفتي، وجب عليه الترجيح بحسب القواعد المقررة في الأصول.</p><p>ومن قواعد الترجيح: تقديم النص على القياس، وتقديم الحديث المتواتر على الآحاد.</p>` },
+            { id: "ch5", title: "النوازل والمستجدات", page: 76, content: `<p>النوازل هي الوقائع الجديدة التي لم ينص عليها المتقدمون.</p><p>ويجب على المفتي في النوازل أن يفهم الواقعة فهماً دقيقاً (تكييف النازلة)، ثم يخرجها على القواعد الشرعية والنصوص العامة.</p>` }
+        ];
+
+        // --- المنطق ---
+        const state = { loadedCount: 0, fontSize: 22, isLoading: false };
+        const dom = {
+            wrapper: document.getElementById('book-content-wrapper'),
+            scrollArea: document.getElementById('content-scroll-area'),
+            sidebar: document.getElementById('sidebar'),
+            searchInput: document.getElementById('header-search-input'),
+            filterMenu: document.getElementById('filter-menu'),
+            moreMenu: document.getElementById('more-menu')
+        };
+
+        function init() {
+            renderTOC();
+            loadNextPage();
+            loadNextPage();
+            setupEvents();
+            setupDropdowns();
+        }
+
+        function renderTOC() {
+            const html = bookData.map(c => `
+                <li class="toc-item">
+                    <a href="#" class="toc-link" onclick="jumpTo('${c.id}', event)">
+                        <span>${c.title}</span><span class="page-num">${c.page}</span>
+                    </a>
+                </li>`).join('');
+            document.getElementById('toc-container').innerHTML = html;
+        }
+
+        function loadNextPage() {
+            if (state.isLoading || state.loadedCount >= bookData.length) return;
+            state.isLoading = true;
+            const chapter = bookData[state.loadedCount];
+            const div = document.createElement('div');
+            div.className = 'paper-sheet'; div.id = `sheet-${chapter.id}`;
+            div.innerHTML = `
+                <div class="paper-header"><span>${chapter.title}</span><span>آداب الفتوى</span></div>
+                <h2 class="chapter-title">${chapter.title}</h2>
+                <div class="chapter-text" style="font-size: ${state.fontSize}px">${chapter.content}</div>
+                <div class="paper-footer">صفحة ${chapter.page}</div>`;
+            dom.wrapper.appendChild(div);
+            state.loadedCount++;
+            state.isLoading = false;
+        }
+
+        function setupEvents() {
+            dom.scrollArea.addEventListener('scroll', () => {
+                if (dom.scrollArea.scrollTop + dom.scrollArea.clientHeight >= dom.scrollArea.scrollHeight - 300) loadNextPage();
+                updateActiveState();
+            });
+            document.getElementById('menu-increase').onclick = () => updateFont(2);
+            document.getElementById('menu-decrease').onclick = () => updateFont(-2);
+            document.getElementById('menu-theme').onclick = toggleTheme;
+            document.getElementById('menu-share').onclick = () => alert('تم نسخ رابط الكتاب!');
+            document.getElementById('menu-toggle').onclick = () => dom.sidebar.classList.toggle('active');
+            
+            // Search Logic
+            document.getElementById('btn-search-go').onclick = executeSearch;
+            dom.searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') executeSearch(); });
+        }
+
+        function setupDropdowns() {
+            // Toggle Logic
+            const toggle = (btnId, menuId) => {
+                document.getElementById(btnId).onclick = (e) => {
+                    e.stopPropagation();
+                    const menu = document.getElementById(menuId);
+                    const isOpen = menu.classList.contains('show');
+                    closeAllDropdowns();
+                    if(!isOpen) menu.classList.add('show');
+                };
+            };
+            
+            toggle('btn-more-toggle', 'more-menu');
+            toggle('btn-filter', 'filter-menu');
+
+            // Close when clicking outside
+            document.addEventListener('click', () => closeAllDropdowns());
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.onclick = (e) => e.stopPropagation());
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        }
+
+        function executeSearch() {
+            const term = dom.searchInput.value.trim();
+            if (!term) return;
+            
+            // Simple highlight logic
+            document.querySelectorAll('.highlight').forEach(el => el.replaceWith(el.textContent));
+            const texts = document.querySelectorAll('.chapter-text');
+            let found = false;
+            
+            texts.forEach(el => {
+                if (el.textContent.includes(term)) {
+                    el.innerHTML = el.innerHTML.replace(new RegExp(term, 'g'), `<span class="highlight">${term}</span>`);
+                    if(!found) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        found = true;
+                    }
+                }
+            });
+            
+            if(!found) alert('لم يتم العثور على نتائج');
+        }
+
+        function updateFont(d) {
+            state.fontSize += d;
+            document.querySelectorAll('.chapter-text').forEach(el => el.style.fontSize = state.fontSize + 'px');
+        }
+
+        function toggleTheme() {
+            const curr = document.body.getAttribute('data-theme');
+            document.body.setAttribute('data-theme', curr === 'dark' ? 'light' : 'dark');
+        }
+
+        window.jumpTo = function(id, e) {
+            e.preventDefault();
+            let target = document.getElementById(`sheet-${id}`);
+            if (!target) {
+                while(state.loadedCount < bookData.length) {
+                    loadNextPage();
+                    target = document.getElementById(`sheet-${id}`);
+                    if (target) break;
+                }
+            }
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+            dom.sidebar.classList.remove('active');
+        };
+
+        function updateActiveState() {
+            const sheets = document.querySelectorAll('.paper-sheet');
+            let activeId = null; let page = 1;
+            sheets.forEach(s => {
+                const rect = s.getBoundingClientRect();
+                if (rect.top < window.innerHeight/2 && rect.bottom > window.innerHeight/4) {
+                    activeId = s.id.replace('sheet-', '');
+                    const ch = bookData.find(c => c.id === activeId);
+                    if(ch) page = ch.page;
+                }
+            });
+            if (activeId) {
+                document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+                // Use optional chaining just in case
+                const link = document.querySelector(`.toc-link[onclick*="'${activeId}'"]`);
+                if(link) link.classList.add('active');
+                document.getElementById('page-counter').innerText = `صفحة ${page} / 120`;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
