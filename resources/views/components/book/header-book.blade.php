@@ -1,3 +1,5 @@
+@props(['book' => null])
+
 <style>
     /* Scoped styles for the book header */
     .book-header {
@@ -13,7 +15,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background-color: rgba(255, 255, 255, 0.3); /* Reduced opacity for better pattern visibility */
+        background-color: rgba(255, 255, 255, 0); /* Reduced opacity for better pattern visibility */
         z-index: 0;
     }
     .book-header > * {
@@ -232,13 +234,13 @@
 <header class="book-header">
     <!-- Breadcrumbs -->
     <nav class="breadcrumbs">
-        <a href="#">الرئيسية</a>
+        <a href="{{ url('/') }}">الرئيسية</a>
         <span class="separator">/</span>
         <a href="#">أقسام الكتاب</a>
         <span class="separator">/</span>
-       <a href="#">أصول الفقه</a>
+        <a href="#">{{ $book?->bookSection?->name ?? 'أصول الفقه' }}</a>
         <span class="separator">/</span>
-        <span class="current">آداب الفتوى</span>
+        <span class="current">{{ Str::limit($book?->title ?? 'آداب الفتوى', 30) }}</span>
     </nav>
 
     <div class="header-main-row">
@@ -251,8 +253,8 @@
                 <img src="/images/icon_islamic.png" alt="أيقونة إسلامية" width="48" height="48" style="display: block; margin: 0 auto;" />
             </div>
             <div class="header-title">
-                <h1>آداب الفتوى</h1>
-                <span>الإمام النووي</span>
+                <h1>{{ $book?->title ?? 'آداب الفتوى' }}</h1>
+                <span>{{ $book?->authors?->first()?->full_name ?? 'الإمام النووي' }}</span>
             </div>
         </div>
         

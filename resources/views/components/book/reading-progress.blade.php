@@ -1,3 +1,16 @@
+@props([
+    'currentPageNum' => 1,
+    'totalPages' => 1,
+    'book' => null,
+    'nextPage' => null,
+    'previousPage' => null
+])
+
+@php
+    $progress = $totalPages > 0 ? round(($currentPageNum / $totalPages) * 100) : 0;
+    $volumes = $book?->volumes ?? collect();
+@endphp
+
 <div class="fixed bottom-4 left-4 z-30">
     <style>
         .reading-menu-dropdown {
@@ -32,6 +45,8 @@
             background: transparent;
             width: 100%;
             text-align: right;
+            border: none;
+            cursor: pointer;
         }
         .menu-item:hover {
             background-color: var(--bg-hover);
@@ -50,20 +65,25 @@
             margin: 0.25rem 0;
         }
     </style>
+    
     <div class="relative">
         <div class="reading-menu-dropdown" id="reading-menu">
-             <!-- Mobile Part Selector -->
-             <div class="lg:hidden pb-2 mb-2 border-b border-gray-200" style="border-color: var(--border-color);">
-                <div style="padding: 5px 10px; font-weight: bold; color: var(--text-muted); font-size: 0.75rem;">المجلد</div>
-                <select class="w-full bg-transparent text-sm p-2 rounded cursor-pointer" 
-                        style="font-family: var(--font-ui); color: var(--text-main); text-align: right; border: 1px solid var(--border-color);"
-                        id="mobile-part-selector">
-                    <option value="1">المجلد الأول</option>
-                    <option value="2">المجلد الثاني</option>
-                    <option value="3">المجلد الثالث</option>
-                    <option value="4">المجلد الرابع</option>
-                </select>
-             </div>
+             <!-- Volume Selector (if book has volumes) -->
+             @if($volumes->isNotEmpty())
+                 <div class="lg:hidden pb-2 mb-2 border-b border-gray-200" style="border-color: var(--border-color);">
+                    <div style="padding: 5px 10px; font-weight: bold; color: var(--text-muted); font-size: 0.75rem;">المجلد</div>
+                    <select class="w-full bg-transparent text-sm p-2 rounded cursor-pointer" 
+                            style="font-family: var(--font-ui); color: var(--text-main); text-align: right; border: 1px solid var(--border-color);"
+                            id="mobile-part-selector"
+                            onchange="window.location.href='/book/{{ $book?->id }}/' + this.selectedOptions[0].dataset.page">
+                        @foreach($volumes as $vol)
+                            <option value="{{ $vol->id }}" data-page="{{ $vol->pages()->min('page_number') ?? 1 }}">
+                                {{ $vol->display_name ?? 'المجلد ' . $vol->number }}
+                            </option>
+                        @endforeach
+                    </select>
+                 </div>
+             @endif
 
              <div style="padding: 5px 10px; font-weight: bold; color: var(--text-muted); font-size: 0.75rem;">العرض</div>
             
@@ -76,43 +96,27 @@
                 <span>تصغير الخط</span>
             </button>
             
-            <div class="menu-divider"></div>
-            
-            <button class="menu-item" id="menu-theme">
-                <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <span>الوضع الليلي</span>
+            <button class="menu-item" id="toggle-harakat">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="8" cy="4" r="1.5" fill="currentColor"/><circle cx="16" cy="10" r="1.5" fill="currentColor"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>
+                <span id="harakat-text">إخفاء الحركات</span>
             </button>
             
+            <div class="menu-divider"></div>
+            
             <button class="menu-item" id="fullscreen-btn">
-                <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-                <span>توسيع الشاشة</span>
+                <svg viewBox="0 0 24 24" id="fullscreen-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                <span id="fullscreen-text">توسيع الشاشة</span>
             </button>
 
             <div class="menu-divider"></div>
             
-            <button class="menu-item" id="menu-share">
+            <button class="menu-item" id="menu-share" onclick="navigator.share?.({title: '{{ $book?->title }}', url: window.location.href})">
                 <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                 <span>مشاركة الكتاب</span>
             </button>
         </div>
     </div>
     
-    <!-- Search Popup -->
-    <div class="relative">
-        <div class="reading-menu-dropdown" id="search-popup" style="min-width: 250px;">
-             <div style="padding: 5px 10px; font-weight: bold; color: var(--text-muted); font-size: 0.75rem;">بحث في الكتاب</div>
-             <div class="p-2">
-                <div class="relative">
-                    <input type="text" id="mobile-search-input" placeholder="اكتب كلمة البحث..." 
-                           class="w-full p-2 pl-8 rounded border text-sm"
-                           style="border-color: var(--border-color); font-family: var(--font-ui); background: var(--bg-body); color: var(--text-main);">
-                    <button class="absolute left-2 top-2 text-gray-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </button>
-                </div>
-             </div>
-        </div>
-    </div>
     <div class="flex items-center gap-3 px-4 py-2 rounded-full shadow-lg" 
          style="background-color: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: var(--shadow-soft);">
         
@@ -127,12 +131,16 @@
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                 
                 <!-- Progress Circle -->
+                @php
+                    $circumference = 2 * 3.14159 * 15.9155;
+                    $strokeDasharray = ($progress / 100) * $circumference . ', ' . $circumference;
+                @endphp
                 <path class="transition-all duration-300"
                       stroke="var(--accent-color)"
                       stroke-width="3"
                       stroke-linecap="round"
                       fill="none"
-                      stroke-dasharray="8, 92"
+                      stroke-dasharray="{{ $strokeDasharray }}"
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       id="progress-circle"/>
             </svg>
@@ -140,66 +148,77 @@
             <!-- Percentage Text -->
             <div class="absolute inset-0 flex items-center justify-center">
                 <span class="text-xs font-bold" style="color: var(--accent-color); font-family: var(--font-ui);" id="progress-percentage">
-                    8%
+                    {{ $progress }}%
                 </span>
             </div>
         </div>
         
-        <!-- Part/Volume Selector -->
-        <div class="hidden lg:block border-l border-gray-200 pl-3 ml-1" style="border-color: var(--border-color);">
-            <select class="bg-transparent text-sm focus:outline-none cursor-pointer" 
-                    style="font-family: var(--font-ui); color: var(--text-main);"
-                    id="part-selector">
-                <option value="1">المجلد الأول</option>
-                <option value="2">المجلد الثاني</option>
-                <option value="3">المجلد الثالث</option>
-                <option value="4">المجلد الرابع</option>
-            </select>
-        </div>
+        <!-- Volume Selector (Desktop) -->
+        @if($volumes->isNotEmpty())
+            <div class="hidden lg:block border-l border-gray-200 pl-3 ml-1" style="border-color: var(--border-color);">
+                <select class="bg-transparent text-sm focus:outline-none cursor-pointer" 
+                        style="font-family: var(--font-ui); color: var(--text-main);"
+                        id="part-selector"
+                        onchange="window.location.href='/book/{{ $book?->id }}/' + this.selectedOptions[0].dataset.page">
+                    @foreach($volumes as $vol)
+                        <option value="{{ $vol->id }}" data-page="{{ $vol->pages()->min('page_number') ?? 1 }}">
+                            {{ $vol->display_name ?? 'المجلد ' . $vol->number }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
 
         <!-- Page Counter -->
         <div class="flex items-center text-sm gap-1" style="font-family: var(--font-ui); color: var(--text-secondary);">
             <span>صفحة</span>
             <input type="number" 
-                   value="10" 
+                   value="{{ $currentPageNum }}" 
                    min="1" 
-                   max="120"
+                   max="{{ $totalPages }}"
                    id="page-input"
                    class="w-12 text-center bg-transparent border-b border-gray-300 focus:border-green-600 focus:outline-none transition-colors"
-                   style="color: var(--text-main);">
-            <span id="total-pages-text">من 120</span>
+                   style="color: var(--text-main);"
+                   onchange="window.location.href='/book/{{ $book?->id }}/' + this.value">
+            <span id="total-pages-text">من {{ $totalPages }}</span>
         </div>
         
-        <!-- Quick Jump Buttons -->
+        <!-- Navigation Buttons -->
         <div class="flex items-center gap-1">
-            <!-- Next Chapter -->
-            <button class="p-1.5 rounded hover:bg-gray-100 transition-colors" 
-                    title="الفصل السابق"
-                    id="next-chapter-btn">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
-                </svg>
-            </button>
-            <!-- Previous Chapter -->
-            <button class="p-1.5 rounded hover:bg-gray-100 transition-colors" 
-                    title="الفصل التالي"
-                    id="prev-chapter-btn">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
-                </svg>
-            </button>
+            <!-- Previous Page -->
+            @if($previousPage)
+                <a href="{{ route('book.read', ['bookId' => $book?->id, 'pageNumber' => $previousPage->page_number]) }}" 
+                   class="p-1.5 rounded hover:bg-gray-100 transition-colors" 
+                   title="الصفحة السابقة">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            @else
+                <span class="p-1.5 text-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7"></path>
+                    </svg>
+                </span>
+            @endif
             
-
+            <!-- Next Page -->
+            @if($nextPage)
+                <a href="{{ route('book.read', ['bookId' => $book?->id, 'pageNumber' => $nextPage->page_number]) }}" 
+                   class="p-1.5 rounded hover:bg-gray-100 transition-colors" 
+                   title="الصفحة التالية">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7"></path>
+                    </svg>
+                </a>
+            @else
+                <span class="p-1.5 text-gray-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7"></path>
+                    </svg>
+                </span>
+            @endif
             
-            <!-- Search Button (Mobile) 
-            <button class="p-1.5 rounded hover:bg-gray-100 transition-colors lg:hidden" 
-                    title="بحث"
-                    id="reading-search-toggle">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </button>
-           -->
             <!-- More Menu Button -->
             <button class="p-1.5 rounded hover:bg-gray-100 transition-colors" 
                     title="المزيد"
@@ -212,86 +231,8 @@
     </div>
 </div>
 
-<!-- Scroll to Top Button 
-<button class="fixed bottom-4 left-4 p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none z-30"
-        style="background-color: var(--accent-color); color: white;"
-        id="scroll-to-top-btn">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-    </svg>
-</button>
--->
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const progressCircle = document.getElementById('progress-circle');
-    const progressPercentage = document.getElementById('progress-percentage');
-    const pageCounter = document.getElementById('page-counter');
-    const scrollToTopBtn = document.getElementById('scroll-to-top-btn');
-    const contentArea = document.querySelector('main');
-    
-    let currentPage = 10;
-    const totalPages = 120;
-    
-    // Update progress circle
-    function updateProgress() {
-        const percentage = Math.round((currentPage / totalPages) * 100);
-        const circumference = 2 * Math.PI * 15.9155;
-        const strokeDasharray = `${(percentage / 100) * circumference}, ${circumference}`;
-        
-        if (progressCircle) {
-            progressCircle.style.strokeDasharray = strokeDasharray;
-        }
-        
-        if (progressPercentage) {
-            progressPercentage.textContent = `${percentage}%`;
-        }
-        
-        // Update input if it's not the active element (to avoid interrupting typing)
-        const pageInput = document.getElementById('page-input');
-        if (pageInput && document.activeElement !== pageInput) {
-            pageInput.value = currentPage;
-        }
-    }
-    
-    // Show/hide scroll to top button
-    function handleScroll() {
-        if (!contentArea || !scrollToTopBtn) return;
-        
-        if (contentArea.scrollTop > 300) {
-            scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
-            scrollToTopBtn.classList.add('opacity-100');
-        } else {
-            scrollToTopBtn.classList.add('opacity-0', 'pointer-events-none');
-            scrollToTopBtn.classList.remove('opacity-100');
-        }
-    }
-    
-    // Scroll to top functionality
-    scrollToTopBtn?.addEventListener('click', function() {
-        contentArea?.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
-    
-    // Listen for scroll events
-    contentArea?.addEventListener('scroll', handleScroll);
-    
-    // Chapter navigation buttons
-    const prevChapterBtn = document.getElementById('prev-chapter-btn');
-    const nextChapterBtn = document.getElementById('next-chapter-btn');
-    
-    prevChapterBtn?.addEventListener('click', function() {
-        // In dynamic version, this would navigate to previous chapter
-        console.log('Navigate to previous chapter');
-    });
-    
-    nextChapterBtn?.addEventListener('click', function() {
-        // In dynamic version, this would navigate to next chapter  
-        console.log('Navigate to next chapter');
-    });
-
     // Menu Toggle Logic
     const menuToggleBtn = document.getElementById('reading-menu-toggle');
     const menuDropdown = document.getElementById('reading-menu');
@@ -299,115 +240,101 @@ document.addEventListener('DOMContentLoaded', function() {
     menuToggleBtn?.addEventListener('click', function(e) {
         e.stopPropagation();
         menuDropdown.classList.toggle('show');
-        if(searchPopup) searchPopup.classList.remove('show');
     });
     
-    // Search Toggle Logic
-    const searchToggleBtn = document.getElementById('reading-search-toggle');
-    const searchPopup = document.getElementById('search-popup');
-
-    searchToggleBtn?.addEventListener('click', function(e) {
-        e.stopPropagation();
-        searchPopup.classList.toggle('show');
-        if(menuDropdown) menuDropdown.classList.remove('show');
-        
-        // Focus input
-        if(searchPopup.classList.contains('show')) {
-            setTimeout(() => document.getElementById('mobile-search-input')?.focus(), 100);
-        }
-    });
-
-    // Also link the Header Mobile Search Button
-    const headerSearchBtn = document.getElementById('header-search-mobile-btn');
-    headerSearchBtn?.addEventListener('click', function(e) {
-        e.stopPropagation();
-        
-        // NEW: Open Dedicated Search Sidebar
-        const searchSidebarOverlay = document.getElementById('search-sidebar-overlay');
-        const bookSearchMobile = document.getElementById('book-search-mobile');
-        
-        if(searchSidebarOverlay) {
-            searchSidebarOverlay.classList.remove('hidden');
-            
-            // Close other menus if open
-            if(menuDropdown) menuDropdown.classList.remove('show');
-            if(searchPopup) searchPopup.classList.remove('show');
-            const sidebarOverlay = document.getElementById('sidebar-overlay');
-            if(sidebarOverlay) sidebarOverlay.classList.add('hidden'); // Close TOC if open
-            
-            // Focus search input in sidebar
-            setTimeout(() => {
-                if(bookSearchMobile) bookSearchMobile.focus();
-            }, 100);
-        }
-    });
-
     // Close menu when clicking outside
     document.addEventListener('click', function(e) {
         if (menuDropdown && !menuDropdown.contains(e.target) && e.target !== menuToggleBtn) {
             menuDropdown.classList.remove('show');
         }
-        if (searchPopup && !searchPopup.contains(e.target) && e.target !== searchToggleBtn && !e.target.closest('#mobile-search-input')) {
-            searchPopup.classList.remove('show');
-        }
     });
 
     // Fullscreen Toggle Logic
     const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const fullscreenText = document.getElementById('fullscreen-text');
+    
     fullscreenBtn?.addEventListener('click', function() {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.log(`Error attempting to enable fullscreen: ${err.message}`);
+            document.documentElement.requestFullscreen().then(() => {
+                if(fullscreenText) fullscreenText.textContent = 'الخروج من الشاشة الكاملة';
+                menuDropdown?.classList.remove('show');
+            }).catch(err => {
+                alert('لا يمكن تفعيل وضع ملء الشاشة: ' + err.message);
             });
-            menuDropdown.classList.remove('show');
-            if(searchPopup) searchPopup.classList.remove('show');
         } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                menuDropdown.classList.remove('show');
-                if(searchPopup) searchPopup.classList.remove('show');
+            document.exitFullscreen().then(() => {
+                if(fullscreenText) fullscreenText.textContent = 'توسيع الشاشة';
+                menuDropdown?.classList.remove('show');
+            });
+        }
+    });
+    
+    // Update fullscreen text when user exits via Esc key
+    document.addEventListener('fullscreenchange', function() {
+        if (!document.fullscreenElement && fullscreenText) {
+            fullscreenText.textContent = 'توسيع الشاشة';
+        }
+    });
+    
+    // Font Size Controls
+    const contentArea = document.querySelector('.book-content, .prose');
+    let currentFontSize = parseInt(localStorage.getItem('bookFontSize')) || 18;
+    if (contentArea) contentArea.style.fontSize = currentFontSize + 'px';
+    
+    document.getElementById('menu-increase')?.addEventListener('click', function() {
+        currentFontSize = Math.min(currentFontSize + 2, 32);
+        if (contentArea) contentArea.style.fontSize = currentFontSize + 'px';
+        localStorage.setItem('bookFontSize', currentFontSize);
+        menuDropdown?.classList.remove('show');
+    });
+    
+    document.getElementById('menu-decrease')?.addEventListener('click', function() {
+        currentFontSize = Math.max(currentFontSize - 2, 12);
+        if (contentArea) contentArea.style.fontSize = currentFontSize + 'px';
+        localStorage.setItem('bookFontSize', currentFontSize);
+        menuDropdown?.classList.remove('show');
+    });
+    
+    // Harakat (Diacritics) Toggle
+    const harakatBtn = document.getElementById('toggle-harakat');
+    const harakatText = document.getElementById('harakat-text');
+    let harakatVisible = localStorage.getItem('harakatVisible') !== 'false';
+    
+    // Arabic diacritics regex pattern
+    const harakatPattern = /[\u064B-\u065F\u0670]/g;
+    let originalContent = null;
+    
+    function updateHarakatDisplay() {
+        const contentEl = document.querySelector('.book-content, .prose');
+        if (!contentEl) return;
+        
+        if (!harakatVisible) {
+            // Store original and remove harakat
+            if (!originalContent) {
+                originalContent = contentEl.innerHTML;
             }
+            contentEl.innerHTML = contentEl.innerHTML.replace(harakatPattern, '');
+            if(harakatText) harakatText.textContent = 'إظهار الحركات';
+        } else {
+            // Restore original content with harakat
+            if (originalContent) {
+                contentEl.innerHTML = originalContent;
+            }
+            if(harakatText) harakatText.textContent = 'إخفاء الحركات';
         }
-    });
+    }
     
-    // Initialize
-    updateProgress();
-    handleScroll();
+    // Initialize based on saved preference
+    if (!harakatVisible) {
+        setTimeout(updateHarakatDisplay, 100);
+    }
     
-    // Part Selector Logic
-    const partSelector = document.getElementById('part-selector');
-    partSelector?.addEventListener('change', function(e) {
-        console.log(`Switched to Part/Volume: ${e.target.value}`);
-    });
-    
-    // Mobile Part Selector Logic
-    const mobilePartSelector = document.getElementById('mobile-part-selector');
-    mobilePartSelector?.addEventListener('change', function(e) {
-        console.log(`Switched to Part/Volume (Mobile): ${e.target.value}`);
-        // Sync with desktop selector if needed
-        if(partSelector) partSelector.value = e.target.value;
-    });
-
-    // Page Input Logic
-    const pageInput = document.getElementById('page-input');
-    pageInput?.addEventListener('change', function(e) {
-        let val = parseInt(e.target.value);
-        if(val < 1) val = 1;
-        if(val > totalPages) val = totalPages;
+    harakatBtn?.addEventListener('click', function() {
+        harakatVisible = !harakatVisible;
+        localStorage.setItem('harakatVisible', harakatVisible);
         
-        currentPage = val;
-        updateProgress();
-        // In a real app, this would scroll to the specific page
+        // Reload to apply changes properly (simplest approach)
+        location.reload();
     });
-    
-    // Simulate page changes for demo (remove in dynamic version)
-    setInterval(() => {
-        currentPage = Math.min(currentPage + 1, totalPages);
-        updateProgress();
-        
-        if (currentPage >= totalPages) {
-            currentPage = 1; // Reset for demo
-        }
-    }, 3000);
 });
 </script>

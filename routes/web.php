@@ -8,7 +8,9 @@ use App\Http\Controllers\BookReaderController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Book Reader Routes
-Route::get('/book/{book}/read', [BookReaderController::class, 'show'])->name('book.read');
+Route::get('/book/{bookId}/{pageNumber?}', [BookReaderController::class, 'show'])
+    ->name('book.read')
+    ->where(['bookId' => '[0-9]+', 'pageNumber' => '[0-9]+']);
 
 // Static Book Preview Route
 Route::get('/preview/book-static', function () {

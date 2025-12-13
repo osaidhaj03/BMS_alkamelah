@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آداب الفتوى والمفتي والمستفتي - الإمام النووي</title>
+    <title>{{ $book->title }} - {{ $book->authors->first()->full_name }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Arabic Fonts -->
@@ -57,20 +57,40 @@
         <!-- Main Site Header -->
         <x-layout.header />
         
-        <!-- Book Hero Section -->
-        <x-book.header-book />
+        <!-- Book Hero Section - Pass book data -->
+        <x-book.header-book 
+            :book="$book ?? null" 
+        />
         
         <!-- Main Layout -->
         <div class="flex" style="padding-top: 0px;">
-            <!-- Sidebar Component -->
-            <x-book.table-of-contents />
+            <!-- Sidebar Component - Pass chapters data -->
+            <x-book.table-of-contents 
+                :chapters="$chapters ?? collect()" 
+                :book="$book ?? null"
+                :currentPage="$currentPage ?? null"
+            />
             
-            <!-- Main Content Component -->
-            <x-book.book-content />
+            <!-- Main Content Component - Pass page data -->
+            <x-book.book-content 
+                :currentPage="$currentPage ?? null"
+                :pages="$pages ?? collect()"
+                :book="$book ?? null"
+                :currentPageNum="$currentPageNum ?? 1"
+                :totalPages="$totalPages ?? 1"
+                :nextPage="$nextPage ?? null"
+                :previousPage="$previousPage ?? null"
+            />
         </div>
         
-        <!-- Progress Component -->
-        <x-book.reading-progress />
+        <!-- Progress Component - Pass progress data -->
+        <x-book.reading-progress 
+            :currentPageNum="$currentPageNum ?? 1"
+            :totalPages="$totalPages ?? 1"
+            :book="$book ?? null"
+            :nextPage="$nextPage ?? null"
+            :previousPage="$previousPage ?? null"
+        />
     </div>
 </body>
 </html>
