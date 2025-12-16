@@ -128,7 +128,9 @@ class BooksTable
 
             ], layout: FiltersLayout::AboveContentCollapsible)
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()
+                    ->url(fn ($record) => "https://alkamelah1.anwaralolmaa.com/book/{$record->id}")
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([
