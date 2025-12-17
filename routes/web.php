@@ -64,4 +64,6 @@ Route::get('/clear-cache-secret-2024', function () {
             <p><strong>Important:</strong> Delete this route from routes/web.php after use.</p>
             <p><a href="/admin">Go to Admin Panel</a></p>';
 });
+
+Route::view('/static-search', 'pages.search.static-search')->name('search.static');
  
