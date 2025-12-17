@@ -55,7 +55,7 @@
         wrapper.style.top = '-9999px';
         wrapper.style.left = '-9999px';
         wrapper.style.width = '800px'; // Fixed width for consistent output
-        wrapper.style.backgroundColor = '#ffffff';
+        wrapper.style.backgroundColor = '#fbf7ee';
         wrapper.style.padding = '40px';
         wrapper.style.direction = 'rtl';
         wrapper.style.fontFamily = 'serif';
@@ -102,7 +102,7 @@
             const canvas = await html2canvas(wrapper, {
                 scale: 2, // High resolution
                 useCORS: true,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#fbf7ee'
             });
 
             if (type === 'image') {
@@ -157,7 +157,7 @@ class="h-full w-full flex flex-col bg-white">
             <div x-ref="bookContent"
                  :style="'font-size: ' + fontSize + 'px'"
                  class="rounded-lg shadow-lg p-6 lg:p-12 relative transition-all duration-200"
-                 style="background-color: #ffffff; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+                 style="background-color: #fbf7ee; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
                 
                 <!-- Content -->
                 <div class="prose prose-lg max-w-none text-justify leading-loose text-gray-800 font-serif space-y-6" style="line-height: 2;">
