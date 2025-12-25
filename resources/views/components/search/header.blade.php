@@ -1,7 +1,7 @@
 <div class="px-4 py-3 md:px-6 md:py-4 bg-white" x-data="{ 
     settingsOpen: false, 
-    searchType: 'flexible',
-    wordOrder: 'any',
+    searchType: 'flexible_match',
+    wordOrder: 'any_order',
     query: '',
     filterModalOpen: false,
     activeTab: 'books',
@@ -165,7 +165,8 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
 
                     <!-- Input -->
                     <input type="text" 
-                           x-model="query"
+                           x-model="$store.search.query"
+                           @keydown.enter="$store.search.performSearch()"
                            class="w-full bg-transparent border-none py-3 text-lg text-gray-800 placeholder-gray-400 focus:ring-0"
                            placeholder="ابحث عن كلمة، عبارة، أو موضوع..."
                            autofocus>
@@ -186,9 +187,13 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                     </button>
                     
                     <!-- Search Button -->
-                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 md:px-6 py-3 rounded-l-xl font-medium transition-colors">
-                        <span class="hidden md:inline">بحث</span>
-                        <svg class="w-5 h-5 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <button @click="$store.search.performSearch()" class="bg-green-600 hover:bg-green-700 text-white px-4 md:px-6 py-3 rounded-l-xl font-medium transition-colors">
+                        <span class="hidden md:inline" x-show="!$store.search.loading">بحث</span>
+                        <svg x-show="$store.search.loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <svg x-show="!$store.search.loading" class="w-5 h-5 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </button>
                 </div>
                 
@@ -272,13 +277,13 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                             <div class="flex flex-col gap-1">
                                 <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
                                     <div class="relative flex items-center">
-                                        <input type="radio" name="searchType" value="exact" x-model="searchType" class="peer h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
+                                        <input type="radio" name="searchType" value="exact_match" x-model="searchType" class="peer h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
                                     </div>
                                     <span class="text-sm text-gray-700 group-hover:text-green-700 font-medium">البحث المطابق</span>
                                 </label>
                                 
                                 <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
-                                    <input type="radio" name="searchType" value="flexible" x-model="searchType" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
+                                    <input type="radio" name="searchType" value="flexible_match" x-model="searchType" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
                                     <span class="text-sm text-gray-700 group-hover:text-green-700 font-medium">البحث الغير مطابق</span>
                                 </label>
 
@@ -302,12 +307,12 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                                 </label>
 
                                 <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
-                                    <input type="radio" name="wordOrder" value="paragraph" x-model="wordOrder" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                    <input type="radio" name="wordOrder" value="same_paragraph" x-model="wordOrder" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="text-sm text-gray-700 group-hover:text-blue-700 font-medium">في نفس الفقرة</span>
                                 </label>
 
                                 <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
-                                    <input type="radio" name="wordOrder" value="any" x-model="wordOrder" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                    <input type="radio" name="wordOrder" value="any_order" x-model="wordOrder" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                     <span class="text-sm text-gray-700 group-hover:text-blue-700 font-medium">أي ترتيب</span>
                                 </label>
                             </div>

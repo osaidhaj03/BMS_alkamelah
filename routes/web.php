@@ -133,4 +133,74 @@ Route::prefix('api')->name('api.')->group(function () {
                      ->get()
                      ->map(fn($s) => ['id' => $s->id, 'name' => $s->name]);
     })->name('sections');
+    
+    // Ultra-Fast Search API (Elasticsearch)
+    Route::get('/ultra-search', function(\Illuminate\Http\Request $request) {
+        try {
+            $searchService = new \App\Services\UltraFastSearchService();
+            
+            $query = $request->input('q', '');
+            $page = (int) $request->input('page', 1);
+            $perPage = (int) $request->input('per_page', 10);
+            
+            // Build filters array
+            $filters = [
+                'search_type' => $request->input('search_type', 'flexible_match'),
+                'word_order' => $request->input('word_order', 'any_order'),
+            ];
+            
+            // Add optional filters
+            if ($request->filled('book_id')) {
+                $filters['book_id'] = explode(',', $request->input('book_id'));
+            }
+            if ($request->filled('author_id')) {
+                $filters['author_id'] = explode(',', $request->input('author_id'));
+            }
+            if ($request->filled('section_id')) {
+                $filters['section_id'] = explode(',', $request->input('section_id'));
+            }
+            
+            $results = $searchService->search($query, $filters, $page, $perPage);
+            
+            // Transform to API response format
+            return response()->json([
+                'success' => true,
+                'data' => collect($results['results'] ?? [])->map(function($item) {
+                    return [
+                        'id' => $item['id'] ?? null,
+                        'book_title' => $item['book_title'] ?? '',
+                        'author_name' => is_array($item['author_names'] ?? null) 
+                            ? implode(', ', $item['author_names']) 
+                            : ($item['author_names'] ?? ''),
+                        'page_number' => $item['page_number'] ?? null,
+                        'content' => $item['content'] ?? '',
+                        'highlighted_content' => $item['highlighted_content'] ?? ($item['content'] ?? ''),
+                        'book_id' => $item['book_id'] ?? null,
+                    ];
+                }),
+                'pagination' => [
+                    'current_page' => $results['current_page'] ?? $page,
+                    'last_page' => $results['last_page'] ?? 1,
+                    'per_page' => $results['per_page'] ?? $perPage,
+                    'total' => $results['total'] ?? 0,
+                ],
+                'search_metadata' => $results['search_metadata'] ?? null,
+            ]);
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Ultra-search API error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Search failed: ' . $e->getMessage(),
+                'data' => [],
+                'pagination' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'per_page' => 10,
+                    'total' => 0,
+                ]
+            ], 500);
+        }
+    })->name('ultra-search');
 });

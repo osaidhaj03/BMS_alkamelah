@@ -55,9 +55,11 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-    </style>
+</style>
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
     @yield('content')
+    
+    @stack('scripts')
 </body>
 </html>
