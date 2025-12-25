@@ -66,4 +66,71 @@ Route::get('/clear-cache-secret-2024', function () {
 });
 
 Route::view('/static-search', 'pages.search.static-search')->name('search.static');
- 
+
+// ===================================================================
+// FILTER API ROUTES
+// ===================================================================
+Route::prefix('api')->name('api.')->group(function () {
+    
+    // Books API for filter modal (with search & pagination)
+    Route::get('/books', function(\Illuminate\Http\Request $request) {
+        $query = \App\Models\Book::query();
+        
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+        
+        return $query->select('id', 'title')
+                     ->orderBy('title')
+                     ->paginate(50);
+    })->name('books');
+    
+    // Authors API for filter modal (with search & pagination)
+    Route::get('/authors', function(\Illuminate\Http\Request $request) {
+        $query = \App\Models\Author::query();
+        
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $search = $request->search;
+                $q->where('first_name', 'like', '%' . $search . '%')
+                  ->orWhere('last_name', 'like', '%' . $search . '%')
+                  ->orWhere('laqab', 'like', '%' . $search . '%')
+                  ->orWhere('kunyah', 'like', '%' . $search . '%');
+            });
+        }
+        
+        $results = $query->select('id', 'first_name', 'last_name', 'laqab', 'kunyah')
+                         ->orderBy('first_name')
+                         ->paginate(50);
+        
+        // Transform to add full_name
+        $results->getCollection()->transform(function ($author) {
+            return [
+                'id' => $author->id,
+                'name' => trim(implode(' ', array_filter([
+                    $author->laqab,
+                    $author->kunyah,
+                    $author->first_name,
+                    $author->last_name,
+                ])))
+            ];
+        });
+        
+        return $results;
+    })->name('authors');
+    
+    // Sections API for filter modal (load all - typically 40-100 sections)
+    Route::get('/sections', function(\Illuminate\Http\Request $request) {
+        $query = \App\Models\BookSection::query();
+        
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        
+        return $query->select('id', 'name')
+                     ->orderBy('sort_order')
+                     ->orderBy('name')
+                     ->get()
+                     ->map(fn($s) => ['id' => $s->id, 'name' => $s->name]);
+    })->name('sections');
+});

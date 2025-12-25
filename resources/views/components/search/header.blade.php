@@ -1,44 +1,153 @@
 <div class="px-4 py-3 md:px-6 md:py-4 bg-white" x-data="{ 
     settingsOpen: false, 
-    searchType: 'flexible', // exact, flexible, morphological, semantic
-    wordOrder: 'any', // consecutive, paragraph, any
+    searchType: 'flexible',
+    wordOrder: 'any',
     query: '',
     filterModalOpen: false,
     activeTab: 'books',
     filterSearch: '',
     selectedItems: { books: [], authors: [], sections: [] },
     
-    // Mock Data
-    mockData: {
-        books: [
-            { id: 1, name: 'تاريخ الأدب العربي' },
-            { id: 2, name: 'مقدمة ابن خلدون' },
-            { id: 3, name: 'ألف ليلة وليلة' },
-            { id: 4, name: 'روايات نجيب محفوظ' },
-            { id: 5, name: 'الحسب تمل مما' },
-            { id: 6, name: 'العجيرة والندق' },
-            { id: 7, name: 'المرضخة نجيب العربي' },
-            { id: 8, name: 'كتاب سيبويه' },
-            { id: 9, name: 'البخلاء للجاحظ' },
-        ],
-        authors: [
-            { id: 1, name: 'طه حسين' },
-            { id: 2, name: 'نزار قباني' },
-            { id: 3, name: 'جبران خليل جبران' },
-            { id: 4, name: 'محمود درويش' },
-            { id: 5, name: 'المتنبي' },
-        ],
-        sections: [
-            { id: 1, name: 'الأدب' },
-            { id: 2, name: 'التاريخ' },
-            { id: 3, name: 'الفلسفة' },
-            { id: 4, name: 'العلوم الإسلامية' },
-            { id: 5, name: 'اللغة العربية' },
-        ]
-    },
+    // Dynamic Books Data
+    books: [],
+    booksPage: 1,
+    hasMoreBooks: true,
+    booksLoading: false,
+    booksSearchTimeout: null,
+    
+    // Dynamic Authors Data
+    authors: [],
+    authorsPage: 1,
+    hasMoreAuthors: true,
+    authorsLoading: false,
+    authorsSearchTimeout: null,
+    
+    // Dynamic Sections Data (load all at once)
+    sections: [],
+    sectionsLoading: false,
+    sectionsLoaded: false,
+    
     sortOpen: false,
-    sortBy: 'relevance', // relevance, death_year_asc, death_year_desc, alphabet
-    mobileMenuOpen: false
+    sortBy: 'relevance',
+    mobileMenuOpen: false,
+
+    // Load books from API
+    async loadBooks(page = 1, append = false) {
+        this.booksLoading = true;
+        try {
+            const params = new URLSearchParams({
+                page: page,
+                search: this.filterSearch
+            });
+            const response = await fetch('/api/books?' + params.toString());
+            const data = await response.json();
+            
+            if (append) {
+                this.books = [...this.books, ...data.data.map(b => ({ id: b.id, name: b.title }))];
+            } else {
+                this.books = data.data.map(b => ({ id: b.id, name: b.title }));
+            }
+            
+            this.booksPage = data.current_page;
+            this.hasMoreBooks = data.current_page < data.last_page;
+        } catch (error) {
+            console.error('Failed to load books:', error);
+        } finally {
+            this.booksLoading = false;
+        }
+    },
+
+    // Search books with debounce
+    searchBooks() {
+        clearTimeout(this.booksSearchTimeout);
+        this.booksSearchTimeout = setTimeout(() => {
+            this.booksPage = 1;
+            this.loadBooks(1, false);
+        }, 300);
+    },
+
+    // Load more books
+    loadMoreBooks() {
+        if (this.hasMoreBooks && !this.booksLoading) {
+            this.loadBooks(this.booksPage + 1, true);
+        }
+    },
+
+    // Load authors from API
+    async loadAuthors(page = 1, append = false) {
+        this.authorsLoading = true;
+        try {
+            const params = new URLSearchParams({
+                page: page,
+                search: this.filterSearch
+            });
+            const response = await fetch('/api/authors?' + params.toString());
+            const data = await response.json();
+            
+            if (append) {
+                this.authors = [...this.authors, ...data.data];
+            } else {
+                this.authors = data.data;
+            }
+            
+            this.authorsPage = data.current_page;
+            this.hasMoreAuthors = data.current_page < data.last_page;
+        } catch (error) {
+            console.error('Failed to load authors:', error);
+        } finally {
+            this.authorsLoading = false;
+        }
+    },
+
+    // Search authors with debounce
+    searchAuthors() {
+        clearTimeout(this.authorsSearchTimeout);
+        this.authorsSearchTimeout = setTimeout(() => {
+            this.authorsPage = 1;
+            this.loadAuthors(1, false);
+        }, 300);
+    },
+
+    // Load more authors
+    loadMoreAuthors() {
+        if (this.hasMoreAuthors && !this.authorsLoading) {
+            this.loadAuthors(this.authorsPage + 1, true);
+        }
+    },
+
+    // Load all sections at once
+    async loadSections() {
+        if (this.sectionsLoaded) return;
+        this.sectionsLoading = true;
+        try {
+            const response = await fetch('/api/sections');
+            this.sections = await response.json();
+            this.sectionsLoaded = true;
+        } catch (error) {
+            console.error('Failed to load sections:', error);
+        } finally {
+            this.sectionsLoading = false;
+        }
+    },
+
+    // Filter sections locally (since all are loaded)
+    get filteredSections() {
+        if (!this.filterSearch) return this.sections;
+        return this.sections.filter(s => s.name.includes(this.filterSearch));
+    },
+
+    // Init - load data when modal opens
+    initFilter() {
+        if (this.books.length === 0) {
+            this.loadBooks();
+        }
+        if (this.authors.length === 0) {
+            this.loadAuthors();
+        }
+        if (!this.sectionsLoaded) {
+            this.loadSections();
+        }
+    }
 }" 
 style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); background-position: center;">
     <div class="max-w-7xl mx-auto flex flex-col gap-4">
@@ -330,7 +439,7 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                 </div>
 
                 <!-- Search & Content -->
-                <div class="flex-1 overflow-hidden flex flex-col bg-gray-50">
+                <div class="flex-1 overflow-hidden flex flex-col bg-gray-50" x-init="initFilter()">
                     <!-- Inner Search -->
                     <div class="px-[1.05rem] py-4 bg-white border-b border-gray-100">
                         <div class="relative">
@@ -340,7 +449,8 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                                 </svg>
                             </div>
                             <input type="text" 
-                                   x-model="filterSearch" 
+                                   x-model="filterSearch"
+                                   @input="if(activeTab === 'books') searchBooks(); else if(activeTab === 'authors') searchAuthors();"
                                    class="block w-full rounded-lg border-gray-300 pr-10 focus:border-green-500 focus:ring-green-500 text-[1rem] leading-[1.35rem] bg-gray-50" 
                                    :placeholder="'بحث في ' + (activeTab === 'books' ? 'الكتب' : (activeTab === 'authors' ? 'المؤلفين' : 'الأقسام')) + '...'">
                         </div>
@@ -349,30 +459,164 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                     <!-- List Area -->
                     <div class="flex-1 overflow-y-auto p-2">
                         <ul class="space-y-1">
-                            <template x-for="item in mockData[activeTab].filter(i => i.name.includes(filterSearch))" :key="item.id">
-                                <li class="relative flex items-start py-2 px-[1.05rem] hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
-                                    @click="
-                                        if (selectedItems[activeTab].includes(item.id)) {
-                                            selectedItems[activeTab] = selectedItems[activeTab].filter(id => id !== item.id);
-                                        } else {
-                                            selectedItems[activeTab].push(item.id);
-                                        }
-                                    ">
-                                    <div class="min-w-0 flex-1 text-[1rem] leading-[1.35rem]">
-                                        <label :for="'item-' + item.id" class="select-none font-medium text-gray-900 cursor-pointer" x-text="item.name"></label>
-                                    </div>
-                                    <div class="mr-3 flex h-6 items-center">
-                                        <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors"
-                                             :class="selectedItems[activeTab].includes(item.id) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300'">
-                                             <svg x-show="selectedItems[activeTab].includes(item.id)" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                        </div>
-                                    </div>
-                                </li>
+                            <!-- Books Tab (Dynamic) -->
+                            <template x-if="activeTab === 'books'">
+                                <div>
+                                    <!-- Loading State -->
+                                    <template x-if="booksLoading && books.length === 0">
+                                        <li class="py-8 text-center text-gray-500 text-sm">
+                                            <svg class="animate-spin h-6 w-6 mx-auto text-green-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            جاري تحميل الكتب...
+                                        </li>
+                                    </template>
+                                    
+                                    <!-- Books List -->
+                                    <template x-for="item in books" :key="item.id">
+                                        <li class="relative flex items-start py-2 px-[1.05rem] hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
+                                            @click="
+                                                if (selectedItems.books.includes(item.id)) {
+                                                    selectedItems.books = selectedItems.books.filter(id => id !== item.id);
+                                                } else {
+                                                    selectedItems.books.push(item.id);
+                                                }
+                                            ">
+                                            <div class="min-w-0 flex-1 text-[1rem] leading-[1.35rem]">
+                                                <label class="select-none font-medium text-gray-900 cursor-pointer" x-text="item.name"></label>
+                                            </div>
+                                            <div class="mr-3 flex h-6 items-center">
+                                                <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors"
+                                                     :class="selectedItems.books.includes(item.id) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300'">
+                                                     <svg x-show="selectedItems.books.includes(item.id)" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </template>
+                                    
+                                    <!-- Load More Button -->
+                                    <li x-show="hasMoreBooks && !booksLoading && books.length > 0" class="py-3 text-center">
+                                        <button @click="loadMoreBooks()" class="text-sm text-green-600 hover:text-green-700 font-bold hover:underline">
+                                            عرض المزيد من الكتب...
+                                        </button>
+                                    </li>
+                                    
+                                    <!-- Loading More Indicator -->
+                                    <li x-show="booksLoading && books.length > 0" class="py-3 text-center text-gray-400 text-sm">
+                                        <svg class="animate-spin h-4 w-4 mx-auto text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </li>
+                                    
+                                    <!-- Empty State -->
+                                    <li x-show="!booksLoading && books.length === 0" class="py-8 text-center text-gray-500 text-sm">
+                                        لا توجد نتائج مطابقة
+                                    </li>
+                                </div>
                             </template>
-                            <!-- Empty State -->
-                            <li x-show="mockData[activeTab].filter(i => i.name.includes(filterSearch)).length === 0" class="py-8 text-center text-gray-500 text-sm">
-                                لا توجد نتائج مطابقة
-                            </li>
+                            
+                            <!-- Authors Tab (Dynamic with Pagination) -->
+                            <template x-if="activeTab === 'authors'">
+                                <div>
+                                    <!-- Loading State -->
+                                    <template x-if="authorsLoading && authors.length === 0">
+                                        <li class="py-8 text-center text-gray-500 text-sm">
+                                            <svg class="animate-spin h-6 w-6 mx-auto text-green-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            جاري تحميل المؤلفين...
+                                        </li>
+                                    </template>
+                                    
+                                    <!-- Authors List -->
+                                    <template x-for="item in authors" :key="item.id">
+                                        <li class="relative flex items-start py-2 px-[1.05rem] hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
+                                            @click="
+                                                if (selectedItems.authors.includes(item.id)) {
+                                                    selectedItems.authors = selectedItems.authors.filter(id => id !== item.id);
+                                                } else {
+                                                    selectedItems.authors.push(item.id);
+                                                }
+                                            ">
+                                            <div class="min-w-0 flex-1 text-[1rem] leading-[1.35rem]">
+                                                <label class="select-none font-medium text-gray-900 cursor-pointer" x-text="item.name"></label>
+                                            </div>
+                                            <div class="mr-3 flex h-6 items-center">
+                                                <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors"
+                                                     :class="selectedItems.authors.includes(item.id) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300'">
+                                                     <svg x-show="selectedItems.authors.includes(item.id)" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </template>
+                                    
+                                    <!-- Load More Button -->
+                                    <li x-show="hasMoreAuthors && !authorsLoading && authors.length > 0" class="py-3 text-center">
+                                        <button @click="loadMoreAuthors()" class="text-sm text-green-600 hover:text-green-700 font-bold hover:underline">
+                                            عرض المزيد من المؤلفين...
+                                        </button>
+                                    </li>
+                                    
+                                    <!-- Loading More Indicator -->
+                                    <li x-show="authorsLoading && authors.length > 0" class="py-3 text-center text-gray-400 text-sm">
+                                        <svg class="animate-spin h-4 w-4 mx-auto text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </li>
+                                    
+                                    <!-- Empty State -->
+                                    <li x-show="!authorsLoading && authors.length === 0" class="py-8 text-center text-gray-500 text-sm">
+                                        لا توجد نتائج مطابقة
+                                    </li>
+                                </div>
+                            </template>
+                            
+                            <!-- Sections Tab (All loaded, filtered locally) -->
+                            <template x-if="activeTab === 'sections'">
+                                <div>
+                                    <!-- Loading State -->
+                                    <template x-if="sectionsLoading">
+                                        <li class="py-8 text-center text-gray-500 text-sm">
+                                            <svg class="animate-spin h-6 w-6 mx-auto text-green-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            جاري تحميل الأقسام...
+                                        </li>
+                                    </template>
+                                    
+                                    <!-- Sections List (filtered locally) -->
+                                    <template x-for="item in filteredSections" :key="item.id">
+                                        <li class="relative flex items-start py-2 px-[1.05rem] hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
+                                            @click="
+                                                if (selectedItems.sections.includes(item.id)) {
+                                                    selectedItems.sections = selectedItems.sections.filter(id => id !== item.id);
+                                                } else {
+                                                    selectedItems.sections.push(item.id);
+                                                }
+                                            ">
+                                            <div class="min-w-0 flex-1 text-[1rem] leading-[1.35rem]">
+                                                <label class="select-none font-medium text-gray-900 cursor-pointer" x-text="item.name"></label>
+                                            </div>
+                                            <div class="mr-3 flex h-6 items-center">
+                                                <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors"
+                                                     :class="selectedItems.sections.includes(item.id) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300'">
+                                                     <svg x-show="selectedItems.sections.includes(item.id)" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </template>
+                                    
+                                    <!-- Empty State -->
+                                    <li x-show="!sectionsLoading && filteredSections.length === 0" class="py-8 text-center text-gray-500 text-sm">
+                                        لا توجد نتائج مطابقة
+                                    </li>
+                                </div>
+                            </template>
                         </ul>
                     </div>
                 </div>
