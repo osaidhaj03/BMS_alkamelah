@@ -149,9 +149,39 @@
                 await this.performSearch(false);
             },
             
-            // Select a result
-            selectResult(result) {
-                this.selectedResult = result;
+            // Select a result and load full page content
+            selectedResult: null,
+            loadingPreview: false,
+            
+            async selectResult(result) {
+                if (!result || !result.id) {
+                    this.selectedResult = result;
+                    return;
+                }
+                
+                this.loadingPreview = true;
+                
+                try {
+                    // Fetch full page content with highlight
+                    const response = await fetch(`/api/page/${result.id}?q=${encodeURIComponent(this.query)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        this.selectedResult = {
+                            ...result,
+                            ...data.data,
+                            highlighted_content: data.data.content
+                        };
+                    } else {
+                        // Fallback to original result
+                        this.selectedResult = result;
+                    }
+                } catch (error) {
+                    console.error('Failed to load full page:', error);
+                    this.selectedResult = result;
+                } finally {
+                    this.loadingPreview = false;
+                }
             }
         });
     });

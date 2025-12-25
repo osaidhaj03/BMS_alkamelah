@@ -203,4 +203,62 @@ Route::prefix('api')->name('api.')->group(function () {
             ], 500);
         }
     })->name('ultra-search');
+    
+    // Get Full Page Content API (for preview pane)
+    Route::get('/page/{id}', function(\Illuminate\Http\Request $request, $id) {
+        try {
+            $page = \App\Models\Page::with(['book', 'volume', 'chapter'])->find($id);
+            
+            if (!$page) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Page not found'
+                ], 404);
+            }
+            
+            $content = $page->html_content ?? $page->content ?? '';
+            
+            // Highlight search query if provided
+            $searchQuery = $request->input('q', '');
+            if (!empty($searchQuery)) {
+                // Split query into words and highlight each
+                $words = preg_split('/\s+/', trim($searchQuery));
+                foreach ($words as $word) {
+                    if (strlen($word) >= 2) {
+                        // Escape special regex characters
+                        $escapedWord = preg_quote($word, '/');
+                        // Highlight the word
+                        $content = preg_replace(
+                            '/(' . $escapedWord . ')/ui',
+                            '<mark class="bg-yellow-200 text-black px-0.5 rounded">$1</mark>',
+                            $content
+                        );
+                    }
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $page->id,
+                    'page_number' => $page->page_number,
+                    'original_page_number' => $page->original_page_number,
+                    'content' => $content,
+                    'book_id' => $page->book_id,
+                    'book_title' => $page->book->title ?? '',
+                    'volume_title' => $page->volume->title ?? null,
+                    'chapter_title' => $page->chapter->title ?? null,
+                    'author_name' => $page->book->authors->first()?->laqab ?? 
+                                    $page->book->authors->first()?->first_name ?? '',
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Page API error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to load page'
+            ], 500);
+        }
+    })->name('page');
 });
