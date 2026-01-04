@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex flex-col h-screen bg-gray-50" dir="rtl">
+<div class="flex flex-col h-screen bg-gray-50" dir="rtl" x-data>
     <!-- Global Header -->
     <div class="z-50 relative">
         <x-layout.header />
@@ -27,6 +27,7 @@
 
         <!-- Mobile Toggle Button (Visible only on small screens) -->
         <button id="mobile-sidebar-toggle" 
+                @click="$store.search.mobileSearchOpen = true"
                 class="lg:hidden absolute bottom-10 right-6 z-30 p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
@@ -52,27 +53,138 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
-    // Basic mobile sidebar toggle
-    const toggleBtn = document.getElementById('mobile-sidebar-toggle');
-    const overlay = document.getElementById('mobile-sidebar-overlay');
-    const panel = document.getElementById('mobile-sidebar-panel');
-    const closeBtn = document.getElementById('mobile-sidebar-close');
-
-    function openSidebar() {
-        overlay.classList.remove('hidden');
-        setTimeout(() => panel.classList.remove('translate-x-full'), 10);
-    }
-
-    function closeSidebar() {
-        panel.classList.add('translate-x-full');
-        setTimeout(() => overlay.classList.add('hidden'), 300);
-    }
-
-    if(toggleBtn) toggleBtn.addEventListener('click', openSidebar);
-    if(closeBtn) closeBtn.addEventListener('click', closeSidebar);
-    if(overlay) overlay.addEventListener('click', (e) => {
-        if(e.target === overlay) closeSidebar();
+    document.addEventListener('alpine:init', () => {
+        // Create a global store for search state
+        Alpine.store('search', {
+            // Search State
+            query: '',
+            searchType: 'flexible_match',
+            wordOrder: 'any_order',
+            perPage: 10,
+            page: 1,
+            
+            // Results State
+            results: [],
+            totalResults: 0,
+            loading: false,
+            hasMore: true,
+            searchTime: 0,
+            
+            // Filters
+            selectedFilters: { books: [], authors: [], sections: [] },
+            
+            // Mobile
+            mobileSearchOpen: false,
+            
+            // Selected result for preview
+            selectedResult: null,
+            
+            // Perform Search
+            async performSearch(resetPage = true) {
+                if (!this.query.trim()) {
+                    this.results = [];
+                    this.totalResults = 0;
+                    return;
+                }
+                
+                if (resetPage) {
+                    this.page = 1;
+                    this.results = [];
+                }
+                
+                this.loading = true;
+                const startTime = performance.now();
+                
+                try {
+                    const params = new URLSearchParams({
+                        q: this.query,
+                        per_page: this.perPage,
+                        page: this.page,
+                        search_type: this.searchType,
+                        word_order: this.wordOrder
+                    });
+                    
+                    // Add filters
+                    if (this.selectedFilters.books.length > 0) {
+                        params.append('book_id', this.selectedFilters.books.join(','));
+                    }
+                    if (this.selectedFilters.authors.length > 0) {
+                        params.append('author_id', this.selectedFilters.authors.join(','));
+                    }
+                    if (this.selectedFilters.sections.length > 0) {
+                        params.append('section_id', this.selectedFilters.sections.join(','));
+                    }
+                    
+                    console.log('Searching:', this.query, params.toString());
+                    
+                    const response = await fetch('/api/ultra-search?' + params.toString());
+                    const data = await response.json();
+                    
+                    console.log('Search response:', data);
+                    
+                    this.searchTime = Math.round(performance.now() - startTime);
+                    
+                    if (data.success && data.data) {
+                        if (resetPage) {
+                            this.results = data.data;
+                        } else {
+                            this.results = [...this.results, ...data.data];
+                        }
+                        this.totalResults = data.pagination?.total || data.data.length;
+                        this.hasMore = data.pagination ? (this.page < data.pagination.last_page) : false;
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            // Load More Results
+            async loadMore() {
+                if (!this.hasMore || this.loading) return;
+                this.page++;
+                await this.performSearch(false);
+            },
+            
+            // Select a result and load full page content
+            selectedResult: null,
+            loadingPreview: false,
+            
+            async selectResult(result) {
+                if (!result || !result.id) {
+                    this.selectedResult = result;
+                    return;
+                }
+                
+                this.loadingPreview = true;
+                
+                try {
+                    // Fetch full page content with highlight
+                    const response = await fetch(`/api/page/${result.id}?q=${encodeURIComponent(this.query)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        this.selectedResult = {
+                            ...result,
+                            ...data.data,
+                            highlighted_content: data.data.content
+                        };
+                    } else {
+                        // Fallback to original result
+                        this.selectedResult = result;
+                    }
+                } catch (error) {
+                    console.error('Failed to load full page:', error);
+                    this.selectedResult = result;
+                } finally {
+                    this.loadingPreview = false;
+                }
+            }
+        });
     });
 </script>
+@endpush
 @endsection
