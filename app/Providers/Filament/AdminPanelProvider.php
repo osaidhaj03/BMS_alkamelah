@@ -68,6 +68,23 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make(),
                 FilamentUiSwitcherPlugin::make()
                     ->withModeSwitcher(),
+                \Caresome\FilamentAuthDesigner\AuthDesignerPlugin::make()
+                    ->login(
+                        layout: \Caresome\FilamentAuthDesigner\Enums\AuthLayout::Overlay,
+                        media: asset('images/الأقصى.jpg')
+                    )
+                    ->registration(
+                        layout: \Caresome\FilamentAuthDesigner\Enums\AuthLayout::Overlay,
+                        media: asset('images/الأقصى.jpg')
+                    )
+                    ->passwordReset(
+                        layout: \Caresome\FilamentAuthDesigner\Enums\AuthLayout::Overlay,
+                        media: asset('images/الأقصى.jpg')
+                    )
+                    ->emailVerification(
+                        layout: \Caresome\FilamentAuthDesigner\Enums\AuthLayout::Overlay,
+                        media: asset('images/الأقصى.jpg')
+                    ),
             ])
             ->authMiddleware([
                 Authenticate::class,
