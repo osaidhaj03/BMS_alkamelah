@@ -6,6 +6,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BookReaderController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/category', [HomeController::class, 'categories'])->name('categories.index');
+
 
 // Search Page Prototype
 Route::get('/search', function () {
@@ -35,9 +37,9 @@ Route::get('/clear-cache-secret-2024', function () {
         storage_path('framework/cache/data'),
         base_path('bootstrap/cache'),
     ];
-    
+
     $cleared = [];
-    
+
     foreach ($paths as $path) {
         if (is_dir($path)) {
             $files = glob($path . '/*');
@@ -49,7 +51,7 @@ Route::get('/clear-cache-secret-2024', function () {
             $cleared[] = $path;
         }
     }
-    
+
     // مسح cache من جدول cache في قاعدة البيانات
     try {
         \Illuminate\Support\Facades\DB::table('cache')->truncate();
@@ -57,7 +59,7 @@ Route::get('/clear-cache-secret-2024', function () {
     } catch (\Exception $e) {
         // تجاهل إذا لم يكن هناك جدول cache
     }
-    
+
     return '<h2>Cache Cleared Successfully! ✅</h2>
             <p>Cleared paths:</p>
             <ul><li>' . implode('</li><li>', $cleared) . '</li></ul>
@@ -71,38 +73,38 @@ Route::view('/static-search', 'pages.search.static-search')->name('search.static
 // FILTER API ROUTES
 // ===================================================================
 Route::prefix('api')->name('api.')->group(function () {
-    
+
     // Books API for filter modal (with search & pagination)
-    Route::get('/books', function(\Illuminate\Http\Request $request) {
+    Route::get('/books', function (\Illuminate\Http\Request $request) {
         $query = \App\Models\Book::query();
-        
+
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
-        
+
         return $query->select('id', 'title')
-                     ->orderBy('title')
-                     ->paginate(50);
+            ->orderBy('title')
+            ->paginate(50);
     })->name('books');
-    
+
     // Authors API for filter modal (with search & pagination)
-    Route::get('/authors', function(\Illuminate\Http\Request $request) {
+    Route::get('/authors', function (\Illuminate\Http\Request $request) {
         $query = \App\Models\Author::query();
-        
+
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $search = $request->search;
                 $q->where('first_name', 'like', '%' . $search . '%')
-                  ->orWhere('last_name', 'like', '%' . $search . '%')
-                  ->orWhere('laqab', 'like', '%' . $search . '%')
-                  ->orWhere('kunyah', 'like', '%' . $search . '%');
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhere('laqab', 'like', '%' . $search . '%')
+                    ->orWhere('kunyah', 'like', '%' . $search . '%');
             });
         }
-        
+
         $results = $query->select('id', 'first_name', 'last_name', 'laqab', 'kunyah')
-                         ->orderBy('first_name')
-                         ->paginate(50);
-        
+            ->orderBy('first_name')
+            ->paginate(50);
+
         // Transform to add full_name
         $results->getCollection()->transform(function ($author) {
             return [
@@ -115,40 +117,40 @@ Route::prefix('api')->name('api.')->group(function () {
                 ])))
             ];
         });
-        
+
         return $results;
     })->name('authors');
-    
+
     // Sections API for filter modal (load all - typically 40-100 sections)
-    Route::get('/sections', function(\Illuminate\Http\Request $request) {
+    Route::get('/sections', function (\Illuminate\Http\Request $request) {
         $query = \App\Models\BookSection::query();
-        
+
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
-        
+
         return $query->select('id', 'name')
-                     ->orderBy('sort_order')
-                     ->orderBy('name')
-                     ->get()
-                     ->map(fn($s) => ['id' => $s->id, 'name' => $s->name]);
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->map(fn($s) => ['id' => $s->id, 'name' => $s->name]);
     })->name('sections');
-    
+
     // Ultra-Fast Search API (Elasticsearch)
-    Route::get('/ultra-search', function(\Illuminate\Http\Request $request) {
+    Route::get('/ultra-search', function (\Illuminate\Http\Request $request) {
         try {
             $searchService = new \App\Services\UltraFastSearchService();
-            
+
             $query = $request->input('q', '');
             $page = (int) $request->input('page', 1);
             $perPage = (int) $request->input('per_page', 10);
-            
+
             // Build filters array
             $filters = [
                 'search_type' => $request->input('search_type', 'flexible_match'),
                 'word_order' => $request->input('word_order', 'any_order'),
             ];
-            
+
             // Add optional filters
             if ($request->filled('book_id')) {
                 $filters['book_id'] = explode(',', $request->input('book_id'));
@@ -159,18 +161,18 @@ Route::prefix('api')->name('api.')->group(function () {
             if ($request->filled('section_id')) {
                 $filters['section_id'] = explode(',', $request->input('section_id'));
             }
-            
+
             $results = $searchService->search($query, $filters, $page, $perPage);
-            
+
             // Transform to API response format
             return response()->json([
                 'success' => true,
-                'data' => collect($results['results'] ?? [])->map(function($item) {
+                'data' => collect($results['results'] ?? [])->map(function ($item) {
                     return [
                         'id' => $item['id'] ?? null,
                         'book_title' => $item['book_title'] ?? '',
-                        'author_name' => is_array($item['author_names'] ?? null) 
-                            ? implode(', ', $item['author_names']) 
+                        'author_name' => is_array($item['author_names'] ?? null)
+                            ? implode(', ', $item['author_names'])
                             : ($item['author_names'] ?? ''),
                         'page_number' => $item['page_number'] ?? null,
                         'content' => $item['content'] ?? '',
@@ -186,10 +188,10 @@ Route::prefix('api')->name('api.')->group(function () {
                 ],
                 'search_metadata' => $results['search_metadata'] ?? null,
             ]);
-            
+
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Ultra-search API error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'error' => 'Search failed: ' . $e->getMessage(),
@@ -203,21 +205,21 @@ Route::prefix('api')->name('api.')->group(function () {
             ], 500);
         }
     })->name('ultra-search');
-    
+
     // Get Full Page Content API (for preview pane)
-    Route::get('/page/{id}', function(\Illuminate\Http\Request $request, $id) {
+    Route::get('/page/{id}', function (\Illuminate\Http\Request $request, $id) {
         try {
             $page = \App\Models\Page::with(['book', 'volume', 'chapter'])->find($id);
-            
+
             if (!$page) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Page not found'
                 ], 404);
             }
-            
+
             $content = $page->html_content ?? $page->content ?? '';
-            
+
             // Highlight search query if provided
             $searchQuery = $request->input('q', '');
             if (!empty($searchQuery)) {
@@ -236,7 +238,7 @@ Route::prefix('api')->name('api.')->group(function () {
                     }
                 }
             }
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -248,11 +250,11 @@ Route::prefix('api')->name('api.')->group(function () {
                     'book_title' => $page->book->title ?? '',
                     'volume_title' => $page->volume->title ?? null,
                     'chapter_title' => $page->chapter->title ?? null,
-                    'author_name' => $page->book->authors->first()?->laqab ?? 
-                                    $page->book->authors->first()?->first_name ?? '',
+                    'author_name' => $page->book->authors->first()?->laqab ??
+                        $page->book->authors->first()?->first_name ?? '',
                 ]
             ]);
-            
+
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Page API error: ' . $e->getMessage());
             return response()->json([

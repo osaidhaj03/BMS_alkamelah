@@ -32,14 +32,14 @@ class HomeController extends Controller
             'total_pages' => \DB::table('pages')->count(),
             'total_sections' => BookSection::where('is_active', true)->count(),
         ];
-        
+
         /**
          * 2. جلب أقسام الكتب للعرض الرئيسي
          * - استخدام scope مخصص في Model للحصول على 6 أقسام فقط
          * - تحسين الأداء بعدم جلب جميع الأقسام
          */
         $sections = BookSection::getForHomepage(6);
-        
+
         /**
          * 2. جلب أحدث الكتب المنشورة والمرئية للعامة
          * - with(['authors', 'bookSection']): تحميل العلاقات مسبقاً لتجنب N+1 queries
@@ -52,17 +52,17 @@ class HomeController extends Controller
             ->public()
             ->latest()
             ->paginate(10);
-        
+
         /**
          * 3. جلب المؤلفين مع عدد كتبهم المنشورة
          * - هذا القسم يحتوي على تاريخ التطوير والإصلاحات المختلفة
          */
-        
+
         /*
         ═══════════════════════════════════════════════════════════════════
         تاريخ الكود القديم والمحاولات السابقة (محفوظ للمرجع)
         ═══════════════════════════════════════════════════════════════════
-        
+
         الكود القديم الأول - كان يستخدم having لإظهار المؤلفين الذين لديهم كتب فقط:
         $authors = Author::withCount(['books' => function($query) {
             $query->where('status', 'published')
@@ -71,13 +71,13 @@ class HomeController extends Controller
             ->having('books_count', '>', 0)
             ->orderByDesc('books_count')
             ->paginate(10);
-        
+
         تجربة بسيطة للاختبار - لفهم سبب عدم ظهور المؤلفين:
         $authors = Author::withCount('books')
             ->orderBy('full_name')
             ->paginate(10);
         */
-        
+
         /**
          * الكود الصحيح المُحسن لجلب المؤلفين للصفحة الرئيسية
          * 
@@ -90,13 +90,15 @@ class HomeController extends Controller
          * ملاحظة: لا نستخدم having('books_count', '>', 0) هنا لأننا نريد عرض
          * جميع المؤلفين حتى لو لم يكن لديهم كتب منشورة (للتحضير المستقبلي)
          */
-        $authors = Author::withCount(['books' => function($query) {
-            $query->where('visibility', 'public');
-        }])
+        $authors = Author::withCount([
+            'books' => function ($query) {
+                $query->where('visibility', 'public');
+            }
+        ])
             ->orderByDesc('books_count')
             ->orderBy('first_name')
             ->paginate(10);
-        
+
         // تسجيل عدد المؤلفين لمراقبة الأداء والتأكد من عمل الاستعلام
         Log::info('Authors count: ' . $authors->total());
 
@@ -118,24 +120,26 @@ class HomeController extends Controller
     public function showAll(Request $request, ?string $type = 'books')
     {
         $section = $request->query('section');
-        
+
         if ($type === 'authors') {
             // جلب جميع المؤلفين مع عدد كتبهم
-            $authors = Author::withCount(['books' => function($query) {
-                $query->where('visibility', 'public');
-            }])
+            $authors = Author::withCount([
+                'books' => function ($query) {
+                    $query->where('visibility', 'public');
+                }
+            ])
                 ->orderByDesc('books_count')
                 ->orderBy('first_name')
                 ->paginate(20);
-            
+
             return view('components.superduper.pages.show-all-authors', compact('authors'));
         }
-        
+
         // الافتراضي: عرض الكتب
         $query = Book::with(['authors', 'bookSection'])
             ->public()
             ->latest();
-        
+
         // التصفية حسب القسم إذا تم تحديده
         if ($section) {
             $bookSection = BookSection::where('slug', $section)->first();
@@ -143,10 +147,10 @@ class HomeController extends Controller
                 $query->where('book_section_id', $bookSection->id);
             }
         }
-        
+
         $books = $query->paginate(20);
         $currentSection = $section ? BookSection::where('slug', $section)->first() : null;
-        
+
         return view('components.superduper.pages.show-all-books', compact('books', 'currentSection'));
     }
 
@@ -155,14 +159,22 @@ class HomeController extends Controller
      * 
      * @return \Illuminate\View\View
      */
-    public function categories()
+    public function categories(Request $request)
     {
-        $sections = BookSection::withCount('books')
+        $search = $request->input('search');
+
+        $query = BookSection::withCount('books')
             ->where('is_active', true)
-            ->whereNull('parent_id')
-            ->orderBy('sort_order')
+            ->whereNull('parent_id');
+
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        $sections = $query->orderBy('sort_order')
             ->get();
-        
-        return view('components.superduper.pages.categories', compact('sections'));
+
+        return view('pages.category', compact('sections', 'search'));
     }
+
 }
