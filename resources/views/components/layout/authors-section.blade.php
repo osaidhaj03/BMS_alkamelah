@@ -1,8 +1,18 @@
 <!-- Authors Section -->
-<div class="bg-gray-50 py-16" dir="rtl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-green-800 mb-8 text-center">المؤلفين</h2>
+<div class="relative overflow-hidden bg-[#fafafa]" id="authors-section">
+    <!-- Section Background Pattern -->
+    <div class="absolute inset-0 pointer-events-none" style="background-image: url('{{ asset('assets/Frame 1321314420.png') }}'); background-repeat: repeat; background-size: 800px;"></div>
 
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20" dir="rtl">
+        <div class="mb-12">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
+                    <img src="{{ asset('images/group0.svg') }}" alt="Icon" class="w-full h-full object-contain">
+                </div>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-[#1a3a2a]">أبرز المؤلفين</h2>
+            </div>
+        </div>
+        
         <!-- Authors Table -->
         @livewire('authors-table', ['showSearch' => false, 'showFilters' => true, 'perPage' => 10])
     </div>
