@@ -37,6 +37,11 @@ class AuthorsTable
                     ->label('الاسم الأخير')
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('full_name')
+                    ->label('الاسم الكامل')
+                    ->searchable()
+                    ->toggleable()
+                    ->sortable(),
                 TextColumn::make('laqab')
                     ->label('اللقب')
                     ->searchable()
@@ -85,18 +90,15 @@ class AuthorsTable
                         'المذهب الشافعي' => 'المذهب الشافعي',
                         'المذهب الحنبلي' => 'المذهب الحنبلي',
                         'آخرون' => 'آخرون',
-                    ])
-                    ->default('المذهب الحنفي')
-                    ->native(false),
-
+                    ]),
+                   
                 SelectFilter::make('is_living')
                     ->label('على قيد الحياة')
                     ->options([
                         1 => 'نعم',
                         0 => 'لا',
-                    ])
-                    ->default(0)
-                    ->native(false),
+                    ]),
+                   
 
                 Filter::make('birth_date')
                     ->label('تاريخ الولادة')

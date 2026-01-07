@@ -15,6 +15,7 @@ class Author extends Model
         'first_name',
         'middle_name',
         'last_name',
+        'full_name',
         'laqab',
         'kunyah',
         'biography',
@@ -139,6 +140,11 @@ class Author extends Model
      */
     public function getFullNameAttribute(): string
     {
+        $stored = $this->getRawOriginal('full_name');
+        if (!empty($stored)) {
+            return $stored;
+        }
+
         $nameParts = array_filter([
             $this->laqab,
             $this->kunyah,

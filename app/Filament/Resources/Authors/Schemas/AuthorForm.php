@@ -37,9 +37,15 @@ class AuthorForm
 
                                 TextInput::make('last_name')
                                     ->label('الاسم الأخير')
-                                    ->maxLength(255)
+                                   ->maxLength(255)
                                     ->placeholder('مثال: التيمي'),
                             ]),
+
+                        TextInput::make('full_name')
+                            ->label('الاسم الكامل')
+                            ->maxLength(255)
+                            ->placeholder('مثال: النعمان بن ثابت التيمي الكوفي')
+                            ->columnSpanFull(),
 
                         Grid::make(2)
                             ->schema([

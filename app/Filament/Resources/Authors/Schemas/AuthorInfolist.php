@@ -33,6 +33,7 @@ class AuthorInfolist
                                 Group::make([
                                     Grid::make(3)
                                         ->schema([
+                                            
                                             TextEntry::make('first_name')
                                                 ->label('الاسم الأول')
                                                 ->weight('bold')
