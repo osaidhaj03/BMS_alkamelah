@@ -34,6 +34,14 @@ class BooksTable
                 ->searchable()
                 ->toggleable()
                     ->badge(),
+                IconColumn::make('is_reviewed')
+                ->label('تم المراجعة')
+                ->toggleable()
+                    ->boolean(),
+                TextColumn::make('reviewed_by')
+                ->label('اسم المراجع')
+                ->searchable()
+                ->toggleable(),
                 TextColumn::make('bookSection.name')
                 ->label('القسم')
                 ->searchable()
@@ -78,6 +86,19 @@ class BooksTable
 
             ])
             ->filters([
+                TernaryFilter::make('is_reviewed')
+                    ->label('تم مراجعة الكتاب')
+                    ->queries(
+                        true: fn (Builder $query) => $query->where('is_reviewed', true),
+                        false: fn (Builder $query) => $query->where('is_reviewed', false),
+                    ),
+
+                SelectFilter::make('book_section_id')
+                    ->label('القسم')
+                    ->relationship('bookSection', 'name')
+                    ->searchable()
+                    ->preload(),
+
                 SelectFilter::make('visibility')
                     ->label('الظهور')
                     ->options([

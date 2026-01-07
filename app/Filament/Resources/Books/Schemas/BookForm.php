@@ -64,6 +64,22 @@ class BookForm
                             ])
                             ->default('public')
                             ->required(),
+
+                        Select::make('is_reviewed')
+                            ->label('تم مراجعة الكتاب')
+                            ->options([
+                                true => 'نعم',
+                                false => 'لا',
+                            ])
+                            ->default(false)
+                            ->required(),
+
+                        TextInput::make('reviewed_by')
+                            ->label('اسم المراجع')
+                            ->disabled()
+                            ->dehydrated()
+                            ->default(fn () => auth()->user()->name)
+                            ->helperText('يتم ملؤه تلقائياً من بيانات المستخدم'),
                     ])
                     ->columns(2)
                     ->columnSpanFull(),

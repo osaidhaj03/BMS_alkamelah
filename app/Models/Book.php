@@ -18,6 +18,8 @@ class Book extends Model
         'title',
         'description',
         'visibility',
+        'is_reviewed',
+        'reviewed_by',
         'book_section_id',
         'publisher_id',
         'has_original_pagination',
@@ -26,6 +28,7 @@ class Book extends Model
 
     protected $casts = [
         'has_original_pagination' => 'boolean',
+        'is_reviewed' => 'boolean',
     ];
 
     /**
