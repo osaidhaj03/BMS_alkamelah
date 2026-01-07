@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Books\Schemas;
 
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -111,7 +112,81 @@ class BookForm
                                     ->placeholder('اختر مؤلفاً')
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->createOptionForm([
+                                        TextInput::make('full_name')
+                                            ->label('الاسم الكامل')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->placeholder('مثال: النعمان بن ثابت التيمي الكوفي')
+                                            ->columnSpanFull(),
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('first_name')
+                                                    ->label('الاسم الأول')
+                                                    ->maxLength(255)
+                                                    ->placeholder('مثال: النعمان'),
+                                                TextInput::make('middle_name')
+                                                    ->label('الاسم الأوسط')
+                                                    ->maxLength(255)
+                                                    ->placeholder('مثال: بن ثابت'),
+                                                TextInput::make('last_name')
+                                                    ->label('الاسم الأخير')
+                                                    ->maxLength(255)
+                                                    ->placeholder('مثال: التيمي'),
+                                            ]),
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('laqab')
+                                                    ->label('اللقب')
+                                                    ->maxLength(255)
+                                                    ->placeholder('مثال: الإمام الأعظم'),
+                                                TextInput::make('kunyah')
+                                                    ->label('الكنية')
+                                                    ->maxLength(255)
+                                                    ->placeholder('مثال: أبو حنيفة'),
+                                            ]),
+                                        Select::make('madhhab')
+                                            ->label('المذهب')
+                                            ->options([
+                                                'المذهب الحنفي' => 'المذهب الحنفي',
+                                                'المذهب المالكي' => 'المذهب المالكي',
+                                                'المذهب الشافعي' => 'المذهب الشافعي',
+                                                'المذهب الحنبلي' => 'المذهب الحنبلي',
+                                                'آخرون' => 'آخرون',
+                                            ])
+                                            ->placeholder('اختر المذهب'),
+                                        Select::make('is_living')
+                                            ->label('هل على قيد الحياة؟')
+                                            ->options([
+                                                1 => 'نعم',
+                                                0 => 'لا',
+                                            ])
+                                            ->default(0)
+                                            ->required(),
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('birth_date')
+                                                    ->label('تاريخ الولادة')
+                                                    ->placeholder('ادخل التاريخ الهجري')
+                                                    ->helperText('مثال: 150 هـ'),
+                                                TextInput::make('death_date')
+                                                    ->label('تاريخ الوفاة')
+                                                    ->placeholder('ادخل التاريخ الهجري')
+                                                    ->helperText('مثال: 204 هـ')
+                                                    ->hidden(fn ($get) => $get('is_living') == 1),
+                                            ]),
+                                        FileUpload::make('image')
+                                            ->label('صورة المؤلف')
+                                            ->image()
+                                            ->imageEditor()
+                                            ->directory('authors')
+                                            ->columnSpanFull(),
+                                        Textarea::make('biography')
+                                            ->label('السيرة الذاتية')
+                                            ->placeholder('اكتب السيرة الذاتية...')
+                                            ->columnSpanFull(),
+                                    ]),
                                 
                                 Select::make('role')
                                     ->label('الدور')
@@ -145,7 +220,60 @@ class BookForm
                             ->relationship('publisher', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(null),
+                            ->default(null)
+                            ->createOptionForm([
+                                TextInput::make('name')
+                                    ->label('اسم الناشر')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('مثال: دار الكتب العلمية')
+                                    ->columnSpanFull(),
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('country')
+                                            ->label('الدولة')
+                                            ->maxLength(255)
+                                            ->placeholder('مثال: مصر، لبنان'),
+                                        TextInput::make('address')
+                                            ->label('العنوان')
+                                            ->maxLength(255)
+                                            ->placeholder('العنوان الكامل'),
+                                    ]),
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('email')
+                                            ->label('البريد الإلكتروني')
+                                            ->email()
+                                            ->placeholder('example@publisher.com'),
+                                        TextInput::make('phone')
+                                            ->label('الهاتف')
+                                            ->tel()
+                                            ->placeholder('+201000000000'),
+                                    ]),
+                                TextInput::make('website_url')
+                                    ->label('موقع الناشر')
+                                    ->url()
+                                    ->placeholder('https://example.com')
+                                    ->columnSpanFull(),
+                                FileUpload::make('image')
+                                    ->label('شعار الناشر')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->directory('publishers')
+                                    ->columnSpanFull(),
+                                Textarea::make('description')
+                                    ->label('نبذة عن الناشر')
+                                    ->placeholder('وصف مختصر عن الناشر...')
+                                    ->columnSpanFull(),
+                                Select::make('is_active')
+                                    ->label('النشاط')
+                                    ->options([
+                                        true => 'نشط',
+                                        false => 'غير نشط',
+                                    ])
+                                    ->default(true)
+                                    ->required(),
+                            ]),
                         
                        
                     ])
