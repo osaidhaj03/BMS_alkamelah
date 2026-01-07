@@ -22,11 +22,15 @@ class AuthorForm
                     ->description('بيانات المؤلف الرئيسية')
                     ->icon('heroicon-o-user')
                     ->schema([
+                        TextInput::make('full_name')
+                            ->label('الاسم الكامل')
+                            ->maxLength(255)
+                            ->placeholder('مثال: النعمان بن ثابت التيمي الكوفي')
+                            ->columnSpanFull(),
                         Grid::make(3)
                             ->schema([
                                 TextInput::make('first_name')
                                     ->label('الاسم الأول')
-                                    ->required()
                                     ->maxLength(255)
                                     ->placeholder('مثال: النعمان'),
 
@@ -41,11 +45,7 @@ class AuthorForm
                                     ->placeholder('مثال: التيمي'),
                             ]),
 
-                        TextInput::make('full_name')
-                            ->label('الاسم الكامل')
-                            ->maxLength(255)
-                            ->placeholder('مثال: النعمان بن ثابت التيمي الكوفي')
-                            ->columnSpanFull(),
+                       
 
                         Grid::make(2)
                             ->schema([
