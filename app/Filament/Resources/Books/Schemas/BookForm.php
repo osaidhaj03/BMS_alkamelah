@@ -85,6 +85,7 @@ class BookForm
                     ->columnSpanFull(),
 
                 Section::make('معلومات الطبعة')
+                    ->relationship('bookMetadata')
                     ->schema([
                         Select::make('has_original_pagination')
                             ->label('وفق المطبوع')
