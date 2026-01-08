@@ -2,40 +2,25 @@
     {{-- Search and Filters Row --}}
     @if($showSearch)
         <div class="mb-6">
-            <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
-                {{-- Search Bar (Full Width) --}}
-                <div class="flex-1 relative">
-                    <div class="relative flex items-center bg-white border-2 border-gray-200 rounded-xl focus-within:border-green-500 transition-colors">
-                        <div class="absolute right-4 text-gray-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </div>
-                        <input type="text" wire:model.live.debounce.300ms="search"
-                            placeholder="ابحث في عناوين الكتب أو المؤلفين أو اسماء الأقسام..."
-                            class="w-full px-4 py-3 pr-12 text-right bg-transparent border-none rounded-xl focus:outline-none focus:ring-0 text-gray-800 placeholder-gray-400">
-                    </div>
+            {{-- Search Bar with integrated controls --}}
+            <div class="relative flex items-center bg-white border-2 border-gray-200 rounded-xl focus-within:border-green-500 transition-colors">
+                {{-- Search Icon --}}
+                <div class="absolute right-4 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
                 </div>
-
-                {{-- Filter Button --}}
-                <div class="flex items-center gap-3">
-                    <button wire:click="$toggle('filterModalOpen')" 
-                        class="flex items-center gap-2 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-green-500 transition-colors relative">
-                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                        </svg>
-                        <span class="text-gray-700 font-medium">تصفية</span>
-                        @if($this->getActiveFiltersCount() > 0)
-                            <span class="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                {{ $this->getActiveFiltersCount() }}
-                            </span>
-                        @endif
-                    </button>
-
+                
+                {{-- Search Input --}}
+                <input type="text" wire:model.live.debounce.300ms="search"
+                    placeholder="ابحث في عناوين الكتب أو المؤلفين أو الأقسام..."
+                    class="flex-1 px-4 py-3 pr-12 text-right bg-transparent border-none rounded-xl focus:outline-none focus:ring-0 text-gray-800 placeholder-gray-400">
+                
+                {{-- Controls inside search bar --}}
+                <div class="flex items-center gap-1 pl-2 border-r border-gray-200">
                     {{-- Per Page Selector --}}
                     @if($showPerPageSelector)
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl">
-                            <span class="text-sm text-gray-600">عرض</span>
+                        <div class="flex items-center gap-1 px-2 py-1">
                             <select wire:model.live="perPage"
                                 class="border-none bg-transparent px-1 py-1 text-sm focus:outline-none focus:ring-0 text-gray-800 font-medium">
                                 <option value="10">10</option>
@@ -43,9 +28,22 @@
                                 <option value="50">50</option>
                                 <option value="100">100</option>
                             </select>
-                            <span class="text-sm text-gray-600">نتيجة</span>
                         </div>
                     @endif
+                    
+                    {{-- Filter Button --}}
+                    <button wire:click="$toggle('filterModalOpen')" 
+                        class="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-green-600 hover:bg-gray-100 rounded-lg transition-colors relative">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        <span class="hidden sm:inline text-sm font-medium">تصفية</span>
+                        @if($this->getActiveFiltersCount() > 0)
+                            <span class="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                                {{ $this->getActiveFiltersCount() }}
+                            </span>
+                        @endif
+                    </button>
                 </div>
             </div>
 
@@ -375,6 +373,24 @@
                                     @empty
                                         <li class="py-8 text-center text-gray-500 text-sm">لا توجد نتائج</li>
                                     @endforelse
+                                    
+                                    {{-- Load More Authors Button --}}
+                                    @if($this->hasMoreAuthors())
+                                        <li class="py-3 text-center">
+                                            <button wire:click="loadMoreAuthors" 
+                                                    wire:loading.attr="disabled"
+                                                    class="text-sm text-green-600 hover:text-green-700 font-bold hover:underline disabled:opacity-50">
+                                                <span wire:loading.remove wire:target="loadMoreAuthors">عرض المزيد من المؤلفين...</span>
+                                                <span wire:loading wire:target="loadMoreAuthors" class="flex items-center justify-center gap-2">
+                                                    <svg class="animate-spin h-4 w-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    جاري التحميل...
+                                                </span>
+                                            </button>
+                                        </li>
+                                    @endif
                                 @endif
                             </ul>
                         </div>

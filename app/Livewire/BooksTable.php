@@ -31,6 +31,11 @@ class BooksTable extends Component
     public $filterSearch = '';
     public $activeFilterTab = 'sections';
 
+    // Authors pagination
+    public $authorsPage = 1;
+    public $authorsPerPage = 30;
+    public $loadedAuthors = [];
+
     protected $queryString = [
         'search' => ['except' => ''],
         'perPage' => ['except' => 10],
@@ -125,7 +130,40 @@ class BooksTable extends Component
             });
         }
 
-        return $query->orderBy('first_name')->limit(50)->get();
+        return $query->orderBy('first_name')
+            ->limit($this->authorsPage * $this->authorsPerPage)
+            ->get();
+    }
+
+    public function loadMoreAuthors()
+    {
+        $this->authorsPage++;
+    }
+
+    public function resetAuthorsPage()
+    {
+        $this->authorsPage = 1;
+    }
+
+    public function hasMoreAuthors()
+    {
+        $query = Author::query();
+
+        if ($this->filterSearch && $this->activeFilterTab === 'authors') {
+            $query->where(function ($q) {
+                $q->where('first_name', 'like', '%' . $this->filterSearch . '%')
+                    ->orWhere('last_name', 'like', '%' . $this->filterSearch . '%')
+                    ->orWhere('laqab', 'like', '%' . $this->filterSearch . '%');
+            });
+        }
+
+        $total = $query->count();
+        return $total > ($this->authorsPage * $this->authorsPerPage);
+    }
+
+    public function updatingFilterSearch()
+    {
+        $this->authorsPage = 1;
     }
 
     public function getBooks()
