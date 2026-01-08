@@ -176,15 +176,7 @@ class BooksTable extends Component
         $query = Book::with(['authors', 'bookSection', 'publisher'])
             ->withCount(['pages', 'volumes', 'chapters']);
 
-        // تطبيق فلتر القسم إذا كان محدداً (القديم)
-        if ($this->section) {
-            $sectionModel = BookSection::where('slug', $this->section)->first();
-            if ($sectionModel) {
-                $query->where('book_section_id', $sectionModel->id);
-            }
-        }
-
-        // تطبيق فلاتر الأقسام المتعددة (الجديد)
+        // تطبيق فلاتر الأقسام المتعددة
         if (!empty($this->sectionFilters)) {
             $query->whereIn('book_section_id', $this->sectionFilters);
         }
