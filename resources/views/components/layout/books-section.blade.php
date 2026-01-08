@@ -1,8 +1,10 @@
 <!-- Books Section -->
 <div class="relative overflow-hidden bg-[#fafafa]" id="books-section">
     <!-- Section Background Pattern -->
-    <div class="absolute inset-0 pointer-events-none" style="background-image: url('{{ asset('assets/Frame 1321314420.png') }}'); background-repeat: repeat; background-size: 800px; background-attachment: fixed;"></div>
-    
+    <div class="absolute inset-0 pointer-events-none"
+        style="background-image: url('{{ asset('assets/Frame 1321314420.png') }}'); background-repeat: repeat; background-size: 800px; background-attachment: fixed;">
+    </div>
+
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20" dir="rtl">
         <div class="mb-12">
             <div class="flex items-center gap-4 mb-8">
@@ -12,8 +14,19 @@
                 <h2 class="text-3xl md:text-5xl font-extrabold text-[#1a3a2a]">أحدث الكتب</h2>
             </div>
         </div>
-        
+
         <!-- Books Table -->
         @livewire('books-table', ['showSearch' => false, 'showFilters' => true, 'perPage' => 10])
+
+        <!-- Action Button -->
+        <div class="flex justify-center mt-8">
+            <a href="{{ route('books.index') }}"
+                class="group relative px-10 py-4 bg-white border-2 border-[#2C6E4A] text-[#2C6E4A] rounded-full font-bold text-lg overflow-hidden transition-all hover:text-white">
+                <div
+                    class="absolute inset-0 bg-[#2C6E4A] translate-y-full group-hover:translate-y-0 transition-transform duration-300 -z-10">
+                </div>
+                <span>عرض جميع الكتب</span>
+            </a>
+        </div>
     </div>
 </div>

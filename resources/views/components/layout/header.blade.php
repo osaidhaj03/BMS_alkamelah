@@ -49,13 +49,13 @@
                 </a>
 
                 <span class="text-gray-300">|</span>
-                <a href="#"
-                    class="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium border-b-2 border-transparent hover:border-green-800 transition-colors">
+                <a href="{{ route('books.index') }}"
+                    class="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium border-b-2 border-transparent hover:border-green-800 transition-colors {{ request()->routeIs('books.index') ? 'border-green-800 text-green-800' : '' }}">
                     الكتب
                 </a>
                 <span class="text-gray-300">|</span>
-                <a href="#"
-                    class="text-gray-700 hover:text-green-800 px-3 py-2  text-sm font-medium border-b-2 border-transparent hover:border-green-800 transition-colors">
+                <a href="{{ route('authors.index') }}"
+                    class="text-gray-700 hover:text-green-800 px-3 py-2  text-sm font-medium border-b-2 border-transparent hover:border-green-800 transition-colors {{ request()->routeIs('authors.index') ? 'border-green-800 text-green-800' : '' }}">
                     المؤلفين
                 </a>
                 <span class="text-gray-300">|</span>

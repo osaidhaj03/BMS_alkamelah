@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Book;
 use App\Models\BookSection;
+use App\Models\Author;
 use Illuminate\Database\Eloquent\Builder;
 
 class BooksTable extends Component
@@ -23,13 +24,18 @@ class BooksTable extends Component
     public $showPagination = true;
     public $showPerPageSelector = true;
 
+    // Advanced filters
+    public $sectionFilters = [];
+    public $authorFilters = [];
+    public $filterModalOpen = false;
+    public $filterSearch = '';
+    public $activeFilterTab = 'sections';
+
     protected $queryString = [
         'search' => ['except' => ''],
         'perPage' => ['except' => 10],
         'section' => ['except' => null],
     ];
-
-
 
     public function mount($section = null, $author_id = null, $publisher_id = null, $showSearch = true, $showFilters = true, $title = 'الكتب', $perPage = 10, $showPagination = true, $showPerPageSelector = true)
     {
@@ -59,11 +65,75 @@ class BooksTable extends Component
         $this->resetPage();
     }
 
+    public function updatingSectionFilters()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingAuthorFilters()
+    {
+        $this->resetPage();
+    }
+
+    public function toggleSectionFilter($sectionId)
+    {
+        if (in_array($sectionId, $this->sectionFilters)) {
+            $this->sectionFilters = array_values(array_diff($this->sectionFilters, [$sectionId]));
+        } else {
+            $this->sectionFilters[] = $sectionId;
+        }
+        $this->resetPage();
+    }
+
+    public function toggleAuthorFilter($authorId)
+    {
+        if (in_array($authorId, $this->authorFilters)) {
+            $this->authorFilters = array_values(array_diff($this->authorFilters, [$authorId]));
+        } else {
+            $this->authorFilters[] = $authorId;
+        }
+        $this->resetPage();
+    }
+
+    public function clearAllFilters()
+    {
+        $this->sectionFilters = [];
+        $this->authorFilters = [];
+        $this->resetPage();
+    }
+
+    public function getSections()
+    {
+        $query = BookSection::where('is_active', true);
+
+        if ($this->filterSearch && $this->activeFilterTab === 'sections') {
+            $query->where('name', 'like', '%' . $this->filterSearch . '%');
+        }
+
+        return $query->orderBy('sort_order')->get();
+    }
+
+    public function getAuthors()
+    {
+        $query = Author::query();
+
+        if ($this->filterSearch && $this->activeFilterTab === 'authors') {
+            $query->where(function ($q) {
+                $q->where('first_name', 'like', '%' . $this->filterSearch . '%')
+                    ->orWhere('last_name', 'like', '%' . $this->filterSearch . '%')
+                    ->orWhere('laqab', 'like', '%' . $this->filterSearch . '%');
+            });
+        }
+
+        return $query->orderBy('first_name')->limit(50)->get();
+    }
+
     public function getBooks()
     {
-        $query = Book::with(['authors', 'bookSection', 'publisher']);
+        $query = Book::with(['authors', 'bookSection', 'publisher'])
+            ->withCount(['pages', 'volumes', 'chapters']);
 
-        // تطبيق فلتر القسم إذا كان محدداً
+        // تطبيق فلتر القسم إذا كان محدداً (القديم)
         if ($this->section) {
             $sectionModel = BookSection::where('slug', $this->section)->first();
             if ($sectionModel) {
@@ -71,10 +141,22 @@ class BooksTable extends Component
             }
         }
 
-        // تطبيق فلتر المؤلف إذا كان محدداً
+        // تطبيق فلاتر الأقسام المتعددة (الجديد)
+        if (!empty($this->sectionFilters)) {
+            $query->whereIn('book_section_id', $this->sectionFilters);
+        }
+
+        // تطبيق فلتر المؤلف إذا كان محدداً (القديم)
         if ($this->author_id) {
             $query->whereHas('authors', function (Builder $authorQuery) {
                 $authorQuery->where('authors.id', $this->author_id);
+            });
+        }
+
+        // تطبيق فلاتر المؤلفين المتعددين (الجديد)
+        if (!empty($this->authorFilters)) {
+            $query->whereHas('authors', function (Builder $authorQuery) {
+                $authorQuery->whereIn('authors.id', $this->authorFilters);
             });
         }
 
@@ -87,17 +169,17 @@ class BooksTable extends Component
         if ($this->search) {
             $query->where(function (Builder $q) {
                 $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%')
-                  ->orWhereHas('authors', function (Builder $authorQuery) {
-                      $authorQuery->where('first_name', 'like', '%' . $this->search . '%')
-                                  ->orWhere('middle_name', 'like', '%' . $this->search . '%')
-                                  ->orWhere('last_name', 'like', '%' . $this->search . '%');
-                  });
+                    ->orWhere('description', 'like', '%' . $this->search . '%')
+                    ->orWhereHas('authors', function (Builder $authorQuery) {
+                        $authorQuery->where('first_name', 'like', '%' . $this->search . '%')
+                            ->orWhere('middle_name', 'like', '%' . $this->search . '%')
+                            ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                    });
             });
         }
 
         return $query->orderBy('created_at', 'desc')
-                    ->paginate($this->perPage);
+            ->paginate($this->perPage);
     }
 
     public function getCurrentSection()
@@ -113,17 +195,25 @@ class BooksTable extends Component
         if (empty($search) || empty($text)) {
             return $text;
         }
-        
-        return preg_replace('/(' . preg_quote($search, '/') . ')/iu', 
-            '<mark class="bg-yellow-200 text-yellow-900 px-1 rounded font-medium">$1</mark>', 
+
+        return preg_replace(
+            '/(' . preg_quote($search, '/') . ')/iu',
+            '<mark class="bg-yellow-200 text-yellow-900 px-1 rounded font-medium">$1</mark>',
             $text
         );
+    }
+
+    public function getActiveFiltersCount()
+    {
+        return count($this->sectionFilters) + count($this->authorFilters);
     }
 
     public function render()
     {
         return view('livewire.books-table', [
             'books' => $this->getBooks(),
+            'sections' => $this->getSections(),
+            'authors' => $this->getAuthors(),
         ]);
     }
 }

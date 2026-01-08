@@ -17,5 +17,16 @@
 
         <!-- Authors Table -->
         @livewire('authors-table', ['showSearch' => false, 'showFilters' => true, 'perPage' => 10])
+
+        <!-- Action Button -->
+        <div class="flex justify-center mt-8">
+            <a href="{{ route('authors.index') }}"
+                class="group relative px-10 py-4 bg-white border-2 border-[#2C6E4A] text-[#2C6E4A] rounded-full font-bold text-lg overflow-hidden transition-all hover:text-white">
+                <div
+                    class="absolute inset-0 bg-[#2C6E4A] translate-y-full group-hover:translate-y-0 transition-transform duration-300 -z-10">
+                </div>
+                <span>عرض جميع المؤلفين</span>
+            </a>
+        </div>
     </div>
 </div>
