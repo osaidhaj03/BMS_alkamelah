@@ -145,14 +145,14 @@
                                 {{ ($authors->currentPage() - 1) * $authors->perPage() + $index + 1 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="font-medium text-gray-900" style="font-size: 1.1rem;">
+                                <div class="font-medium text-gray-900 mb-1" style="font-size: 1.1rem;">
                                     <a href="#"
                                         class="text-green-700 hover:text-green-900 hover:underline transition-colors duration-200">
                                         {!! $this->highlightText($author->full_name, $search) !!}
                                     </a>
                                 </div>
                                 @if($author->biography)
-                                    <div class="text-gray-500 text-sm truncate max-w-xs">
+                                    <div class="text-gray-500 truncate max-w-xs" style="font-size: 0.95rem; line-height: 1.4rem; margin-top: 4px;">
                                         {!! $this->highlightText(Str::limit($author->biography, 50), $search) !!}
                                     </div>
                                 @endif
@@ -328,23 +328,23 @@
 
                         {{-- Date Range Tab --}}
                         @if($activeFilterTab === 'daterange')
-                            <div class="bg-white rounded-lg p-4 shadow-sm">
-                                <p class="text-sm text-gray-600 mb-4">أدخل نطاق سنة الوفاة بالتقويم الهجري:</p>
+                            <div class="bg-white rounded-lg p-5 shadow-sm">
+                                <p class="text-gray-600 mb-5" style="font-size: 1rem; line-height: 1.5rem;">أدخل نطاق سنة الوفاة بالتقويم الهجري:</p>
                                 <div class="flex gap-4 items-center">
                                     <div class="flex-1">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">من سنة</label>
+                                        <label class="block font-medium text-gray-700 mb-2" style="font-size: 1rem;">من سنة</label>
                                         <input type="number" wire:model.lazy="deathDateFrom" 
                                                placeholder="مثال: 150"
                                                min="1" max="1500"
-                                               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500 text-sm">
+                                               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500" style="font-size: 1rem;">
                                     </div>
-                                    <span class="text-gray-400 pt-6">—</span>
+                                    <span class="text-gray-400 pt-8 text-xl">—</span>
                                     <div class="flex-1">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">إلى سنة</label>
+                                        <label class="block font-medium text-gray-700 mb-2" style="font-size: 1rem;">إلى سنة</label>
                                         <input type="number" wire:model.lazy="deathDateTo" 
                                                placeholder="مثال: 200"
                                                min="1" max="1500"
-                                               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500 text-sm">
+                                               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500" style="font-size: 1rem;">
                                     </div>
                                 </div>
                                 @if($deathDateFrom || $deathDateTo)
