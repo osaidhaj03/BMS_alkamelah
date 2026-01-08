@@ -38,8 +38,6 @@ class AuthorsTable extends Component
         'المذهب المالكي',
         'المذهب الشافعي',
         'المذهب الحنبلي',
-        'أصول الفقه',
-        'المذهب الظاهري',
     ];
 
     public function mount($showSearch = true, $showFilters = true, $title = 'المؤلفين', $perPage = 10, $showPagination = true, $showPerPageSelector = true)
