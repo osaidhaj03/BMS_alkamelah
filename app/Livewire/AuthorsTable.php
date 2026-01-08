@@ -24,6 +24,12 @@ class AuthorsTable extends Component
     public $madhhabFilters = [];
     public $filterModalOpen = false;
     public $filterSearch = '';
+    public $activeFilterTab = 'madhhab';
+
+    // Century and date range filters
+    public $centuryFilters = [];
+    public $deathDateFrom = null;
+    public $deathDateTo = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -38,6 +44,25 @@ class AuthorsTable extends Component
         'المذهب المالكي',
         'المذهب الشافعي',
         'المذهب الحنبلي',
+    ];
+
+    // قائمة القرون الهجرية (من 1 إلى 15)
+    public $availableCenturies = [
+        1 => 'القرن الأول',
+        2 => 'القرن الثاني',
+        3 => 'القرن الثالث',
+        4 => 'القرن الرابع',
+        5 => 'القرن الخامس',
+        6 => 'القرن السادس',
+        7 => 'القرن السابع',
+        8 => 'القرن الثامن',
+        9 => 'القرن التاسع',
+        10 => 'القرن العاشر',
+        11 => 'القرن الحادي عشر',
+        12 => 'القرن الثاني عشر',
+        13 => 'القرن الثالث عشر',
+        14 => 'القرن الرابع عشر',
+        15 => 'القرن الخامس عشر',
     ];
 
     public function mount($showSearch = true, $showFilters = true, $title = 'المؤلفين', $perPage = 10, $showPagination = true, $showPerPageSelector = true)
@@ -78,12 +103,42 @@ class AuthorsTable extends Component
     public function clearAllFilters()
     {
         $this->madhhabFilters = [];
+        $this->centuryFilters = [];
+        $this->deathDateFrom = null;
+        $this->deathDateTo = null;
         $this->resetPage();
     }
 
     public function getActiveFiltersCount()
     {
-        return count($this->madhhabFilters);
+        $count = count($this->madhhabFilters) + count($this->centuryFilters);
+        if ($this->deathDateFrom || $this->deathDateTo) {
+            $count++;
+        }
+        return $count;
+    }
+
+    public function toggleCenturyFilter($century)
+    {
+        $century = (int) $century;
+        if (in_array($century, $this->centuryFilters)) {
+            $this->centuryFilters = array_values(array_diff($this->centuryFilters, [$century]));
+        } else {
+            $this->centuryFilters[] = $century;
+        }
+        $this->resetPage();
+    }
+
+    public function applyDateRange()
+    {
+        $this->resetPage();
+    }
+
+    public function clearDateRange()
+    {
+        $this->deathDateFrom = null;
+        $this->deathDateTo = null;
+        $this->resetPage();
     }
 
     public function getFilteredMadhhabs()
@@ -109,6 +164,31 @@ class AuthorsTable extends Component
         // تطبيق فلاتر المذاهب المتعددة (الجديد)
         if (!empty($this->madhhabFilters)) {
             $query->whereIn('madhhab', $this->madhhabFilters);
+        }
+
+        // تطبيق فلاتر القرون الهجرية
+        if (!empty($this->centuryFilters)) {
+            $query->where(function ($q) {
+                foreach ($this->centuryFilters as $century) {
+                    $startYear = ($century - 1) * 100 + 1; // بداية القرن
+                    $endYear = $century * 100;            // نهاية القرن
+                    $q->orWhere(function ($subQ) use ($startYear, $endYear) {
+                        $subQ->whereNotNull('death_date')
+                            ->whereRaw('YEAR(death_date) >= ?', [$startYear])
+                            ->whereRaw('YEAR(death_date) <= ?', [$endYear]);
+                    });
+                }
+            });
+        }
+
+        // تطبيق فلتر نطاق تاريخ الوفاة
+        if ($this->deathDateFrom) {
+            $query->whereNotNull('death_date')
+                ->whereRaw('YEAR(death_date) >= ?', [$this->deathDateFrom]);
+        }
+        if ($this->deathDateTo) {
+            $query->whereNotNull('death_date')
+                ->whereRaw('YEAR(death_date) <= ?', [$this->deathDateTo]);
         }
 
         // تطبيق البحث
