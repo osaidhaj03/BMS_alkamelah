@@ -2,7 +2,7 @@
 <div class="relative overflow-hidden bg-[#fafafa]" id="book-sections">
     <!-- Section Background Pattern -->
     <div class="absolute inset-0 pointer-events-none"
-        style="background-image: url('{{ asset('assets/Frame 1321314420.png') }}'); background-repeat: repeat; background-size: 800px;">
+        style="background-image: url('{{ asset('assets/Frame 1321314420.png') }}'); background-repeat: repeat; background-size: 800px; background-attachment: fixed;">
     </div>
 
     <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20" dir="rtl">
