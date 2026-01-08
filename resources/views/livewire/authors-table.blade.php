@@ -250,47 +250,109 @@
                 wire:click="$set('filterModalOpen', false)"></div>
 
             <div class="flex min-h-full items-center justify-center p-4">
-                <div
-                    class="relative transform overflow-hidden rounded-xl bg-white text-right shadow-xl transition-all w-full max-w-md flex flex-col max-h-[70vh]">
+                <div class="relative transform overflow-hidden rounded-xl bg-white text-right shadow-xl transition-all w-full max-w-lg flex flex-col max-h-[80vh]">
 
                     {{-- Header --}}
                     <div class="bg-white px-6 pt-5 pb-4 border-b border-gray-100">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-xl font-bold leading-6 text-gray-900">تصفية حسب المذهب</h3>
+                            <h3 class="text-xl font-bold leading-6 text-gray-900">تصفية المؤلفين</h3>
                             <button wire:click="$set('filterModalOpen', false)"
                                 class="text-gray-400 hover:text-gray-500 transition-colors">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                    stroke="currentColor">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
+                            </button>
+                        </div>
+
+                        {{-- Tabs --}}
+                        <div class="flex border-b border-gray-200">
+                            <button wire:click="$set('activeFilterTab', 'madhhab')"
+                                class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors duration-200 {{ $activeFilterTab === 'madhhab' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                المذهب
+                                @if(count($madhhabFilters) > 0)
+                                    <span class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">{{ count($madhhabFilters) }}</span>
+                                @endif
+                            </button>
+                            <button wire:click="$set('activeFilterTab', 'century')"
+                                class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors duration-200 {{ $activeFilterTab === 'century' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                القرن
+                                @if(count($centuryFilters) > 0)
+                                    <span class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">{{ count($centuryFilters) }}</span>
+                                @endif
+                            </button>
+                            <button wire:click="$set('activeFilterTab', 'daterange')"
+                                class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors duration-200 {{ $activeFilterTab === 'daterange' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700' }}">
+                                نطاق التاريخ
+                                @if($deathDateFrom || $deathDateTo)
+                                    <span class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">1</span>
+                                @endif
                             </button>
                         </div>
                     </div>
 
                     {{-- Content --}}
-                    <div class="flex-1 overflow-y-auto p-4 bg-gray-50">
-                        <ul class="space-y-1">
-                            @foreach($this->getFilteredMadhhabs() as $m)
-                                <li class="relative flex items-start py-2 px-4 hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
-                                    wire:click="toggleMadhhabFilter('{{ $m }}')">
-                                    <div class="min-w-0 flex-1 text-sm">
-                                        <label class="select-none font-medium text-gray-900 cursor-pointer">{{ $m }}</label>
-                                    </div>
-                                    <div class="mr-3 flex h-6 items-center">
-                                        <div
-                                            class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors {{ in_array($m, $madhhabFilters) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300' }}">
-                                            @if(in_array($m, $madhhabFilters))
-                                                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                                        d="M5 13l4 4L19 7"></path>
-                                                </svg>
-                                            @endif
+                    <div class="flex-1 overflow-y-auto p-4 bg-gray-50 max-h-72">
+                        {{-- Madhhab Tab --}}
+                        @if($activeFilterTab === 'madhhab')
+                            <ul class="space-y-1">
+                                @foreach($this->getFilteredMadhhabs() as $m)
+                                    <li class="relative flex items-start py-2 px-4 hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
+                                        wire:click="toggleMadhhabFilter('{{ $m }}')">
+                                        <div class="min-w-0 flex-1 text-sm">
+                                            <label class="select-none font-medium text-gray-900 cursor-pointer">{{ $m }}</label>
                                         </div>
+                                        <div class="mr-3 flex h-6 items-center">
+                                            <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors {{ in_array($m, $madhhabFilters) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300' }}">
+                                                @if(in_array($m, $madhhabFilters))
+                                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        {{-- Century Tab --}}
+                        @if($activeFilterTab === 'century')
+                            <div class="grid grid-cols-3 gap-2">
+                                @foreach($availableCenturies as $num => $name)
+                                    <button wire:click="toggleCenturyFilter({{ $num }})"
+                                        class="py-3 px-2 text-center rounded-lg border-2 transition-all text-sm font-medium {{ in_array($num, $centuryFilters) ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-green-500' }}">
+                                        {{ $name }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        {{-- Date Range Tab --}}
+                        @if($activeFilterTab === 'daterange')
+                            <div class="bg-white rounded-lg p-4 shadow-sm">
+                                <p class="text-sm text-gray-600 mb-4">أدخل نطاق سنة الوفاة بالتقويم الهجري:</p>
+                                <div class="flex gap-4 items-center">
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">من سنة</label>
+                                        <input type="number" wire:model.lazy="deathDateFrom" 
+                                               placeholder="مثال: 150"
+                                               min="1" max="1500"
+                                               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500 text-sm">
                                     </div>
-                                </li>
-                            @endforeach
-                        </ul>
+                                    <span class="text-gray-400 pt-6">—</span>
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">إلى سنة</label>
+                                        <input type="number" wire:model.lazy="deathDateTo" 
+                                               placeholder="مثال: 200"
+                                               min="1" max="1500"
+                                               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500 text-sm">
+                                    </div>
+                                </div>
+                                @if($deathDateFrom || $deathDateTo)
+                                    <button wire:click="clearDateRange" class="mt-3 text-sm text-red-600 hover:text-red-800 hover:underline">
+                                        مسح النطاق
+                                    </button>
+                                @endif
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Footer --}}

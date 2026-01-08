@@ -32,13 +32,10 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                //'primary' => '#2C6E4A',
-                //'secondary' => '#161E29',
-                //'accent' => '#192126',
-                //'danger' => '#BA4749',
-                //'success' => '#2C6E4A',
-                //'warning' => '#BA4749',
-                //'info' => '#192126',
+                'primary' => Color::Green,
+                'secondary' => Color::Green,
+                'accent' => Color::Green,
+                'success' => Color::Green,
             ])
             ->brandName('نظام إدارة المكتبة')
             ->darkMode(true)
