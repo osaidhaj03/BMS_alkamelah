@@ -501,9 +501,10 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                                     </template>
                                     
                                     <!-- Load More Button -->
-                                    <li x-show="hasMoreBooks && !booksLoading && books.length > 0" class="py-3 text-center">
-                                        <button @click="loadMoreBooks()" class="text-sm text-green-600 hover:text-green-700 font-bold hover:underline">
-                                            عرض المزيد من الكتب...
+                                    <li x-show="hasMoreBooks && !booksLoading && books.length > 0" class="py-4 text-center sticky bottom-0 bg-gradient-to-t from-white to-transparent">
+                                        <button @click="loadMoreBooks()" class="inline-flex items-center gap-2 px-6 py-3 bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 font-bold rounded-lg border-2 border-green-200 hover:border-green-400 transition-all duration-200 transform hover:scale-105">
+                                            <span>عرض المزيد من الكتب</span>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                                         </button>
                                     </li>
                                     
@@ -559,9 +560,10 @@ style="background-image: url('{{ asset('images/backgrond_islamic.png') }}'); bac
                                     </template>
                                     
                                     <!-- Load More Button -->
-                                    <li x-show="hasMoreAuthors && !authorsLoading && authors.length > 0" class="py-3 text-center">
-                                        <button @click="loadMoreAuthors()" class="text-sm text-green-600 hover:text-green-700 font-bold hover:underline">
-                                            عرض المزيد من المؤلفين...
+                                    <li x-show="hasMoreAuthors && !authorsLoading && authors.length > 0" class="py-4 text-center sticky bottom-0 bg-gradient-to-t from-white to-transparent">
+                                        <button @click="loadMoreAuthors()" class="inline-flex items-center gap-2 px-6 py-3 bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 font-bold rounded-lg border-2 border-green-200 hover:border-green-400 transition-all duration-200 transform hover:scale-105">
+                                            <span>عرض المزيد من المؤلفين</span>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
                                         </button>
                                     </li>
                                     
