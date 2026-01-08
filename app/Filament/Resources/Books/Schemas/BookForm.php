@@ -89,11 +89,8 @@ class BookForm
                     ->schema([
                         Select::make('has_original_pagination')
                             ->label('وفق المطبوع')
-                            ->options([
-                                'yes' => 'نعم',
-                                'no' => 'لا',
-                            ])
-                            ->default('yes')
+                            ->boolean()
+                            ->default(true)
                             ->required(),
                         TextInput::make('edition')
                             ->label('رقم الطبعة')
