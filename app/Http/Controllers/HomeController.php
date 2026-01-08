@@ -177,4 +177,24 @@ class HomeController extends Controller
         return view('pages.category', compact('sections', 'search'));
     }
 
+    /**
+     * عرض صفحة جميع المؤلفين
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function authors()
+    {
+        return view('pages.authors');
+    }
+
+    /**
+     * عرض صفحة جميع الكتب
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function books()
+    {
+        return view('pages.books');
+    }
+
 }
