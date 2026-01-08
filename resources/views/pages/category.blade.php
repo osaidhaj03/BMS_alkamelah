@@ -46,7 +46,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                 @forelse ($sections as $section)
-                    <a href="{{ route('home', ['type' => 'books', 'section' => $section->slug]) }}"
+                    <a href="{{ route('books.index', ['section' => $section->id]) }}"
                         class="group bg-white rounded-[2rem] shadow-xl shadow-green-900/5 overflow-hidden border border-gray-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-900/10 relative">
 
                         <!-- Decorative Mask Pattern -->

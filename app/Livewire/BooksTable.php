@@ -53,6 +53,11 @@ class BooksTable extends Component
         $this->perPage = $perPage;
         $this->showPagination = $showPagination;
         $this->showPerPageSelector = $showPerPageSelector;
+
+        // إذا تم تمرير section من URL، أضفها للفلاتر
+        if ($section) {
+            $this->sectionFilters = [(int) $section];
+        }
     }
 
     public function updatingSearch()

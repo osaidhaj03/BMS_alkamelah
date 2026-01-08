@@ -24,7 +24,7 @@
             </div>
 
             <!-- Books Table with Search -->
-            @livewire('books-table', ['showSearch' => true, 'showFilters' => true, 'perPage' => 20])
+            @livewire('books-table', ['showSearch' => true, 'showFilters' => true, 'perPage' => 20, 'section' => request('section')])
         </section>
     </div>
 
