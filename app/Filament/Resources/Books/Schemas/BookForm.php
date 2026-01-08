@@ -98,6 +98,7 @@ class BookForm
                 Section::make('معلومات الطبعة التفاصيلية')
                     ->relationship('bookMetadata')
                     ->schema([
+                        TextInput::make('edition')
                             ->label('رقم الطبعة')
                             ->placeholder('الطبعة 1 ، 2، ...')
                             ->numeric(),
@@ -111,6 +112,7 @@ class BookForm
                     ->columns(3)
                     ->columnSpanFull(),
 
+                Section::make('التصنيف والمؤلفين والنشر')
                     ->schema([
                         Select::make('book_section_id')
                             ->label('القسم')
