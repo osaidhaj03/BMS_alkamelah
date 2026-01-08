@@ -5,6 +5,9 @@ namespace App\Providers\Filament;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Caresome\FilamentNeobrutalism\NeobrutalismeTheme;
+use Caresome\FilamentAuthDesigner\AuthDesignerPlugin;
+use Caresome\FilamentAuthDesigner\Data\AuthPageConfig;
+use Caresome\FilamentAuthDesigner\Enums\MediaPosition;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -23,7 +26,6 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Caresome\FilamentAuthDesigner\Data\AuthPageConfig;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 
@@ -71,6 +73,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
+                AuthDesignerPlugin::make()
+                    ->login(fn (AuthPageConfig $config) => $config
+                        ->media(asset('assets/2.png'))
+                        ->mediaPosition(MediaPosition::Cover)
+                        ->blur(0)
+                    ),
                 NeobrutalismeTheme::make()
                     ->customize([
                         'border-width' => '3px',
@@ -79,13 +87,6 @@ class AdminPanelProvider extends PanelProvider
                         'shadow-offset-md' => '4px',
                         '--primary-color' => '#1A3A2A',
                     ]),
-                AuthDesignerPlugin::make()
-                    ->login(fn (AuthPageConfig $config) => $config
-                        ->media(asset('assets/2.jpg'))
-                        ->mediaPosition(MediaPosition::Cover)
-                        ->blur(0)
-                    ),
-
             ])
             ->authMiddleware([
                 Authenticate::class,
