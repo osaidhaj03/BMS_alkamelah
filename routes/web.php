@@ -9,6 +9,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/category', [HomeController::class, 'categories'])->name('categories.index');
 Route::get('/authors', [HomeController::class, 'authors'])->name('authors.index');
 Route::get('/books', [HomeController::class, 'books'])->name('books.index');
+Route::view('/about-us', 'pages.about')->name('about');
 
 
 // Search Page Prototype
