@@ -55,26 +55,26 @@
                     :placeholder="placeholderText"
                     class="w-full px-6 py-4 pr-14 pl-14 text-lg border-2 border-gray-300 rounded-full focus:outline-none focus:border-green-600 text-right bg-white">
 
-                <!-- Filter Icon (Right side) -->
+                <!-- Search Icon (Right side) -->
+                <button @click="handleSearch()"
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+
+                <!-- Filter Icon (Left side) -->
                 <button @click="filterModalOpen = true"
-                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-green-600 transition-colors relative">
+                    class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-green-600 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
                         </path>
                     </svg>
                     <span x-show="getActiveFiltersCount() > 0"
-                        class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                        class="absolute -top-2 -left-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
                         x-text="getActiveFiltersCount()"></span>
-                </button>
-
-                <!-- Search Icon (Left side) -->
-                <button @click="handleSearch()"
-                    class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
                 </button>
             </div>
 
@@ -357,12 +357,12 @@
                         <h4 class="font-bold text-gray-800 text-sm mb-3">نوع البحث</h4>
                         <div class="flex flex-col gap-2">
                             <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="heroSearchType" value="exact" x-model="searchType"
+                                <input type="radio" name="heroSearchType" value="exact_match" x-model="searchType"
                                     class="h-4 w-4" style="color: #2C6E4A;">
                                 <span class="text-sm font-medium">البحث المطابق</span>
                             </label>
                             <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="heroSearchType" value="flexible" x-model="searchType"
+                                <input type="radio" name="heroSearchType" value="flexible_match" x-model="searchType"
                                     class="h-4 w-4" style="color: #2C6E4A;">
                                 <span class="text-sm font-medium">البحث الغير مطابق</span>
                             </label>
@@ -379,8 +379,8 @@
                                 <span class="text-sm font-medium">كلمات متتالية</span>
                             </label>
                             <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                <input type="radio" name="heroWordOrder" value="any" x-model="wordOrder" class="h-4 w-4"
-                                    style="color: #2C6E4A;">
+                                <input type="radio" name="heroWordOrder" value="any_order" x-model="wordOrder"
+                                    class="h-4 w-4" style="color: #2C6E4A;">
                                 <span class="text-sm font-medium">أي ترتيب</span>
                             </label>
                         </div>
@@ -426,8 +426,8 @@
             deathDateTo: '',
 
             // Content filters
-            searchType: 'flexible',
-            wordOrder: 'any',
+            searchType: 'flexible_match',
+            wordOrder: 'any_order',
 
             availableMadhhabs: ['المذهب الحنفي', 'المذهب المالكي', 'المذهب الشافعي', 'المذهب الحنبلي'],
             availableCenturies: {
@@ -596,8 +596,8 @@
                     return count;
                 } else if (this.searchMode === 'content') {
                     let count = 0;
-                    if (this.searchType !== 'flexible') count++;
-                    if (this.wordOrder !== 'any') count++;
+                    if (this.searchType !== 'flexible_match') count++;
+                    if (this.wordOrder !== 'any_order') count++;
                     return count;
                 }
                 return 0;
