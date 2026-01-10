@@ -47,7 +47,7 @@
                 <input type="text" x-model="query" @input.debounce.300ms="fetchSuggestions()"
                     @focus="showDropdown = true" @click.outside="showDropdown = false"
                     class="w-full h-full border-none focus:ring-0 text-lg text-gray-700 placeholder-gray-400 px-0 bg-transparent rounded-full text-right"
-                    :placeholder="placeholderText">
+                    :placeholder="placeholderText" dir="rtl">
 
                 <!-- Actions (Left) -->
                 <div class="flex items-center pl-2 gap-1 h-full">
@@ -154,18 +154,21 @@
             <!-- Quick Action Buttons (Mode Toggles) -->
             <div class="mt-8 flex justify-center gap-3">
                 <button @click="searchMode = 'books'"
-                    class="px-6 py-2.5 text-sm font-bold rounded-md transition-all shadow-sm hover:shadow-md border border-[#2C6E4A]"
-                    :class="searchMode === 'books' ? 'bg-[#2C6E4A] text-white' : 'bg-white text-[#2C6E4A]'">
+                    class="px-6 py-2.5 font-bold rounded-md transition-all shadow-sm hover:shadow-md border border-[#2C6E4A]"
+                    :class="searchMode === 'books' ? 'bg-[#2C6E4A] text-white' : 'bg-white text-[#2C6E4A]'"
+                    style="font-size: 1rem; line-height: 1.35rem;">
                     بحث في الكتب
                 </button>
                 <button @click="searchMode = 'authors'"
-                    class="px-6 py-2.5 text-sm font-bold rounded-md transition-all shadow-sm hover:shadow-md border border-[#2C6E4A]"
-                    :class="searchMode === 'authors' ? 'bg-[#2C6E4A] text-white' : 'bg-white text-[#2C6E4A]'">
+                    class="px-6 py-2.5 font-bold rounded-md transition-all shadow-sm hover:shadow-md border border-[#2C6E4A]"
+                    :class="searchMode === 'authors' ? 'bg-[#2C6E4A] text-white' : 'bg-white text-[#2C6E4A]'"
+                    style="font-size: 1rem; line-height: 1.35rem;">
                     بحث في المؤلفين
                 </button>
                 <button @click="searchMode = 'content'"
-                    class="px-6 py-2.5 text-sm font-bold rounded-md transition-all shadow-sm hover:shadow-md border border-[#2C6E4A]"
-                    :class="searchMode === 'content' ? 'bg-[#2C6E4A] text-white' : 'bg-white text-[#2C6E4A]'">
+                    class="px-6 py-2.5 font-bold rounded-md transition-all shadow-sm hover:shadow-md border border-[#2C6E4A]"
+                    :class="searchMode === 'content' ? 'bg-[#2C6E4A] text-white' : 'bg-white text-[#2C6E4A]'"
+                    style="font-size: 1rem; line-height: 1.35rem;">
                     بحث في المحتوى
                 </button>
             </div>
@@ -174,7 +177,7 @@
 
     <!-- Filter Modal for Books -->
     <div x-show="filterModalOpen && searchMode === 'books'" style="display: none;"
-        class="fixed inset-0 z-[100] overflow-y-auto" aria-modal="true">
+        class="fixed inset-0 z-[9999] overflow-y-auto" aria-modal="true" x-cloak>
 
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm" @click="filterModalOpen = false"></div>
 
@@ -222,7 +225,8 @@
                         <div class="mb-3">
                             <input type="text" x-model="sectionSearch" @input.debounce.300ms="fetchSections()"
                                 placeholder="بحث في الأقسام..."
-                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-green-500 focus:border-green-500 text-right">
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-green-500 focus:border-green-500 text-right"
+                                dir="rtl">
                         </div>
                         <ul class="space-y-1">
                             <template x-for="section in sections" :key="section.id">
@@ -249,7 +253,8 @@
                         <div class="mb-3">
                             <input type="text" x-model="authorSearch" @input.debounce.300ms="fetchAuthorsForFilter()"
                                 placeholder="بحث في المؤلفين..."
-                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-green-500 focus:border-green-500 text-right">
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-green-500 focus:border-green-500 text-right"
+                                dir="rtl">
                         </div>
                         <ul class="space-y-1">
                             <template x-for="author in authorsForFilter" :key="author.id">
@@ -287,7 +292,7 @@
 
     <!-- Filter Modal for Authors -->
     <div x-show="filterModalOpen && searchMode === 'authors'" style="display: none;"
-        class="fixed inset-0 z-[100] overflow-y-auto" aria-modal="true">
+        class="fixed inset-0 z-[9999] overflow-y-auto" aria-modal="true" x-cloak>
 
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm" @click="filterModalOpen = false"></div>
 
@@ -332,7 +337,7 @@
                     <!-- Madhhab Tab -->
                     <div x-show="authorsFilterTab === 'madhhab'">
                         <ul class="space-y-2 text-right">
-                            <template x-for="m in availableMadhhabs" :key="m">
+                            <template x-for="(m, index) in availableMadhhabs" :key="'madhhab-' + index">
                                 <li class="flex items-center py-3 px-4 hover:bg-white rounded-lg cursor-pointer"
                                     @click="toggleMadhhabFilter(m)">
                                     <div class="flex-1 font-medium" x-text="m"
@@ -353,7 +358,7 @@
                     <!-- Century Tab -->
                     <div x-show="authorsFilterTab === 'century'">
                         <div class="grid grid-cols-3 gap-2">
-                            <template x-for="(name, num) in availableCenturies" :key="num">
+                            <template x-for="(name, num) in availableCenturies" :key="'century-' + num">
                                 <button @click="toggleCenturyFilter(parseInt(num))"
                                     class="py-4 px-2 text-center rounded-lg border-2 transition-all font-medium"
                                     :class="centuryFilters.includes(parseInt(num)) ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-green-500'"
@@ -458,9 +463,9 @@
             },
 
             get placeholderText() {
-                if (this.searchMode === 'books') return 'بحث في الكتب...';
-                if (this.searchMode === 'authors') return 'بحث في المؤلفين...';
-                return 'بحث في محتوى الكتب...';
+                if (this.searchMode === 'books') return 'بحث في {{ number_format($booksCount) }} كتاب...';
+                if (this.searchMode === 'authors') return 'بحث في {{ number_format($authorsCount) }} مؤلف...';
+                return 'بحث في {{ number_format($booksCount) }} كتاب و {{ number_format($pagesCount) }} صفحة...';
             },
 
             init() {
