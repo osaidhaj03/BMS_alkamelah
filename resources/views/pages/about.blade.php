@@ -153,49 +153,103 @@
 
                 <!-- Newsletter Section -->
                 <div class="mt-12">
-                    <div class="bg-gradient-to-r from-[#e8f5e9] to-[#f0fdf4] rounded-2xl p-8 text-center">
+                    <div class="bg-gradient-to-r from-[#e8f5e9] to-[#f0fdf4] rounded-2xl p-8 text-center" x-data="newsletterForm()">
                         <h4 class="text-xl font-bold text-[#1a3a2a] mb-2">اشترك في النشرة البريدية</h4>
                         <p class="text-gray-600 mb-6">ليصلك كل جديد من الكتب والإصدارات</p>
 
-                        @if ($errors->any())
-                            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <ul class="text-red-600 text-sm">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+                        <!-- Error Messages -->
+                        <div x-show="errors.length > 0" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <ul class="text-red-600 text-sm">
+                                <template x-for="error in errors" :key="error">
+                                    <li x-text="error"></li>
+                                </template>
+                            </ul>
+                        </div>
 
-                        @if (session('success'))
-                            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                                <p class="text-green-600 font-semibold">✓ {{ session('success') }}</p>
-                            </div>
-                        @endif
+                        <!-- Success Message -->
+                        <div x-show="successMessage" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <p class="text-green-600 font-semibold" x-text="'✓ ' + successMessage"></p>
+                        </div>
 
-                        <form action="{{ route('newsletter.subscribe') }}" method="POST" class="max-w-xl mx-auto space-y-4">
-                            @csrf
+                        <form @submit.prevent="submitForm" class="max-w-xl mx-auto space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input type="text" name="name" placeholder="الاسم الكامل"
+                                <input type="text" x-model="form.name" placeholder="الاسم الكامل"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#2C6E4A] focus:ring-2 focus:ring-[#2C6E4A]/20 outline-none transition-all text-right"
-                                    value="{{ old('name') }}"
+                                    :disabled="loading"
                                     required>
-                                <input type="email" name="email" placeholder="البريد الإلكتروني"
+                                <input type="email" x-model="form.email" placeholder="البريد الإلكتروني"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#2C6E4A] focus:ring-2 focus:ring-[#2C6E4A]/20 outline-none transition-all text-right"
-                                    value="{{ old('email') }}"
+                                    :disabled="loading"
                                     required>
                             </div>
                             <div class="flex items-center gap-4">
-                                <input type="tel" name="phone" placeholder="رقم الهاتف (اختياري - للإشعارات عبر واتساب)"
+                                <input type="tel" x-model="form.phone" placeholder="رقم الهاتف (اختياري - للإشعارات عبر واتساب)"
                                     class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:border-[#2C6E4A] focus:ring-2 focus:ring-[#2C6E4A]/20 outline-none transition-all text-right"
-                                    value="{{ old('phone') }}">
+                                    :disabled="loading">
                             </div>
                             <p class="text-sm text-gray-500">* أدخل رقم الهاتف لتصلك إشعارات الكتب الجديدة عبر واتساب</p>
                             <button type="submit"
-                                class="w-full md:w-auto px-8 py-3 bg-[#2C6E4A] text-white rounded-lg font-bold hover:bg-[#245a3d] transition-colors">
-                                اشترك الآن
+                                class="w-full md:w-auto px-8 py-3 bg-[#2C6E4A] text-white rounded-lg font-bold hover:bg-[#245a3d] transition-colors disabled:opacity-50"
+                                :disabled="loading"
+                                x-text="loading ? 'جاري الإرسال...' : 'اشترك الآن'">
                             </button>
                         </form>
+
+                        <script>
+                            function newsletterForm() {
+                                return {
+                                    form: {
+                                        name: '',
+                                        email: '',
+                                        phone: '',
+                                    },
+                                    errors: [],
+                                    successMessage: '',
+                                    loading: false,
+
+                                    async submitForm() {
+                                        this.errors = [];
+                                        this.successMessage = '';
+                                        this.loading = true;
+
+                                        try {
+                                            const response = await fetch('{{ route("newsletter.subscribe") }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json',
+                                                },
+                                                body: JSON.stringify(this.form)
+                                            });
+
+                                            const data = await response.json();
+
+                                            if (!response.ok) {
+                                                if (data.errors) {
+                                                    this.errors = Object.values(data.errors).flat();
+                                                } else {
+                                                    this.errors = [data.message || 'حدث خطأ ما'];
+                                                }
+                                            } else {
+                                                this.successMessage = data.message;
+                                                this.form = { name: '', email: '', phone: '' };
+                                                
+                                                // Hide success message after 5 seconds
+                                                setTimeout(() => {
+                                                    this.successMessage = '';
+                                                }, 5000);
+                                            }
+                                        } catch (error) {
+                                            this.errors = ['حدث خطأ في الاتصال'];
+                                            console.error('Error:', error);
+                                        } finally {
+                                            this.loading = false;
+                                        }
+                                    }
+                                }
+                            }
+                        </script>
                     </div>
                 </div>
             </div>

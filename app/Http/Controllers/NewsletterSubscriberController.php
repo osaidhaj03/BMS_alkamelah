@@ -22,6 +22,13 @@ class NewsletterSubscriberController extends Controller
 
         NewsletterSubscriber::create($validated);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'تم اشتراكك في النشرة البريدية بنجاح! شكراً لك',
+            ]);
+        }
+
         return back()->with('success', 'تم اشتراكك في النشرة البريدية بنجاح! شكراً لك');
     }
 }
