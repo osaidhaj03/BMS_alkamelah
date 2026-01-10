@@ -164,11 +164,12 @@
                                 <div class="text-gray-900" style="font-size: 1rem;">
                                     @if($book->authors->isNotEmpty())
                                         @php
-                                            $authorName = $book->authors->first()->full_name ?? '';
+                                            $firstAuthor = $book->authors->first();
+                                            $authorName = $firstAuthor->full_name ?? '';
                                             $words = explode(' ', $authorName);
                                             $truncated = count($words) > 5 ? implode(' ', array_slice($words, 0, 5)) . '...' : $authorName;
                                         @endphp
-                                        <a href="#" title="{{ $authorName }}"
+                                        <a href="{{ route('author.show', $firstAuthor->id) }}" title="{{ $authorName }}"
                                             class="text-green-700 hover:text-green-900 hover:underline transition-colors duration-200">
                                             {!! $this->highlightText($truncated, $search) !!}
                                         </a>
