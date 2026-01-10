@@ -39,35 +39,13 @@ class StatsOverviewWidget extends BaseWidget
                 ->color('danger')
                 ->icon('heroicon-o-tag'),
 
-            Stat::make('الكتب المراجعة', Book::where('is_reviewed', true)->count())
-                ->description('عدد الكتب التي تم مراجعتها')
-                ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success')
-                ->icon('heroicon-o-check-badge'),
+            Stat::make('الكتب المراجعة', Book::where('is_reviewed', true)->count())->description('عدد الكتب التي تم مراجعتها')->descriptionIcon('heroicon-m-check-circle')->color('success')->icon('heroicon-o-check-badge'),
 
-            Stat::make('المؤلفين مع السيرة', Author::whereNotNull('biography')->where('biography', '!=', '')->count())
-                ->description('عدد المؤلفين الذين لديهم سيرة ذاتية')
-                ->descriptionIcon('heroicon-m-document-text')
-                ->color('info')
-                ->icon('heroicon-o-user-circle'),
+            Stat::make('المؤلفين مع السيرة', Author::whereNotNull('biography')->where('biography', '!=', '')->count())->description('عدد المؤلفين الذين لديهم سيرة ذاتية')->descriptionIcon('heroicon-m-document-text')->color('info')->icon('heroicon-o-user-circle'),
 
-            Stat::make('الناشرين - معلومات كاملة', 
-                Publisher::whereNotNull('name')
-                    ->whereNotNull('country')
-                    ->whereNotNull('address')
-                    ->where('name', '!=', '')
-                    ->count()
-            )
-                ->description('ناشرين لديهم معلومات كاملة')
-                ->descriptionIcon('heroicon-m-building-storefront')
-                ->color('warning')
-                ->icon('heroicon-o-building-library'),
+            Stat::make('الناشرين - معلومات كاملة', Publisher::whereNotNull('name')->whereNotNull('country')->whereNotNull('address')->where('name', '!=', '')->count())->description('ناشرين لديهم معلومات كاملة')->descriptionIcon('heroicon-m-building-storefront')->color('warning')->icon('heroicon-o-building-library'),
 
-            Stat::make('إجمالي المستخدمين', User::count())
-                ->description('عدد المستخدمين المسجلين')
-                ->descriptionIcon('heroicon-m-users')
-                ->color('primary')
-                ->icon('heroicon-o-users'),
+            Stat::make('إجمالي المستخدمين', User::count())->description('عدد المستخدمين المسجلين')->descriptionIcon('heroicon-m-users')->color('primary')->icon('heroicon-o-users'),
         ];
     }
 }
