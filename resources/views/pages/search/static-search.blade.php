@@ -14,10 +14,10 @@
         <div class="w-full max-w-2xl z-10 flex flex-col items-center gap-8 -mt-20">
 
             <!-- Large Logo -->
-            <div class="flex flex-col items-center gap-4">
+            <a href="{{ route('home') }}" class="flex flex-col items-center gap-4 hover:opacity-90 transition-opacity">
                 <img src="{{ asset('images/المكتبة الكاملة.png') }}" alt="المكتبة الكاملة" class="h-24 md:h-32 w-auto">
                 <h1 class="sr-only">المكتبة الكاملة</h1>
-            </div>
+            </a>
 
             <!-- Search Container -->
             <div class="w-full relative">
