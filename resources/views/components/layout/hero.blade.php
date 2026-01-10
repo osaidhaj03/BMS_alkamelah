@@ -78,6 +78,117 @@
                 </button>
             </div>
 
+            <!-- Active Filters Display -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mt-4" x-show="getActiveFiltersCount() > 0">
+                <!-- Books Filters -->
+                <template x-if="searchMode === 'books'">
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="id in sectionFilters" :key="'sec-'+id">
+                            <span
+                                class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                <span x-text="sections.find(s => s.id === id)?.name || 'قسم'"></span>
+                                <button @click="toggleFilter('section', id)" class="hover:text-green-900">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                        <template x-for="id in authorFilters" :key="'auth-'+id">
+                            <span
+                                class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                                <span x-text="authorsForFilter.find(a => a.id === id)?.name || 'مؤلف'"></span>
+                                <button @click="toggleFilter('author', id)" class="hover:text-blue-900">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Authors Filters -->
+                <template x-if="searchMode === 'authors'">
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="m in madhhabFilters" :key="'mad-'+m">
+                            <span
+                                class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                <span x-text="m"></span>
+                                <button @click="toggleMadhhabFilter(m)" class="hover:text-green-900">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                        <template x-for="c in centuryFilters" :key="'cent-'+c">
+                            <span
+                                class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                                <span x-text="availableCenturies[c]"></span>
+                                <button @click="toggleCenturyFilter(c)" class="hover:text-blue-900">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                        <template x-if="deathDateFrom || deathDateTo">
+                            <span
+                                class="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                <span x-text="(deathDateFrom || '...') + ' - ' + (deathDateTo || '...') + ' هـ'"></span>
+                                <button @click="deathDateFrom = ''; deathDateTo = ''" class="hover:text-purple-900">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Content Filters -->
+                <template x-if="searchMode === 'content'">
+                    <div class="flex flex-wrap gap-2">
+                        <template x-if="searchType !== 'flexible_match'">
+                            <span
+                                class="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                <span x-text="searchType === 'exact_match' ? 'بحث مطابق' : 'بحث صرفي'"></span>
+                                <button @click="searchType = 'flexible_match'" class="hover:text-orange-900">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                        <template x-if="wordOrder !== 'any_order'">
+                            <span
+                                class="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                <span x-text="wordOrder === 'consecutive' ? 'كلمات متتالية' : 'نفس الفقرة'"></span>
+                                <button @click="wordOrder = 'any_order'" class="hover:text-orange-900">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                </template>
+
+                <button
+                    @click="clearBooksFilters(); clearAuthorsFilters(); searchType = 'flexible_match'; wordOrder = 'any_order'"
+                    class="text-xs text-red-600 hover:text-red-800 hover:underline border-r border-gray-300 pr-2 mr-2">
+                    مسح الكل
+                </button>
+            </div>
+
             <!-- Suggestions Dropdown -->
             <div x-show="showDropdown && suggestions.length > 0 && (searchMode === 'books' || searchMode === 'authors')"
                 x-transition
@@ -234,19 +345,27 @@
                     <!-- Tabs -->
                     <div class="flex border-b border-gray-200">
                         <button @click="authorsFilterTab = 'madhhab'"
-                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors" :class="authorsFilterTab === 'madhhab' ? 'border-green-600 text-green-600' :
-                                'border-transparent text-gray-500'">
+                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors duration-200"
+                            :class="authorsFilterTab === 'madhhab' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
                             المذهب
+                            <span x-show="madhhabFilters.length > 0"
+                                class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full"
+                                x-text="madhhabFilters.length"></span>
                         </button>
                         <button @click="authorsFilterTab = 'century'"
-                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors" :class="authorsFilterTab === 'century' ? 'border-green-600 text-green-600' :
-                                'border-transparent text-gray-500'">
+                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors duration-200"
+                            :class="authorsFilterTab === 'century' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
                             القرن
+                            <span x-show="centuryFilters.length > 0"
+                                class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full"
+                                x-text="centuryFilters.length"></span>
                         </button>
                         <button @click="authorsFilterTab = 'daterange'"
-                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors" :class="authorsFilterTab === 'daterange' ? 'border-green-600 text-green-600' :
-                                'border-transparent text-gray-500'">
+                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors duration-200"
+                            :class="authorsFilterTab === 'daterange' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700'">
                             نطاق التاريخ
+                            <span x-show="deathDateFrom || deathDateTo"
+                                class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">1</span>
                         </button>
                     </div>
                 </div>
@@ -255,19 +374,29 @@
                 <div class="flex-1 overflow-y-auto p-4 bg-gray-50 max-h-72">
                     <!-- Madhhab Tab -->
                     <div x-show="authorsFilterTab === 'madhhab'">
-                        <ul class="space-y-2">
-                            <template x-for="m in availableMadhhabs" :key="m">
-                                <li class="flex items-center py-3 px-4 hover:bg-white rounded-lg cursor-pointer"
+                        <div class="mb-3">
+                            <input type="text" x-model="filterSearch" placeholder="بحث في المذاهب..."
+                                class="w-full rounded-lg border-gray-300 text-sm focus:ring-green-500 focus:border-green-500">
+                        </div>
+                        <ul class="space-y-1">
+                            <template
+                                x-for="m in availableMadhhabs.filter(m => !filterSearch || m.includes(filterSearch))"
+                                :key="m">
+                                <li class="relative flex items-start py-3 px-4 hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
                                     @click="toggleMadhhabFilter(m)">
-                                    <div class="flex-1 font-medium" x-text="m"
-                                        style="font-size: 1rem; line-height: 1.5rem;"></div>
-                                    <div class="w-5 h-5 border rounded flex items-center justify-center" :class="madhhabFilters.includes(m) ? 'bg-green-600 border-green-600' :
-                                            'border-gray-300'">
-                                        <svg x-show="madhhabFilters.includes(m)" class="w-3.5 h-3.5 text-white"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                                d="M5 13l4 4L19 7"></path>
-                                        </svg>
+                                    <div class="min-w-0 flex-1">
+                                        <label class="select-none font-medium text-gray-900 cursor-pointer"
+                                            style="font-size: 1rem; line-height: 1.5rem;" x-text="m"></label>
+                                    </div>
+                                    <div class="mr-3 flex h-6 items-center">
+                                        <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors"
+                                            :class="madhhabFilters.includes(m) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300'">
+                                            <svg x-show="madhhabFilters.includes(m)" class="w-3.5 h-3.5 text-white"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
                                     </div>
                                 </li>
                             </template>
@@ -279,10 +408,9 @@
                         <div class="grid grid-cols-3 gap-2">
                             <template x-for="(name, num) in availableCenturies" :key="num">
                                 <button @click="toggleCenturyFilter(parseInt(num))"
-                                    class="py-4 px-2 text-center rounded-lg border-2 transition-all font-medium" :class="centuryFilters.includes(parseInt(num)) ?
-                                        'bg-green-600 border-green-600 text-white' :
-                                        'bg-white border-gray-200 text-gray-700'" x-text="name"
-                                    style="font-size: 1rem; line-height: 1.5rem;">
+                                    class="py-4 px-2 text-center rounded-lg border-2 transition-all font-medium"
+                                    :class="centuryFilters.includes(parseInt(num)) ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-green-500'"
+                                    x-text="name" style="font-size: 1rem; line-height: 1.5rem;">
                                 </button>
                             </template>
                         </div>
@@ -317,10 +445,11 @@
                 <!-- Footer -->
                 <div class="bg-white px-6 py-3 gap-3 flex flex-row-reverse border-t border-gray-100">
                     <button @click="filterModalOpen = false"
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-500">تطبيق</button>
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow-sm hover:bg-green-500 transition-colors">تطبيق</button>
                     <button @click="filterModalOpen = false"
-                        class="px-4 py-2 bg-white text-gray-900 rounded-lg font-semibold ring-1 ring-gray-300 hover:bg-gray-50">إلغاء</button>
-                    <button @click="clearAuthorsFilters()" class="mr-auto text-sm text-gray-500 hover:text-red-600">مسح
+                        class="px-4 py-2 bg-white text-gray-900 rounded-lg font-semibold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors">إلغاء</button>
+                    <button @click="clearAuthorsFilters()"
+                        class="mr-auto text-sm text-gray-500 hover:text-red-600 transition-colors">مسح
                         الكل</button>
                 </div>
             </div>
@@ -428,24 +557,25 @@
             // Content filters
             searchType: 'flexible_match',
             wordOrder: 'any_order',
+            filterSearch: '',
 
             availableMadhhabs: ['المذهب الحنفي', 'المذهب المالكي', 'المذهب الشافعي', 'المذهب الحنبلي'],
             availableCenturies: {
-                1: 'الأول',
-                2: 'الثاني',
-                3: 'الثالث',
-                4: 'الرابع',
-                5: 'الخامس',
-                6: 'السادس',
-                7: 'السابع',
-                8: 'الثامن',
-                9: 'التاسع',
-                10: 'العاشر',
-                11: 'الحادي عشر',
-                12: 'الثاني عشر',
-                13: 'الثالث عشر',
-                14: 'الرابع عشر',
-                15: 'الخامس عشر'
+                1: 'القرن الأول',
+                2: 'القرن الثاني',
+                3: 'القرن الثالث',
+                4: 'القرن الرابع',
+                5: 'القرن الخامس',
+                6: 'القرن السادس',
+                7: 'القرن السابع',
+                8: 'القرن الثامن',
+                9: 'القرن التاسع',
+                10: 'القرن العاشر',
+                11: 'القرن الحادي عشر',
+                12: 'القرن الثاني عشر',
+                13: 'القرن الثالث عشر',
+                14: 'القرن الرابع عشر',
+                15: 'القرن الخامس عشر'
             },
 
             get placeholderText() {
