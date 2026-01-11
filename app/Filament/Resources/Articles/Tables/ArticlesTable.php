@@ -22,6 +22,7 @@ class ArticlesTable
             ->columns([
                 ImageColumn::make('cover_image')
                     ->label('الغلاف')
+                    ->disk('public')
                     ->circular()
                     ->defaultImageUrl(fn () => asset('images/default-article.png')),
                 

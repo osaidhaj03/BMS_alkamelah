@@ -18,6 +18,7 @@ class BookSectionsTable
             ->columns([
                  ImageColumn::make('logo_path')
                     ->label('الأيقونة')
+                    ->disk('public')
                     ->circular()
                     ->toggleable(),
                 TextColumn::make('name')

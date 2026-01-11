@@ -22,6 +22,7 @@ class NewsTable
             ->columns([
                 ImageColumn::make('featured_image')
                     ->label('الصورة')
+                    ->disk('public')
                     ->circular()
                     ->defaultImageUrl(fn () => asset('images/default-news.png')),
                 
