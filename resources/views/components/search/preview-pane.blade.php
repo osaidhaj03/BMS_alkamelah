@@ -174,14 +174,14 @@ class="h-full w-full flex flex-col bg-white">
             </div>
 
             <!-- Content Scroller -->
-            <div class="flex-1 overflow-y-auto" style="background-color: #fffbf2;">
+            <div class="flex-1 overflow-y-auto bg-white">
                 <div class="max-w-4xl mx-auto p-4 lg:p-8">
                     
                     <!-- Paper/Card Container -->
                     <div x-ref="bookContent"
                          :style="'font-size: ' + fontSize + 'px'"
                          class="rounded-lg shadow-lg p-6 lg:p-12 relative transition-all duration-200"
-                         style="background-color: #fbf7ee; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+                         style="background-color: #fffbf2; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
                         
                         <!-- Content -->
                         <div class="prose prose-lg max-w-none text-justify leading-loose text-gray-800 font-serif space-y-6" style="line-height: 2;">
