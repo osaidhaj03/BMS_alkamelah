@@ -653,29 +653,28 @@ class UltraFastSearchService
 
 	/**
 	 * Build sort array for Elasticsearch
-	 * Supports: relevance, book_title_asc, book_title_desc, page_number_asc, page_number_desc
+	 * Supports: relevance, least_relevance, death_year_asc, death_year_desc
+	 * Note: death_year sorting requires author_death_year field to be indexed
 	 */
 	protected function buildSort(string $sortBy = 'relevance'): array
 	{
 		switch ($sortBy) {
-			case 'book_title_asc':
+			case 'least_relevance':
+				// Lowest score first (opposite of relevance)
 				return [
-					['book_title.keyword' => ['order' => 'asc']],
+					['_score' => ['order' => 'asc']]
+				];
+			case 'death_year_asc':
+				// Oldest author death year first
+				// Note: This field may not exist - fallback to score
+				return [
+					['author_death_year' => ['order' => 'asc', 'missing' => '_last']],
 					'_score'
 				];
-			case 'book_title_desc':
+			case 'death_year_desc':
+				// Newest author death year first
 				return [
-					['book_title.keyword' => ['order' => 'desc']],
-					'_score'
-				];
-			case 'page_number_asc':
-				return [
-					['page_number' => ['order' => 'asc']],
-					'_score'
-				];
-			case 'page_number_desc':
-				return [
-					['page_number' => ['order' => 'desc']],
+					['author_death_year' => ['order' => 'desc', 'missing' => '_last']],
 					'_score'
 				];
 			case 'relevance':
