@@ -15,6 +15,10 @@ class UltraFastSearchService
 	const SEARCH_TYPE_EXACT = 'exact_match';
 	const SEARCH_TYPE_FLEXIBLE = 'flexible_match';
 	const SEARCH_TYPE_MORPHOLOGICAL = 'morphological';
+	const SEARCH_TYPE_FUZZY = 'fuzzy';
+	const SEARCH_TYPE_PREFIX = 'prefix';
+	const SEARCH_TYPE_WILDCARD = 'wildcard';
+	const SEARCH_TYPE_BOOLEAN = 'boolean';
 
 	protected $elasticsearch;
 
@@ -54,7 +58,7 @@ class UltraFastSearchService
 			// Use new search index first, then fallback to old ones
 			$indices = ['pages_new_search', 'pages', 'pages_test', 'pages_optimized'];
 			$indexToUse = null;
-            
+
 			foreach ($indices as $index) {
 				try {
 					if ($this->elasticsearch->indices()->exists(['index' => $index])) {
@@ -65,7 +69,7 @@ class UltraFastSearchService
 					continue;
 				}
 			}
-            
+
 			if (!$indexToUse) {
 				return $this->scoutFallback($query, $filters, $page, $perPage);
 			}
@@ -85,8 +89,13 @@ class UltraFastSearchService
 					'highlight' => $this->buildHighlight(),
 					'aggs' => $this->buildAggregations(), // Context7: Add aggregations for filter counts
 					'_source' => [
-						'id', 'content', 'page_number', 'book_id', 
-						'book_title', 'author_names', 'author_ids',
+						'id',
+						'content',
+						'page_number',
+						'book_id',
+						'book_title',
+						'author_names',
+						'author_ids',
 						'book_section_id'
 					],
 					'from' => ($page - 1) * $perPage,
@@ -99,9 +108,9 @@ class UltraFastSearchService
 			];
 
 			$response = $this->elasticsearch->search($params);
-            
+
 			$results = $this->transformResults($response, $query, $page, $perPage, $filters);
-			
+
 			// Context7: Add search metadata for frontend debugging
 			$results['search_metadata'] = [
 				'index_used' => $indexToUse,
@@ -120,7 +129,7 @@ class UltraFastSearchService
 				'error' => $e->getMessage(),
 				'trace' => $e->getTraceAsString()
 			]);
-			
+
 			// Fallback to Scout if direct fails
 			return $this->scoutFallback($query, $filters, $page, $perPage);
 		}
@@ -188,7 +197,7 @@ class UltraFastSearchService
 	private function hasValidFilters(array $filters): bool
 	{
 		$validFilterKeys = ['book_id', 'section_id', 'author_id'];
-		
+
 		foreach ($validFilterKeys as $key) {
 			if (!empty($filters[$key])) {
 				$values = is_array($filters[$key]) ? $filters[$key] : [$filters[$key]];
@@ -197,36 +206,34 @@ class UltraFastSearchService
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * Build exact match query - literal exact matching with word order
-	 * FIXED: arabic_exact analyzer doesn't work properly, use content.keyword or flexible with strict matching
+	 * Uses content.exact field with arabic_exact analyzer for true literal matching
 	 */
 	protected function buildExactMatchQuery(string $searchTerm, string $wordOrder = 'consecutive'): array
 	{
-		// For exact + any_order: use match with operator=and on flexible field
-		// (arabic_exact analyzer is broken - creates single token)
+		// For exact + any_order: use match with operator=and on exact field
 		if ($wordOrder === 'any_order') {
 			return [
 				'match' => [
-					'content.flexible' => [
+					'content.exact' => [
 						'query' => $searchTerm,
 						'operator' => 'and'
 					]
 				]
 			];
 		}
-		
+
 		// For exact + consecutive/same_paragraph: use match_phrase with slop
-		// Using flexible field because exact analyzer is broken
 		$slop = ($wordOrder === 'consecutive') ? 0 : 50;
-		
+
 		return [
 			'match_phrase' => [
-				'content.flexible' => [
+				'content.exact' => [
 					'query' => $searchTerm,
 					'slop' => $slop
 				]
@@ -251,11 +258,11 @@ class UltraFastSearchService
 				]
 			];
 		}
-		
+
 		// For consecutive: slop=0 (words must be adjacent)
 		// For same_paragraph: slop=50 (words can have up to 50 words between them)
 		$slop = ($wordOrder === 'consecutive') ? 0 : 50;
-		
+
 		return [
 			'match_phrase' => [
 				'content.flexible' => [
@@ -318,10 +325,10 @@ class UltraFastSearchService
 				]
 			];
 		}
-		
+
 		// For consecutive/same_paragraph: use match_phrase with appropriate slop
 		$slop = ($wordOrder === 'consecutive') ? 0 : 50;
-		
+
 		return [
 			'bool' => [
 				'should' => [
@@ -350,6 +357,105 @@ class UltraFastSearchService
 	}
 
 	/**
+	 * Build fuzzy query - handles spelling mistakes
+	 */
+	protected function buildFuzzyQuery(string $searchTerm): array
+	{
+		return [
+			'match' => [
+				'content' => [
+					'query' => $searchTerm,
+					'fuzziness' => 'AUTO',
+					'prefix_length' => 1,
+					'operator' => 'and'
+				]
+			]
+		];
+	}
+
+	/**
+	 * Build prefix query - matches words starting with prefix
+	 */
+	protected function buildPrefixQuery(string $searchTerm): array
+	{
+		// Split into words and create prefix query for each
+		$words = preg_split('/\s+/', trim($searchTerm));
+		$prefixQueries = [];
+
+		foreach ($words as $word) {
+			if (strlen($word) > 0) {
+				$prefixQueries[] = [
+					'prefix' => [
+						'content' => [
+							'value' => $word
+						]
+					]
+				];
+			}
+		}
+
+		if (count($prefixQueries) === 1) {
+			return $prefixQueries[0];
+		}
+
+		return [
+			'bool' => [
+				'must' => $prefixQueries
+			]
+		];
+	}
+
+	/**
+	 * Build wildcard query - supports * and ? patterns
+	 * Warning: Can be slow on large indices
+	 */
+	protected function buildWildcardQuery(string $searchTerm): array
+	{
+		// Split into words and create wildcard query for each
+		$words = preg_split('/\s+/', trim($searchTerm));
+		$wildcardQueries = [];
+
+		foreach ($words as $word) {
+			if (strlen($word) > 0) {
+				$wildcardQueries[] = [
+					'wildcard' => [
+						'content' => [
+							'value' => $word,
+							'case_insensitive' => true
+						]
+					]
+				];
+			}
+		}
+
+		if (count($wildcardQueries) === 1) {
+			return $wildcardQueries[0];
+		}
+
+		return [
+			'bool' => [
+				'must' => $wildcardQueries
+			]
+		];
+	}
+
+	/**
+	 * Build boolean query - supports AND, OR, NOT operators
+	 * Example: "الصلاة AND الزكاة" or "الصلاة OR الصيام" or "الصلاة NOT الجمعة"
+	 */
+	protected function buildBooleanQuery(string $searchTerm): array
+	{
+		return [
+			'query_string' => [
+				'query' => $searchTerm,
+				'default_field' => 'content',
+				'default_operator' => 'AND',
+				'analyze_wildcard' => true
+			]
+		];
+	}
+
+	/**
 	 * Build optimized query for Arabic text with advanced search options
 	 */
 	protected function buildOptimizedQuery(string $query, array $filters): array
@@ -365,7 +471,7 @@ class UltraFastSearchService
 			// Get search type from filters (new system)
 			$searchType = $filters['search_type'] ?? self::SEARCH_TYPE_FLEXIBLE;
 			$wordOrder = $filters['word_order'] ?? 'any_order';
-            
+
 			switch ($searchType) {
 				case self::SEARCH_TYPE_EXACT:
 					$boolQuery['bool']['must'][] = $this->buildExactMatchQuery($query, $wordOrder);
@@ -373,6 +479,22 @@ class UltraFastSearchService
 
 				case self::SEARCH_TYPE_MORPHOLOGICAL:
 					$boolQuery['bool']['must'][] = $this->buildMorphologicalQuery($query, $wordOrder);
+					break;
+
+				case self::SEARCH_TYPE_FUZZY:
+					$boolQuery['bool']['must'][] = $this->buildFuzzyQuery($query);
+					break;
+
+				case self::SEARCH_TYPE_PREFIX:
+					$boolQuery['bool']['must'][] = $this->buildPrefixQuery($query);
+					break;
+
+				case self::SEARCH_TYPE_WILDCARD:
+					$boolQuery['bool']['must'][] = $this->buildWildcardQuery($query);
+					break;
+
+				case self::SEARCH_TYPE_BOOLEAN:
+					$boolQuery['bool']['must'][] = $this->buildBooleanQuery($query);
 					break;
 
 				case self::SEARCH_TYPE_FLEXIBLE:
@@ -387,7 +509,7 @@ class UltraFastSearchService
 		$searchMode = $filters['search_mode'] ?? null;
 		if ($searchMode && !isset($filters['search_type']) && !empty($query)) {
 			$proximity = $filters['proximity'] ?? 'any_order'; // تعريف المتغير
-			
+
 			switch ($searchMode) {
 				case 'exact_phrase':
 					// مطابقة العبارة تماماً
@@ -400,12 +522,12 @@ class UltraFastSearchService
 						]
 					];
 					break;
-                    
+
 				case 'phrase_proximity':
 					// مطابقة العبارة مع تباعد مسموح
-					$slop = ($proximity === 'same_paragraph') ? 50 : 
-						   (($proximity === 'consecutive') ? 2 : 10);
-                    
+					$slop = ($proximity === 'same_paragraph') ? 50 :
+						(($proximity === 'consecutive') ? 2 : 10);
+
 					$boolQuery['bool']['must'][] = [
 						'match_phrase' => [
 							'content' => [
@@ -415,7 +537,7 @@ class UltraFastSearchService
 						]
 					];
 					break;
-                    
+
 				case 'all_words':
 					// جميع الكلمات يجب أن تكون موجودة
 					$boolQuery['bool']['must'][] = [
@@ -428,7 +550,7 @@ class UltraFastSearchService
 						]
 					];
 					break;
-                    
+
 				case 'any_word':
 					// أي كلمة من الكلمات
 					$boolQuery['bool']['must'][] = [
@@ -441,7 +563,7 @@ class UltraFastSearchService
 						]
 					];
 					break;
-                    
+
 				default: // flexible
 					// البحث المرن (الافتراضي)
 					$boolQuery['bool']['must'][] = [
@@ -461,14 +583,14 @@ class UltraFastSearchService
 					break;
 			}
 		}
-		
+
 		// If no query at all, return all documents (for filter-only searches)
 		if (empty($query) && empty($boolQuery['bool']['must'])) {
 			$boolQuery['bool']['must'][] = ['match_all' => new \stdClass()];
 		}
 
 		// Add filters - Context7 Best Practice: Use correct field types
-		
+
 		// Author filter - NOTE: author_ids field does NOT exist in indexed data
 		// We need to filter by book_id and then join with books table to get author
 		// For now, author filter is disabled until re-indexing
@@ -479,10 +601,10 @@ class UltraFastSearchService
 
 		// Section filter - use keyword type (not integer!)
 		if (!empty($filters['section_id'])) {
-			$sectionIds = is_array($filters['section_id']) 
-				? $filters['section_id'] 
+			$sectionIds = is_array($filters['section_id'])
+				? $filters['section_id']
 				: [$filters['section_id']];
-			
+
 			// Convert to strings because book_section_id is keyword type
 			$boolQuery['bool']['filter'][] = [
 				'terms' => ['book_section_id' => array_map('strval', $sectionIds)]
@@ -491,10 +613,10 @@ class UltraFastSearchService
 
 		// Book filter - use integer type
 		if (!empty($filters['book_id'])) {
-			$bookIds = is_array($filters['book_id']) 
-				? $filters['book_id'] 
+			$bookIds = is_array($filters['book_id'])
+				? $filters['book_id']
 				: [$filters['book_id']];
-			
+
 			// book_id is integer type
 			$boolQuery['bool']['filter'][] = [
 				'terms' => ['book_id' => array_map('intval', $bookIds)]
@@ -592,7 +714,7 @@ class UltraFastSearchService
 			];
 
 			$response = $this->elasticsearch->search($params);
-			
+
 			return $this->formatAvailableFilters($response['aggregations'] ?? []);
 
 		} catch (\Exception $e) {
@@ -617,9 +739,11 @@ class UltraFastSearchService
 			// Get authors from database
 			if ($filterType === 'all' || $filterType === 'authors') {
 				$authors = \App\Models\Author::select('id', 'name')
-					->withCount(['books as count' => function($query) {
-						$query->whereNotNull('id');
-					}])
+					->withCount([
+						'books as count' => function ($query) {
+							$query->whereNotNull('id');
+						}
+					])
 					->having('count', '>', 0)
 					->orderByDesc('count')
 					->limit($limit)
@@ -637,9 +761,11 @@ class UltraFastSearchService
 			// Get books from database
 			if ($filterType === 'all' || $filterType === 'books') {
 				$books = \App\Models\Book::select('id', 'title')
-					->withCount(['pages as count' => function($query) {
-						$query->whereNotNull('id');
-					}])
+					->withCount([
+						'pages as count' => function ($query) {
+							$query->whereNotNull('id');
+						}
+					])
 					->having('count', '>', 0)
 					->orderByDesc('count')
 					->limit($limit)
@@ -657,9 +783,11 @@ class UltraFastSearchService
 			// Get sections from database
 			if ($filterType === 'all' || $filterType === 'sections') {
 				$sections = \App\Models\BookSection::select('id', 'name')
-					->withCount(['pages as count' => function($query) {
-						$query->whereNotNull('id');
-					}])
+					->withCount([
+						'pages as count' => function ($query) {
+							$query->whereNotNull('id');
+						}
+					])
 					->having('count', '>', 0)
 					->orderByDesc('count')
 					->limit($limit)
@@ -760,7 +888,7 @@ class UltraFastSearchService
 	private function getActiveIndex(): ?string
 	{
 		$indices = ['pages_new_search', 'pages', 'pages_test', 'pages_optimized'];
-		
+
 		foreach ($indices as $index) {
 			try {
 				if ($this->elasticsearch->indices()->exists(['index' => $index])) {
@@ -770,7 +898,7 @@ class UltraFastSearchService
 				continue;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -907,14 +1035,14 @@ class UltraFastSearchService
 		if ($position !== false) {
 			$start = max(0, $position - 60);
 			$excerpt = mb_substr($content, $start, 120);
-            
+
 			// Highlight
 			$excerpt = str_ireplace(
 				$query,
 				'<mark class="highlight">' . $query . '</mark>',
 				$excerpt
 			);
-            
+
 			return $excerpt . '...';
 		}
 
@@ -929,17 +1057,17 @@ class UltraFastSearchService
 		try {
 			// Try Laravel Scout first
 			$builder = Page::search($query);
-			
+
 			if (!empty($filters['author_id'])) {
 				$builder->where('author_ids', $filters['author_id']);
 			}
-			
+
 			if (!empty($filters['section_id'])) {
 				$builder->where('book_section_id', $filters['section_id']);
 			}
-			
+
 			$results = $builder->paginate($perPage, 'page', $page);
-			
+
 			$items = collect($results->items())->map(function ($page) use ($query) {
 				return [
 					'id' => $page->id,
@@ -952,7 +1080,7 @@ class UltraFastSearchService
 					'book_section_id' => $page->book->book_section_id ?? null,
 				];
 			});
-			
+
 			return [
 				'results' => $items,
 				'total' => $results->total(),
@@ -960,7 +1088,7 @@ class UltraFastSearchService
 				'per_page' => $results->perPage(),
 				'last_page' => $results->lastPage(),
 			];
-			
+
 		} catch (\Exception $e) {
 			// Final fallback to database query
 			return $this->databaseFallback($query, $filters, $page, $perPage);
@@ -974,25 +1102,25 @@ class UltraFastSearchService
 	{
 		try {
 			$queryBuilder = Page::with(['book', 'book.authors']);
-			
+
 			if (!empty($query)) {
 				$queryBuilder->where('content', 'LIKE', "%{$query}%");
 			}
-			
+
 			if (!empty($filters['author_id'])) {
 				$queryBuilder->whereHas('book.authors', function ($q) use ($filters) {
 					$q->where('authors.id', $filters['author_id']);
 				});
 			}
-			
+
 			if (!empty($filters['section_id'])) {
 				$queryBuilder->whereHas('book', function ($q) use ($filters) {
 					$q->where('book_section_id', $filters['section_id']);
 				});
 			}
-			
+
 			$results = $queryBuilder->paginate($perPage, ['*'], 'page', $page);
-			
+
 			$items = collect($results->items())->map(function ($page) use ($query) {
 				return [
 					'id' => $page->id,
@@ -1004,7 +1132,7 @@ class UltraFastSearchService
 					'book_section_id' => $page->book->book_section_id ?? null,
 				];
 			});
-			
+
 			return [
 				'results' => $items,
 				'total' => $results->total(),
@@ -1012,7 +1140,7 @@ class UltraFastSearchService
 				'per_page' => $results->perPage(),
 				'last_page' => $results->lastPage(),
 			];
-			
+
 		} catch (\Exception $e) {
 			return [
 				'results' => collect(),
@@ -1024,8 +1152,8 @@ class UltraFastSearchService
 			];
 		}
 	}	/**
-	 * Health check for search service
-	 */
+		 * Health check for search service
+		 */
 	public function healthCheck(): array
 	{
 		try {

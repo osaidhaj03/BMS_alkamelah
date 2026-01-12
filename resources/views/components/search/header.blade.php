@@ -347,7 +347,7 @@
                                         x-model="$store.search.searchType"
                                         class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
                                     <span class="text-sm text-gray-700 group-hover:text-green-700 font-medium">البحث
-                                        الغير مطابق</span>
+                                        المرن</span>
                                 </label>
 
                                 <label
@@ -357,6 +357,42 @@
                                         class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
                                     <span class="text-sm text-gray-700 group-hover:text-green-700 font-medium">البحث
                                         الصرفي</span>
+                                </label>
+
+                                <label
+                                    class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
+                                    <input type="radio" name="searchType" value="fuzzy"
+                                        x-model="$store.search.searchType"
+                                        class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
+                                    <span class="text-sm text-gray-700 group-hover:text-green-700 font-medium">تصحيح
+                                        الأخطاء</span>
+                                </label>
+
+                                <label
+                                    class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
+                                    <input type="radio" name="searchType" value="prefix"
+                                        x-model="$store.search.searchType"
+                                        class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
+                                    <span class="text-sm text-gray-700 group-hover:text-green-700 font-medium">البحث
+                                        بالبداية</span>
+                                </label>
+
+                                <label
+                                    class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
+                                    <input type="radio" name="searchType" value="wildcard"
+                                        x-model="$store.search.searchType"
+                                        class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                    <span class="text-sm text-gray-700 group-hover:text-orange-700 font-medium">الرموز
+                                        البديلة <span class="text-xs text-gray-400">(*,?)</span></span>
+                                </label>
+
+                                <label
+                                    class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors group">
+                                    <input type="radio" name="searchType" value="boolean"
+                                        x-model="$store.search.searchType"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                    <span class="text-sm text-gray-700 group-hover:text-blue-700 font-medium">البحث
+                                        المتقدم <span class="text-xs text-gray-400">(AND,OR,NOT)</span></span>
                                 </label>
 
                             </div>
