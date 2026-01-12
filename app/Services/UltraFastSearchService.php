@@ -212,28 +212,48 @@ class UltraFastSearchService
 
 	/**
 	 * Build exact match query - literal exact matching with word order
-	 * Uses content.exact field with arabic_exact analyzer for true literal matching
+	 * Uses match_phrase on main content field for true exact matching
+	 * Note: arabic_exact analyzer only has lowercase filter, not useful for Arabic
 	 */
 	protected function buildExactMatchQuery(string $searchTerm, string $wordOrder = 'consecutive'): array
 	{
-		// For exact + any_order: use match with operator=and on exact field
+		// For exact + any_order: each word must exist exactly (no stemming)
+		// Use bool query with must for each word
 		if ($wordOrder === 'any_order') {
+			$words = preg_split('/\s+/', trim($searchTerm));
+			$mustClauses = [];
+
+			foreach ($words as $word) {
+				if (strlen(trim($word)) > 0) {
+					$mustClauses[] = [
+						'match_phrase' => [
+							'content' => [
+								'query' => $word,
+								'slop' => 0
+							]
+						]
+					];
+				}
+			}
+
+			if (count($mustClauses) === 1) {
+				return $mustClauses[0];
+			}
+
 			return [
-				'match' => [
-					'content.exact' => [
-						'query' => $searchTerm,
-						'operator' => 'and'
-					]
+				'bool' => [
+					'must' => $mustClauses
 				]
 			];
 		}
 
-		// For exact + consecutive/same_paragraph: use match_phrase with slop
+		// For exact + consecutive: use match_phrase with slop=0 (words must be adjacent in order)
+		// For exact + same_paragraph: use match_phrase with slop=50 (words in same area, in order)
 		$slop = ($wordOrder === 'consecutive') ? 0 : 50;
 
 		return [
 			'match_phrase' => [
-				'content.exact' => [
+				'content' => [
 					'query' => $searchTerm,
 					'slop' => $slop
 				]
