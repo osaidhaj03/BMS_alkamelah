@@ -100,6 +100,9 @@ class NewsForm
                         ->disk('public')
                         ->directory('news-images')
                         ->imageEditor()
+                        ->saveUploadedFileUsing(function ($file, $record) {
+                            return Storage::disk('public')->putFile('news-images', $file);
+                        })
                         ->columnSpanFull(),
                 ])->collapsible(),
 
