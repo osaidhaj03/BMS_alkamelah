@@ -174,7 +174,7 @@ class="h-full w-full flex flex-col bg-white">
             </div>
 
             <!-- Content Scroller -->
-            <div class="flex-1 overflow-y-auto bg-white">
+            <div class="flex-1 overflow-y-auto" style="background-color: #fffbf2;">
                 <div class="max-w-4xl mx-auto p-4 lg:p-8">
                     
                     <!-- Paper/Card Container -->
