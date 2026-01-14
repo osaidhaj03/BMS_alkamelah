@@ -84,7 +84,20 @@
                      </span>
                  </div>
                  
-                 <p class="text-xs text-gray-500 mb-2" x-text="result.author_name || ''"></p>
+                 <p class="text-xs text-gray-500 mb-1.5" x-text="result.author_name || ''"></p>
+                 
+                 <!-- Matched Terms (الكلمات المطابقة) -->
+                 <div x-show="result.matched_terms && result.matched_terms.length > 0" 
+                      class="flex flex-wrap gap-1 mb-2">
+                     <template x-for="term in result.matched_terms" :key="term">
+                         <span class="inline-flex items-center gap-1 text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-full border border-green-200 font-medium">
+                             <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                 <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                             </svg>
+                             <span x-text="term"></span>
+                         </span>
+                     </template>
+                 </div>
                  
                  <div class="text-xs text-gray-600 leading-relaxed font-serif line-clamp-2" x-html="result.highlighted_content || result.content || ''"></div>
             </div>

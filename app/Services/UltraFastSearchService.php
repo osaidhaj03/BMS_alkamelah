@@ -1003,6 +1003,24 @@ class UltraFastSearchService
 	}
 
 	/**
+	 * Extract matched terms from highlighted content
+	 * Extracts the actual words found that match the search query
+	 */
+	protected function extractMatchedTerms(string $highlightedContent): array
+	{
+		$matchedTerms = [];
+		
+		// Extract words between <em> tags from highlighted content
+		if (preg_match_all('/<em>([^<]+)<\/em>/u', $highlightedContent, $matches)) {
+			$matchedTerms = array_unique($matches[1]);
+			// Remove duplicates and limit to first 5 unique terms
+			$matchedTerms = array_slice(array_values($matchedTerms), 0, 5);
+		}
+		
+		return $matchedTerms;
+	}
+
+	/**
 	 * Transform Elasticsearch results
 	 * Context7 Enhanced: Added aggregations data for filter counts
 	 */
@@ -1015,17 +1033,26 @@ class UltraFastSearchService
 		$results = collect($hits)->map(function ($hit) use ($query) {
 			$source = $hit['_source'] ?? [];
 			$highlight = $hit['highlight']['content'][0] ?? null;
+			$content = $highlight ?: $this->formatContent($source['content'] ?? '', $query);
+			
+			// Extract matched terms from highlighted content
+			$matchedTerms = [];
+			if ($highlight) {
+				$matchedTerms = $this->extractMatchedTerms($highlight);
+			}
 
 			return [
 				'id' => $source['id'] ?? null,
 				'page_number' => $source['page_number'] ?? null,
-				'content' => $highlight ?: $this->formatContent($source['content'] ?? '', $query),
+				'content' => $content,
+				'highlighted_content' => $content, // Same as content (already highlighted)
 				'book_title' => $source['book_title'] ?? 'غير محدد',
 				'author_name' => $source['author_names'] ?? 'غير محدد',
 				'author_id' => !empty($source['author_ids']) ? $source['author_ids'][0] : null,
 				'book_id' => $source['book_id'] ?? null,
 				'book_section_id' => $source['book_section_id'] ?? null,
 				'score' => $hit['_score'] ?? 0,
+				'matched_terms' => $matchedTerms, // الكلمات المطابقة
 			];
 		});
 

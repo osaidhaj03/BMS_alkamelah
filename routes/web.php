@@ -235,6 +235,7 @@ Route::prefix('api')->name('api.')->group(function () {
                         'content' => $item['content'] ?? '',
                         'highlighted_content' => $item['highlighted_content'] ?? ($item['content'] ?? ''),
                         'book_id' => $item['book_id'] ?? null,
+                        'matched_terms' => $item['matched_terms'] ?? [], // الكلمات المطابقة
                     ];
                 }),
                 'pagination' => [
