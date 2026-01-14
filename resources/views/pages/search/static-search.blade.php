@@ -227,6 +227,16 @@
                                     class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full"
                                     x-text="authorFilters.length"></span>
                             </button>
+                            <template x-if="searchMode === 'content'">
+                                <button @click="booksFilterTab = 'books'"
+                                    class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors"
+                                    :class="booksFilterTab === 'books' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500'">
+                                    الكتب
+                                    <span x-show="bookFilters.length > 0"
+                                        class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full"
+                                        x-text="bookFilters.length"></span>
+                                </button>
+                            </template>
                         </div>
                     </div>
 
@@ -280,6 +290,49 @@
                                     </li>
                                 </template>
                             </ul>
+                            <!-- Load More Authors -->
+                            <div x-show="hasMoreAuthors" class="mt-4 text-center">
+                                <button @click="fetchAuthorsForFilter(authorsPage + 1, true)"
+                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors"
+                                    :disabled="loadingMoreAuthors">
+                                    <span x-show="!loadingMoreAuthors">عرض المزيد</span>
+                                    <span x-show="loadingMoreAuthors">جاري التحميل...</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Books Filter Tab (Inside Content Search) -->
+                        <div x-show="booksFilterTab === 'books'">
+                            <div class="mb-3">
+                                <input type="text" x-model="bookSearch" @input.debounce.300ms="fetchBooksForFilter()"
+                                    placeholder="بحث في {{ number_format($booksCount) }} الكتب..."
+                                    class="w-full rounded-lg border-gray-300 text-sm">
+                            </div>
+                            <ul class="space-y-1">
+                                <template x-for="book in booksForFilter" :key="book.id">
+                                    <li class="flex items-center py-2 px-4 hover:bg-white rounded-lg cursor-pointer"
+                                        @click="toggleFilter('book', book.id)">
+                                        <div class="flex-1 font-medium" x-text="book.name" style="font-size: 1rem;"></div>
+                                        <div class="w-5 h-5 border rounded flex items-center justify-center"
+                                            :class="bookFilters.includes(book.id) ? 'bg-green-600 border-green-600' : 'border-gray-300'">
+                                            <svg x-show="bookFilters.includes(book.id)" class="w-3.5 h-3.5 text-white"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                            <!-- Load More Books -->
+                            <div x-show="hasMoreBooksForFilter" class="mt-4 text-center">
+                                <button @click="fetchBooksForFilter(booksPageForFilter + 1, true)"
+                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors"
+                                    :disabled="loadingMoreBooksForFilter">
+                                    <span x-show="!loadingMoreBooksForFilter">عرض المزيد من الكتب</span>
+                                    <span x-show="loadingMoreBooksForFilter">جاري التحميل...</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -449,10 +502,23 @@
                 booksFilterTab: 'sections',
                 sectionFilters: [],
                 authorFilters: [],
+                bookFilters: [],
                 sections: [],
                 authorsForFilter: [],
+                booksForFilter: [],
                 sectionSearch: '',
                 authorSearch: '',
+                bookSearch: '',
+
+                // Filter Pagination & Loading
+                authorsPage: 1,
+                hasMoreAuthors: false,
+                loadingMoreAuthors: false,
+                authorsLoading: false,
+                booksPageForFilter: 1,
+                hasMoreBooksForFilter: false,
+                loadingMoreBooksForFilter: false,
+                booksLoadingForFilter: false,
 
                 // Authors filters
                 authorsFilterTab: 'madhhab',
@@ -477,6 +543,7 @@
                 init() {
                     this.fetchSections();
                     this.fetchAuthorsForFilter();
+                    this.fetchBooksForFilter();
                 },
 
                 async fetchSuggestions() {
@@ -509,12 +576,40 @@
                     } catch (e) { console.error(e); }
                 },
 
-                async fetchAuthorsForFilter() {
+                async fetchAuthorsForFilter(page = 1, append = false) {
+                    this.authorsLoading = !append;
+                    this.loadingMoreAuthors = append;
                     try {
-                        const response = await fetch(`/api/authors?search=${encodeURIComponent(this.authorSearch)}`);
+                        const response = await fetch(`/api/authors?search=${encodeURIComponent(this.authorSearch)}&page=${page}`);
                         const data = await response.json();
-                        this.authorsForFilter = data.data || [];
+                        if (append) {
+                            this.authorsForFilter = [...this.authorsForFilter, ...(data.data || [])];
+                        } else {
+                            this.authorsForFilter = data.data || [];
+                        }
+                        this.authorsPage = data.current_page;
+                        this.hasMoreAuthors = data.current_page < data.last_page;
                     } catch (e) { console.error(e); }
+                    this.authorsLoading = false;
+                    this.loadingMoreAuthors = false;
+                },
+
+                async fetchBooksForFilter(page = 1, append = false) {
+                    this.booksLoadingForFilter = !append;
+                    this.loadingMoreBooksForFilter = append;
+                    try {
+                        const response = await fetch(`/api/books?search=${encodeURIComponent(this.bookSearch)}&page=${page}`);
+                        const data = await response.json();
+                        if (append) {
+                            this.booksForFilter = [...this.booksForFilter, ...data.data.map(b => ({ id: b.id, name: b.title }))];
+                        } else {
+                            this.booksForFilter = data.data.map(b => ({ id: b.id, name: b.title }));
+                        }
+                        this.booksPageForFilter = data.current_page;
+                        this.hasMoreBooksForFilter = data.current_page < data.last_page;
+                    } catch (e) { console.error(e); }
+                    this.booksLoadingForFilter = false;
+                    this.loadingMoreBooksForFilter = false;
                 },
 
                 getSuggestionUrl(item) {
@@ -551,7 +646,7 @@
                         // Add filters for content search
                         if (this.sectionFilters.length > 0) params.set('section_id', this.sectionFilters.join(','));
                         if (this.authorFilters.length > 0) params.set('author_id', this.authorFilters.join(','));
-                        // Optionally add book filters if we add that tab
+                        if (this.bookFilters.length > 0) params.set('book_id', this.bookFilters.join(','));
                     }
 
                     window.location.href = url + '?' + params.toString();
@@ -592,6 +687,7 @@
                 clearBooksFilters() {
                     this.sectionFilters = [];
                     this.authorFilters = [];
+                    this.bookFilters = [];
                 },
 
                 clearAuthorsFilters() {
@@ -603,7 +699,7 @@
 
                 getActiveFiltersCount() {
                     if (this.searchMode === 'books' || this.searchMode === 'content') {
-                        return this.sectionFilters.length + this.authorFilters.length;
+                        return this.sectionFilters.length + this.authorFilters.length + this.bookFilters.length;
                     } else if (this.searchMode === 'authors') {
                         let count = this.madhhabFilters.length + this.centuryFilters.length;
                         if (this.deathDateFrom || this.deathDateTo) count++;
