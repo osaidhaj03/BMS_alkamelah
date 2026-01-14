@@ -347,7 +347,7 @@
                                         x-model="$store.search.searchType"
                                         class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300">
                                     <span class="text-sm text-gray-700 group-hover:text-green-700 font-medium">البحث
-                                        المرن</span>
+                                        الغير مطابق</span>
                                 </label>
 
                                 <label
