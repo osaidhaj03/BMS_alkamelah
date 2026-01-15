@@ -1010,8 +1010,8 @@ class UltraFastSearchService
 	{
 		$matchedTerms = [];
 		
-		// Extract words between <em> tags from highlighted content
-		if (preg_match_all('/<em>([^<]+)<\/em>/u', $highlightedContent, $matches)) {
+		// Extract words between <mark> tags from highlighted content (or <em> for backward compatibility)
+		if (preg_match_all('/<(?:mark|em)[^>]*>([^<]+)<\/(?:mark|em)>/u', $highlightedContent, $matches)) {
 			$matchedTerms = array_unique($matches[1]);
 			// Remove duplicates and limit to first 5 unique terms
 			$matchedTerms = array_slice(array_values($matchedTerms), 0, 5);

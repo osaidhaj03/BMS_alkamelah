@@ -228,9 +228,9 @@ Route::prefix('api')->name('api.')->group(function () {
                     return [
                         'id' => $item['id'] ?? null,
                         'book_title' => $item['book_title'] ?? '',
-                        'author_name' => is_array($item['author_names'] ?? null)
-                            ? implode(', ', $item['author_names'])
-                            : ($item['author_names'] ?? ''),
+                        'author_name' => is_array($item['author_name'] ?? null)
+                            ? implode(', ', $item['author_name'])
+                            : ($item['author_name'] ?? ''),
                         'page_number' => $item['page_number'] ?? null,
                         'content' => $item['content'] ?? '',
                         'highlighted_content' => $item['highlighted_content'] ?? ($item['content'] ?? ''),
