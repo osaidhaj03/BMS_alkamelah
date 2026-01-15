@@ -228,6 +228,7 @@ Route::prefix('api')->name('api.')->group(function () {
                     return [
                         'id' => $item['id'] ?? null,
                         'book_title' => $item['book_title'] ?? '',
+                        'book_description' => $item['book_description'] ?? null, // وصف الكتاب
                         'author_name' => is_array($item['author_name'] ?? null)
                             ? implode(', ', $item['author_name'])
                             : ($item['author_name'] ?? ''),
@@ -235,6 +236,8 @@ Route::prefix('api')->name('api.')->group(function () {
                         'content' => $item['content'] ?? '',
                         'highlighted_content' => $item['highlighted_content'] ?? ($item['content'] ?? ''),
                         'book_id' => $item['book_id'] ?? null,
+                        'publisher' => $item['publisher'] ?? null, // الناشر
+                        'total_pages' => $item['total_pages'] ?? null, // عدد الصفحات
                         'matched_terms' => $item['matched_terms'] ?? [], // الكلمات المطابقة
                     ];
                 }),

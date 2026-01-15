@@ -4,6 +4,8 @@
     wordOrder: 'any_order',
     query: '',
     filterModalOpen: false,
+    helpModalOpen: false,
+    helpActiveTab: 'video',
     activeTab: 'books',
     filterSearch: '',
     
@@ -295,7 +297,7 @@
                         </button>
 
                         <!-- Help -->
-                        <button
+                        <button @click="helpModalOpen = true; mobileMenuOpen = false"
                             class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg group text-right">
                             <div
                                 class="p-1.5 rounded-md bg-gray-100 text-gray-500 group-hover:bg-green-100 group-hover:text-green-600 transition-colors">
@@ -558,7 +560,7 @@
                         </div>
                     </div>
                 </div>
-                <button class="p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200" title="مساعدة">
+                <button @click="helpModalOpen = true" class="p-2.5 text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200" title="مساعدة">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 0 11-18 0 9 9 0 0118 0z">
@@ -874,6 +876,353 @@
                         مسح الكل
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal (مساعدة) -->
+    <div x-show="helpModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto"
+        aria-labelledby="help-modal-title" role="dialog" aria-modal="true">
+
+        <!-- Backdrop -->
+        <div x-show="helpModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm transition-opacity"
+            @click="helpModalOpen = false"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="helpModalOpen" x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="relative transform overflow-hidden rounded-xl bg-white text-right shadow-xl transition-all sm:my-8 w-full max-w-4xl flex flex-col max-h-[90vh]">
+
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 pt-5 pb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-2xl font-bold leading-6 text-white flex items-center gap-3" id="help-modal-title">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                </path>
+                            </svg>
+                            <span>مركز المساعدة - دليل استخدام البحث</span>
+                        </h3>
+                        <button @click="helpModalOpen = false"
+                            class="text-white hover:text-gray-200 transition-colors">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <div class="flex gap-2 mt-4">
+                        <button @click="helpActiveTab = 'video'"
+                            class="px-4 py-2 rounded-lg font-medium transition-all"
+                            :class="helpActiveTab === 'video' ? 'bg-white text-green-700 shadow-md' : 'text-white hover:bg-green-500'">
+                            📹 شرح فيديو
+                        </button>
+                        <button @click="helpActiveTab = 'search'"
+                            class="px-4 py-2 rounded-lg font-medium transition-all"
+                            :class="helpActiveTab === 'search' ? 'bg-white text-green-700 shadow-md' : 'text-white hover:bg-green-500'">
+                            🔍 أنواع البحث
+                        </button>
+                        <button @click="helpActiveTab = 'filters'"
+                            class="px-4 py-2 rounded-lg font-medium transition-all"
+                            :class="helpActiveTab === 'filters' ? 'bg-white text-green-700 shadow-md' : 'text-white hover:bg-green-500'">
+                            ⚙️ الفلاتر
+                        </button>
+                        <button @click="helpActiveTab = 'tips'"
+                            class="px-4 py-2 rounded-lg font-medium transition-all"
+                            :class="helpActiveTab === 'tips' ? 'bg-white text-green-700 shadow-md' : 'text-white hover:bg-green-500'">
+                            💡 نصائح
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                    
+                    <!-- Video Tab -->
+                    <div x-show="helpActiveTab === 'video'" class="space-y-4">
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                            <div class="aspect-video">
+                                <iframe width="100%" height="100%" 
+                                    src="https://www.youtube.com/embed/PDYhjgE2zvM" 
+                                    title="شرح استخدام البحث" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen
+                                    class="w-full h-full">
+                                </iframe>
+                            </div>
+                            <div class="p-4 bg-gradient-to-r from-green-50 to-blue-50">
+                                <h4 class="font-bold text-lg text-gray-800 mb-2">شاهد الفيديو التعليمي</h4>
+                                <p class="text-gray-600">تعلم كيفية استخدام جميع ميزات البحث المتقدم في مكتبة الكاملة</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Types Tab -->
+                    <div x-show="helpActiveTab === 'search'" class="space-y-4">
+                        
+                        <!-- Exact Match -->
+                        <div class="bg-white rounded-lg shadow-md p-5 border-r-4 border-green-500">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">🎯</span>
+                                <h4 class="text-xl font-bold text-gray-800">البحث المطابق</h4>
+                            </div>
+                            <p class="text-gray-700 mb-3">يبحث عن النص بالضبط كما كتبته، دون أي تغيير</p>
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <p class="font-semibold text-green-800 mb-2">مثال:</p>
+                                <p class="text-gray-700">🔍 البحث: <code class="bg-green-100 px-2 py-1 rounded">الصلاة خير</code></p>
+                                <p class="text-gray-600 mt-1">✅ سيجد: "الصلاة خير من النوم"</p>
+                                <p class="text-gray-600">❌ لن يجد: "خير الصلاة" أو "صلاة خير"</p>
+                            </div>
+                        </div>
+
+                        <!-- Flexible Match -->
+                        <div class="bg-white rounded-lg shadow-md p-5 border-r-4 border-blue-500">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">🔄</span>
+                                <h4 class="text-xl font-bold text-gray-800">البحث الغير مطابق (المرن)</h4>
+                            </div>
+                            <p class="text-gray-700 mb-3">يبحث عن الكلمات بأي شكل، مع تصريفاتها المختلفة</p>
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <p class="font-semibold text-blue-800 mb-2">مثال:</p>
+                                <p class="text-gray-700">🔍 البحث: <code class="bg-blue-100 px-2 py-1 rounded">علم نافع</code></p>
+                                <p class="text-gray-600 mt-1">✅ سيجد: "العلم النافع"، "علم نافع"، "بعلم نافع"</p>
+                            </div>
+                        </div>
+
+                        <!-- Morphological -->
+                        <div class="bg-white rounded-lg shadow-md p-5 border-r-4 border-purple-500">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">📚</span>
+                                <h4 class="text-xl font-bold text-gray-800">البحث الصرفي</h4>
+                            </div>
+                            <p class="text-gray-700 mb-3">يبحث عن الكلمة وجميع تصريفاتها من نفس الجذر</p>
+                            <div class="bg-purple-50 p-3 rounded-lg">
+                                <p class="font-semibold text-purple-800 mb-2">مثال:</p>
+                                <p class="text-gray-700">🔍 البحث: <code class="bg-purple-100 px-2 py-1 rounded">كتب</code></p>
+                                <p class="text-gray-600 mt-1">✅ سيجد: "كتب"، "كاتب"، "مكتوب"، "يكتب"، "الكتابة"، "كتّاب"</p>
+                            </div>
+                        </div>
+
+                        <!-- Fuzzy -->
+                        <div class="bg-white rounded-lg shadow-md p-5 border-r-4 border-orange-500">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">✏️</span>
+                                <h4 class="text-xl font-bold text-gray-800">تصحيح الأخطاء</h4>
+                            </div>
+                            <p class="text-gray-700 mb-3">يجد الكلمات حتى لو كانت بها أخطاء إملائية بسيطة</p>
+                            <div class="bg-orange-50 p-3 rounded-lg">
+                                <p class="font-semibold text-orange-800 mb-2">مثال:</p>
+                                <p class="text-gray-700">🔍 البحث: <code class="bg-orange-100 px-2 py-1 rounded">المسلمين</code></p>
+                                <p class="text-gray-600 mt-1">✅ سيجد: "المسلمين"، "المسملين"، "المسلمون"</p>
+                            </div>
+                        </div>
+
+                        <!-- Prefix -->
+                        <div class="bg-white rounded-lg shadow-md p-5 border-r-4 border-teal-500">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">▶️</span>
+                                <h4 class="text-xl font-bold text-gray-800">البحث بالبداية</h4>
+                            </div>
+                            <p class="text-gray-700 mb-3">يبحث عن الكلمات التي تبدأ بالحروف المحددة</p>
+                            <div class="bg-teal-50 p-3 rounded-lg">
+                                <p class="font-semibold text-teal-800 mb-2">مثال:</p>
+                                <p class="text-gray-700">🔍 البحث: <code class="bg-teal-100 px-2 py-1 rounded">صل</code></p>
+                                <p class="text-gray-600 mt-1">✅ سيجد: "صلاة"، "صلى"، "صلح"، "صلاح"</p>
+                            </div>
+                        </div>
+
+                        <!-- Wildcard -->
+                        <div class="bg-white rounded-lg shadow-md p-5 border-r-4 border-yellow-500">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">⭐</span>
+                                <h4 class="text-xl font-bold text-gray-800">الرموز البديلة</h4>
+                            </div>
+                            <p class="text-gray-700 mb-3">استخدم * للبحث عن أي عدد من الأحرف، و ? لحرف واحد</p>
+                            <div class="bg-yellow-50 p-3 rounded-lg">
+                                <p class="font-semibold text-yellow-800 mb-2">أمثلة:</p>
+                                <p class="text-gray-700">🔍 <code class="bg-yellow-100 px-2 py-1 rounded">الصل*</code> → "الصلاة"، "الصلح"</p>
+                                <p class="text-gray-700 mt-1">🔍 <code class="bg-yellow-100 px-2 py-1 rounded">كت?ب</code> → "كتاب"، "كتيب"</p>
+                            </div>
+                        </div>
+
+                        <!-- Boolean -->
+                        <div class="bg-white rounded-lg shadow-md p-5 border-r-4 border-indigo-500">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">🧮</span>
+                                <h4 class="text-xl font-bold text-gray-800">البحث المتقدم (Boolean)</h4>
+                            </div>
+                            <p class="text-gray-700 mb-3">استخدم AND, OR, NOT للبحث المتقدم</p>
+                            <div class="bg-indigo-50 p-3 rounded-lg space-y-2">
+                                <p class="font-semibold text-indigo-800">أمثلة:</p>
+                                <p class="text-gray-700">🔍 <code class="bg-indigo-100 px-2 py-1 rounded">الصلاة AND الزكاة</code> → كلاهما معاً</p>
+                                <p class="text-gray-700">🔍 <code class="bg-indigo-100 px-2 py-1 rounded">الصلاة OR الصوم</code> → أي منهما</p>
+                                <p class="text-gray-700">🔍 <code class="bg-indigo-100 px-2 py-1 rounded">الصلاة NOT الجمعة</code> → الأول بدون الثاني</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters Tab -->
+                    <div x-show="helpActiveTab === 'filters'" class="space-y-4">
+                        
+                        <div class="bg-white rounded-lg shadow-md p-5">
+                            <h4 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+                                <span class="text-3xl">⚙️</span>
+                                خيارات التصفية
+                            </h4>
+                            
+                            <!-- Word Order -->
+                            <div class="mb-5 pb-5 border-b">
+                                <h5 class="text-lg font-bold text-gray-700 mb-3">📍 ترتيب الكلمات</h5>
+                                <div class="space-y-2 mr-4">
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-blue-600 font-bold">•</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">كلمات متتالية:</p>
+                                            <p class="text-gray-600">الكلمات يجب أن تكون بجانب بعضها</p>
+                                            <p class="text-sm text-gray-500 bg-gray-50 p-2 rounded mt-1">مثال: "قال رسول الله" → يجب أن تكون متتالية بهذا الترتيب</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-blue-600 font-bold">•</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">في نفس الفقرة:</p>
+                                            <p class="text-gray-600">الكلمات في نفس الفقرة لكن بينها كلمات أخرى</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-blue-600 font-bold">•</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">أي ترتيب:</p>
+                                            <p class="text-gray-600">الكلمات موجودة في أي مكان من الصفحة</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Word Match -->
+                            <div class="mb-5 pb-5 border-b">
+                                <h5 class="text-lg font-bold text-gray-700 mb-3">🎯 شرط الكلمات</h5>
+                                <div class="space-y-2 mr-4">
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-purple-600 font-bold">•</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">كل الكلمات (AND):</p>
+                                            <p class="text-gray-600">يجب أن تكون كل الكلمات موجودة</p>
+                                            <p class="text-sm text-gray-500 bg-gray-50 p-2 rounded mt-1">مثال: "الصلاة الزكاة" → يجب وجود الكلمتين معاً</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-purple-600 font-bold">•</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">بعض الكلمات (OR):</p>
+                                            <p class="text-gray-600">يكفي وجود كلمة واحدة على الأقل</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filter by Books/Authors/Sections -->
+                            <div>
+                                <h5 class="text-lg font-bold text-gray-700 mb-3">🔍 التصفية حسب</h5>
+                                <div class="space-y-2 mr-4">
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-green-600 font-bold">📚</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">الكتب:</p>
+                                            <p class="text-gray-600">حدد كتباً معينة للبحث فيها فقط</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-green-600 font-bold">✍️</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">المؤلفين:</p>
+                                            <p class="text-gray-600">ابحث في كتب مؤلف محدد</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-green-600 font-bold">📂</span>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">الأقسام:</p>
+                                            <p class="text-gray-600">حدد قسماً معيناً (فقه، حديث، تفسير...)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips Tab -->
+                    <div x-show="helpActiveTab === 'tips'" class="space-y-4">
+                        
+                        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-md p-5 border-2 border-green-200">
+                            <h4 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+                                <span class="text-3xl">💡</span>
+                                نصائح للبحث الفعال
+                            </h4>
+                            
+                            <div class="space-y-3">
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p class="font-bold text-green-700 mb-2">✅ نصيحة 1: ابدأ بسيط</p>
+                                    <p class="text-gray-700">ابدأ بالبحث المرن (الغير مطابق) أولاً، ثم استخدم الخيارات المتقدمة عند الحاجة</p>
+                                </div>
+
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p class="font-bold text-blue-700 mb-2">✅ نصيحة 2: استخدم البحث الصرفي</p>
+                                    <p class="text-gray-700">للبحث عن كل تصريفات الكلمة، استخدم البحث الصرفي - مفيد جداً في اللغة العربية</p>
+                                </div>
+
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p class="font-bold text-purple-700 mb-2">✅ نصيحة 3: استفد من الفلاتر</p>
+                                    <p class="text-gray-700">ضيّق نطاق البحث باستخدام فلاتر الكتب والمؤلفين والأقسام</p>
+                                </div>
+
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p class="font-bold text-orange-700 mb-2">✅ نصيحة 4: راجع النتائج المطابقة</p>
+                                    <p class="text-gray-700">انظر إلى الكلمات المطابقة (badges الخضراء) فوق كل نتيجة لفهم كيف تم العثور عليها</p>
+                                </div>
+
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p class="font-bold text-red-700 mb-2">✅ نصيحة 5: جرب أنواع البحث</p>
+                                    <p class="text-gray-700">إذا لم تجد ما تبحث عنه، جرب نوع بحث آخر - كل نوع له استخدامه الخاص</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow-md p-5">
+                            <h4 class="text-xl font-bold text-gray-800 mb-3">🎓 أمثلة عملية</h4>
+                            <div class="space-y-2 text-sm">
+                                <p class="text-gray-700">• للبحث عن حديث محدد → استخدم <span class="font-bold text-green-600">البحث المطابق</span></p>
+                                <p class="text-gray-700">• للبحث عن موضوع → استخدم <span class="font-bold text-blue-600">البحث المرن</span></p>
+                                <p class="text-gray-700">• للبحث عن كل استخدامات كلمة → استخدم <span class="font-bold text-purple-600">البحث الصرفي</span></p>
+                                <p class="text-gray-700">• إذا نسيت الكتابة الصحيحة → استخدم <span class="font-bold text-orange-600">تصحيح الأخطاء</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="bg-white px-6 py-4 border-t border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm text-gray-500">هل تحتاج مساعدة إضافية؟ تواصل معنا</p>
+                        <button @click="helpModalOpen = false"
+                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                            فهمت، شكراً!
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

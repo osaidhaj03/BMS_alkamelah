@@ -705,6 +705,18 @@ class UltraFastSearchService
 					'pre_tags' => ['<mark class="highlight">'],
 					'post_tags' => ['</mark>'],
 				],
+				'content.flexible' => [
+					'fragment_size' => 120,
+					'number_of_fragments' => 1,
+					'pre_tags' => ['<mark class="highlight">'],
+					'post_tags' => ['</mark>'],
+				],
+				'content.stemmed' => [
+					'fragment_size' => 120,
+					'number_of_fragments' => 1,
+					'pre_tags' => ['<mark class="highlight">'],
+					'post_tags' => ['</mark>'],
+				],
 			],
 			'encoder' => 'html',
 		];
@@ -1010,11 +1022,14 @@ class UltraFastSearchService
 	{
 		$matchedTerms = [];
 		
-		// Extract words between <mark> tags from highlighted content (or <em> for backward compatibility)
-		if (preg_match_all('/<(?:mark|em)[^>]*>([^<]+)<\/(?:mark|em)>/u', $highlightedContent, $matches)) {
-			$matchedTerms = array_unique($matches[1]);
-			// Remove duplicates and limit to first 5 unique terms
-			$matchedTerms = array_slice(array_values($matchedTerms), 0, 5);
+		// Extract words between <mark class="highlight"> tags
+		// Changed regex to handle class attribute properly
+		if (preg_match_all('/<mark[^>]*>([^<]+)<\/mark>/u', $highlightedContent, $matches)) {
+			if (isset($matches[1])) {
+				$matchedTerms = array_unique($matches[1]);
+				// Remove duplicates and limit to first 5 unique terms
+				$matchedTerms = array_slice(array_values($matchedTerms), 0, 5);
+			}
 		}
 		
 		return $matchedTerms;
@@ -1032,13 +1047,65 @@ class UltraFastSearchService
 
 		$results = collect($hits)->map(function ($hit) use ($query) {
 			$source = $hit['_source'] ?? [];
-			$highlight = $hit['highlight']['content'][0] ?? null;
+			
+			// Get highlight from any available field
+			$highlight = $hit['highlight']['content'][0] 
+				?? $hit['highlight']['content.flexible'][0] 
+				?? $hit['highlight']['content.stemmed'][0] 
+				?? null;
+			
 			$content = $highlight ?: $this->formatContent($source['content'] ?? '', $query);
 			
 			// Extract matched terms from highlighted content
 			$matchedTerms = [];
 			if ($highlight) {
 				$matchedTerms = $this->extractMatchedTerms($highlight);
+			} elseif ($content) {
+				// إذا لم يكن هناك highlight، حاول استخراج من content
+				$matchedTerms = $this->extractMatchedTerms($content);
+			}
+			
+			// Get book details from database ALWAYS
+			$authorName = 'غير محدد';
+			$bookDescription = null;
+			$publisher = null;
+			$totalPages = null;
+			$publicationYear = null;
+			
+			if (!empty($source['book_id'])) {
+				try {
+					$book = \App\Models\Book::with(['authors', 'publisher'])->find($source['book_id']);
+					if ($book) {
+						// Get description from book table
+						$bookDescription = $book->description;
+						
+						// Get author name from full_name field or concatenate
+						if ($book->authors->isNotEmpty()) {
+							$authorNames = [];
+							foreach ($book->authors as $author) {
+								// Use full_name if available, otherwise build from parts
+								if (!empty($author->full_name)) {
+									$authorNames[] = $author->full_name;
+								} elseif (!empty($author->first_name)) {
+									$authorNames[] = $author->first_name;
+								}
+							}
+							$authorName = implode(', ', $authorNames) ?: 'غير محدد';
+						}
+						
+						// Get publisher name
+						if ($book->publisher) {
+							$publisher = $book->publisher->name;
+						}
+						
+						// Get total pages count
+						$totalPages = $book->pages()->count();
+					}
+				} catch (\Exception $e) {
+					\Illuminate\Support\Facades\Log::warning('Failed to fetch book details for book_id: ' . $source['book_id'], [
+						'error' => $e->getMessage()
+					]);
+				}
 			}
 
 			return [
@@ -1047,10 +1114,13 @@ class UltraFastSearchService
 				'content' => $content,
 				'highlighted_content' => $content, // Same as content (already highlighted)
 				'book_title' => $source['book_title'] ?? 'غير محدد',
-				'author_name' => $source['author_names'] ?? 'غير محدد',
+				'book_description' => $bookDescription, // وصف الكتاب من جدول books
+				'author_name' => $authorName,
 				'author_id' => !empty($source['author_ids']) ? $source['author_ids'][0] : null,
 				'book_id' => $source['book_id'] ?? null,
 				'book_section_id' => $source['book_section_id'] ?? null,
+				'publisher' => $publisher, // اسم الناشر
+				'total_pages' => $totalPages, // عدد الصفحات
 				'score' => $hit['_score'] ?? 0,
 				'matched_terms' => $matchedTerms, // الكلمات المطابقة
 			];

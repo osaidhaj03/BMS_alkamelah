@@ -4,6 +4,7 @@
 <div x-data="{
     settingsOpen: false,
     downloadModalOpen: false,
+    bookInfoOpen: false,
     fontSize: 18,
     harakatEnabled: true,
     originalContent: '',
@@ -160,7 +161,9 @@ class="h-full w-full flex flex-col bg-white">
             <!-- Breadcrumbs / Info Bar -->
             <div class="flex-none px-6 py-3 border-b border-gray-100 flex justify-between items-center bg-white z-10">
                 <div class="flex items-baseline gap-2 text-sm text-gray-500">
-                    <span class="font-bold text-gray-800 text-[1rem] leading-[1.35rem]" x-text="result.book_title || 'بدون عنوان'"></span>
+                    <span @click="bookInfoOpen = true" 
+                          class="font-bold text-gray-800 text-[1rem] leading-[1.35rem] cursor-pointer hover:text-green-600 transition-colors underline decoration-dotted decoration-gray-300 hover:decoration-green-600" 
+                          x-text="result.book_title || 'بدون عنوان'"></span>
                     <span class="text-gray-300">/</span>
                     <span x-text="result.author_name || ''"></span>
                 </div>
@@ -323,6 +326,49 @@ class="h-full w-full flex flex-col bg-white">
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             <span>جاري تحضير الملف...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Description Popup - Simple White Box -->
+            <div x-show="bookInfoOpen" 
+                 class="absolute inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="bookInfoOpen = false"
+                 style="display: none;">
+                
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[70vh] overflow-hidden"
+                     @click.stop>
+                    
+                    <!-- Simple Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800" x-text="result.book_title || 'بدون عنوان'"></h3>
+                        <button @click="bookInfoOpen = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Description Content -->
+                    <div class="p-6 overflow-y-auto max-h-[50vh]">
+                        <!-- Description -->
+                        <div x-show="result.book_description" class="text-gray-700 leading-relaxed text-justify">
+                            <p x-text="result.book_description"></p>
+                        </div>
+
+                        <!-- No Description -->
+                        <div x-show="!result.book_description" class="text-center py-12">
+                            <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-gray-400">لا يوجد وصف متاح لهذا الكتاب</p>
                         </div>
                     </div>
                 </div>
