@@ -1,8 +1,18 @@
 <x-filament-panels::page>
     {{-- نموذج إدخال الرابط --}}
-    <x-filament-panels::form wire:submit.prevent="startImport">
+    <form wire:submit.prevent="startImport" class="space-y-6">
         {{ $this->form }}
-    </x-filament-panels::form>
+
+        <div class="flex flex-wrap items-center gap-4 mt-4">
+            <x-filament::button type="submit">
+                بدء الاستيراد
+            </x-filament::button>
+
+            <x-filament::button wire:click="previewBook" color="gray">
+                معاينة الكتاب
+            </x-filament::button>
+        </div>
+    </form>
 
     {{-- معلومات الكتاب (بعد المعاينة) --}}
     @if($this->bookInfo)
