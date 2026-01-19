@@ -42,6 +42,15 @@ class ImportTurathPage extends Component
     public ?array $bookInfo = null;
     public ?array $parsedInfo = null;
 
+    // Selected Options
+    public ?int $sectionId = null;
+    public $sections = [];
+
+    public function mount()
+    {
+        $this->sections = \App\Models\BookSection::pluck('name', 'id')->toArray();
+    }
+
     protected $rules = [
         'bookUrl' => 'required',
     ];
@@ -343,12 +352,19 @@ class ImportTurathPage extends Component
             ['name' => 'موقع تراث (Turath.io)']
         );
 
-        // 2. محاولة تحديد القسم (اختياري - سنستخدم القسم غير المصنف مبدئياً إذا لم نجد)
-        // بما أن Turath API يعيد cat_id ولا يعيد الاسم، سنحاول البحث عن قسم بهذا المعرف كـ 'shamela_id' إذا كنا قد خزنا الأقسام سابقاً
-        // أو نتركه فارغاً ليقوم المستخدم بتحديده لاحقاً
-        $sectionId = null;
-        if (isset($meta['cat_id'])) {
-            // يمكن هنا إضافة منطق للبحث عن القسم إذا كان لدينا جدول ربط
+        // 2. محاولة تحديد القسم
+        // إذا اختار المستخدم قسماً، نستخدمه. وإلا نتركه فارغاً.
+        $finalSectionId = $this->sectionId;
+
+        // إذا لم يختر، نحاول البحث (اختياري)
+        if (!$finalSectionId && isset($meta['cat_id'])) {
+            // يمكن هنا إضافة منطق
+        }
+
+        // 3. تجهيز الرابط الكامل للمصدر
+        $fullUrl = $this->bookUrl;
+        if (is_numeric($fullUrl)) {
+            $fullUrl = "https://app.turath.io/book/{$fullUrl}";
         }
 
         return Book::create([
@@ -358,8 +374,8 @@ class ImportTurathPage extends Component
             'visibility' => 'public',
             'has_original_pagination' => true,
             'book_source_id' => $source->id,
-            'additional_notes' => "رابط المصدر: {$this->bookUrl}", // حفظ الرابط كما طلب المستخدم
-            'book_section_id' => $sectionId,
+            'additional_notes' => "رابط المصدر: {$fullUrl}", // حفظ الرابط الكامل
+            'book_section_id' => $finalSectionId,
         ]);
     }
 
