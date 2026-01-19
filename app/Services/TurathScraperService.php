@@ -234,6 +234,70 @@ class TurathScraperService
     }
 
     /**
+     * جلب صفحات متعددة بشكل متوازي
+     *
+     * @param int $bookId معرف الكتاب
+     * @param array $pages قائمة أرقام الصفحات (sequential)
+     * @param int $concurrency عدد الطلبات المتزامنة
+     * @return array نتائج الصفحات
+     */
+    public function fetchPagesParallel(int $bookId, array $pages, int $concurrency = 10): array
+    {
+        $results = [];
+        $chunks = array_chunk($pages, $concurrency);
+
+        foreach ($chunks as $chunk) {
+            $responses = Http::pool(
+                fn($pool) =>
+                collect($chunk)->map(
+                    fn($page) =>
+                    $pool->as("page_{$page}")
+                        ->timeout($this->timeout)
+                        ->withHeaders([
+                            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                            'Accept' => 'application/json',
+                        ])
+                        ->get("{$this->baseUrl}/page", [
+                            'book_id' => $bookId,
+                            'pg' => $page,
+                            'ver' => 3,
+                        ])
+                )
+            );
+
+            foreach ($responses as $key => $response) {
+                $pageNum = (int) str_replace('page_', '', $key);
+
+                if ($response->successful()) {
+                    $pageData = $response->json();
+
+                    // Parse Meta
+                    if (isset($pageData['meta']) && is_string($pageData['meta'])) {
+                        $pageData['parsed_meta'] = json_decode($pageData['meta'], true);
+                    }
+
+                    $text = $this->cleanText($pageData['text'] ?? '');
+
+                    // Only yield valid pages
+                    $results[$pageNum] = [
+                        'page_number' => $pageNum,
+                        'original_page_number' => $pageData['parsed_meta']['page'] ?? $pageNum,
+                        'volume_number' => $pageData['parsed_meta']['vol'] ?? 1,
+                        'content' => $text,
+                    ];
+                } else {
+                    Log::warning("Turath Parallel: Failed page {$pageNum}", ['status' => $response->status()]);
+                }
+            }
+
+            // Short delay to respect server limits
+            usleep($this->delayMs * 1000); // 250ms or 500ms
+        }
+
+        return $results;
+    }
+
+    /**
      * الحصول على عدد الصفحات الإجمالي من volume_bounds
      * 
      * @param array $volumeBounds بيانات حدود المجلدات
