@@ -24,8 +24,13 @@ class Book extends Model
         'publisher_id',
         'has_original_pagination',
         'additional_notes',
-        'source',
+        'book_source_id',
     ];
+
+    public function bookSource(): BelongsTo
+    {
+        return $this->belongsTo(BookSource::class);
+    }
 
     protected $casts = [
         'has_original_pagination' => 'boolean',
