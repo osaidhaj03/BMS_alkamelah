@@ -36,6 +36,7 @@ class ImportCategoryPage extends Component
 
     // Options
     public bool $skipPages = false;
+    public bool $forceReimport = false;
 
     public function mount()
     {
@@ -188,31 +189,58 @@ class ImportCategoryPage extends Component
         try {
             // Check if book already exists
             $existingBook = Book::where('shamela_id', (string) $book['id'])->first();
-            if ($existingBook) {
+
+            if ($existingBook && !$this->forceReimport) {
                 $book['status'] = 'done';
                 $book['message'] = 'موجود مسبقاً';
                 $this->addLog("⏭️ الكتاب موجود مسبقاً: {$book['name']}");
                 $this->completedBooks++;
             } else {
+                // Delete existing book if force reimport is enabled
+                if ($existingBook && $this->forceReimport) {
+                    $this->addLog("🗑️ حذف الكتاب الموجود: {$book['name']}");
+                    // Delete related data first
+                    $existingBook->pages()->delete();
+                    $existingBook->chapters()->delete();
+                    $existingBook->volumes()->delete();
+                    $existingBook->delete();
+                }
+
                 // Import book using existing ImportTurathPage logic
                 $importPage = new ImportTurathPage();
                 $importPage->bookUrl = (string) $book['id'];
                 $importPage->skipPages = $this->skipPages;
                 $importPage->sectionId = $this->sectionId;
-                $importPage->forceReimport = false;
+                $importPage->forceReimport = false; // Already handled above
 
                 // Start import
                 $importPage->startImport();
 
-                // Wait for completion (simplified - in reality would need async handling)
+                // Track previous log count to copy only new logs
+                $previousLogCount = 0;
+
+                // Wait for completion
                 while ($importPage->isImporting) {
                     $importPage->importBatch();
+
+                    // Copy new logs from ImportTurathPage
+                    $newLogs = array_slice($importPage->importLog, $previousLogCount);
+                    foreach ($newLogs as $log) {
+                        $this->importLog[] = $log;
+                    }
+                    $previousLogCount = count($importPage->importLog);
+
                     usleep(100000); // 100ms delay
                 }
 
+                // Copy any remaining logs after completion
+                $newLogs = array_slice($importPage->importLog, $previousLogCount);
+                foreach ($newLogs as $log) {
+                    $this->importLog[] = $log;
+                }
+
                 $book['status'] = 'done';
-                $book['message'] = 'تم الاستيراد';
-                $this->addLog("✅ تم استيراد: {$book['name']}");
+                $book['message'] = $this->forceReimport ? 'تم التحديث' : 'تم الاستيراد';
                 $this->completedBooks++;
             }
         } catch (\Exception $e) {
