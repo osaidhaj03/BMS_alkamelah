@@ -92,6 +92,7 @@
             :currentPageNum="$currentPageNum ?? 1"
             :totalPages="$totalPages ?? 1"
             :book="$book ?? null"
+            :currentPage="$currentPage ?? null"
             :nextPage="$nextPage ?? null"
             :previousPage="$previousPage ?? null"
         />

@@ -11,6 +11,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ArticleCommentController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/import-turath', \App\Livewire\ImportTurathPage::class)->name('import.turath');
 Route::get('/category', [HomeController::class, 'categories'])->name('categories.index');
 Route::get('/authors', [HomeController::class, 'authors'])->name('authors.index');
 Route::get('/author/{id}', [HomeController::class, 'authorShow'])->name('author.show');
@@ -42,22 +43,22 @@ Route::get('/deploy-fix-composer', function () {
     // Security: Only run in production and with secret token
     $token = request()->query('token');
     $expectedToken = config('app.deploy_token', 'your-secret-token-here');
-    
+
     if ($token !== $expectedToken) {
         abort(403, 'Unauthorized');
     }
-    
+
     $scriptPath = base_path('fix-server-composer.sh');
-    
+
     if (!file_exists($scriptPath)) {
         return response()->json(['error' => 'Script not found'], 404);
     }
-    
+
     // Execute the script
     $output = [];
     $returnCode = 0;
     exec("bash {$scriptPath} 2>&1", $output, $returnCode);
-    
+
     return response()->json([
         'success' => $returnCode === 0,
         'return_code' => $returnCode,

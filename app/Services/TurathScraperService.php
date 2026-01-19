@@ -128,7 +128,17 @@ class TurathScraperService
                 ]);
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+
+                // فك بيانات الـ meta إذا كانت موجودة كنص JSON
+                if (isset($data['meta']) && is_string($data['meta'])) {
+                    $decodedMeta = json_decode($data['meta'], true);
+                    if ($decodedMeta) {
+                        $data['parsed_meta'] = $decodedMeta;
+                    }
+                }
+
+                return $data;
             }
 
         } catch (\Exception $e) {
@@ -149,15 +159,21 @@ class TurathScraperService
      * @param int $endPage الصفحة الأخيرة
      * @return \Generator مولد للصفحات
      */
-    public function getAllPages(int $bookId, int $startPage = 1, ?int $endPage = null): \Generator
+    public function getAllPages(int $bookId, int $startPage = 1, ?int $endPage = null, ?array $pageMap = null): \Generator
     {
         $pageNumber = $startPage;
         $emptyPagesCount = 0;
         $maxEmptyPages = 3;
 
+        // إذا تم توفير page_map، نستخدم طولها كحد أقصى للطلبات
+        $totalToFetch = $endPage;
+        if ($pageMap && count($pageMap) > 0) {
+            $totalToFetch = count($pageMap);
+        }
+
         while (true) {
             // التحقق من الوصول لنهاية الكتاب
-            if ($endPage !== null && $pageNumber > $endPage) {
+            if ($totalToFetch !== null && $pageNumber > $totalToFetch) {
                 break;
             }
 
@@ -172,10 +188,15 @@ class TurathScraperService
             // تنظيف النص
             $text = $this->cleanText($pageData['text'] ?? '');
 
+            // استخراج البيانات من الـ meta المفسر
+            $parsedMeta = $pageData['parsed_meta'] ?? [];
+            $originalPage = $parsedMeta['page'] ?? $pageNumber;
+            $volumeNumber = $parsedMeta['vol'] ?? 1;
+
             // صفحة فارغة
             if (empty($text)) {
                 $emptyPagesCount++;
-                if ($emptyPagesCount >= $maxEmptyPages) {
+                if ($emptyPagesCount >= $maxEmptyPages && !$pageMap) {
                     break;
                 }
                 $pageNumber++;
@@ -188,14 +209,17 @@ class TurathScraperService
 
             // إرسال التقدم
             if ($this->progressCallback) {
-                call_user_func($this->progressCallback, $pageNumber, $endPage);
+                call_user_func($this->progressCallback, $pageNumber, $totalToFetch);
             }
 
-            // إرجاع الصفحة
+            // إرجاع الصفحة مع بياناتها الوصفية
             yield [
-                'page_number' => $pageNumber,
+                'page_number' => $pageNumber, // التسلسلي
+                'original_page_number' => (int) $originalPage, // المطبوع
+                'volume_number' => (int) $volumeNumber, // المجلد
                 'content' => $text,
                 'raw_content' => $pageData['text'] ?? '',
+                'meta' => $parsedMeta,
             ];
 
             $pageNumber++;

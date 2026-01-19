@@ -59,6 +59,7 @@
                     :chapter="$chapter" 
                     :book="$book" 
                     :currentPage="$currentPage" 
+                    :originalPageMap="$originalPageMap ?? []"
                     :level="0" 
                 />
             @empty

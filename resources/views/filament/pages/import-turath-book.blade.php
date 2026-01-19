@@ -19,7 +19,6 @@
         <x-filament::section>
             <x-slot name="heading">
                 <div class="flex items-center gap-2">
-                    <x-heroicon-o-book-open class="h-5 w-5 text-primary-500" />
                     <span>معلومات الكتاب</span>
                 </div>
             </x-slot>
@@ -67,11 +66,6 @@
         <x-filament::section>
             <x-slot name="heading">
                 <div class="flex items-center gap-2">
-                    @if($this->isImporting)
-                        <x-filament::loading-indicator class="h-5 w-5" />
-                    @else
-                        <x-heroicon-o-check-circle class="h-5 w-5 text-success-500" />
-                    @endif
                     <span>حالة الاستيراد</span>
                 </div>
             </x-slot>
@@ -122,7 +116,6 @@
                 {{-- رسالة الحالة --}}
                 @if($this->statusMessage)
                     <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <x-filament::loading-indicator class="h-4 w-4" />
                         <span>{{ $this->statusMessage }}</span>
                     </div>
                 @endif
@@ -131,7 +124,6 @@
                 @if($this->isImporting)
                     <div class="flex justify-end">
                         <x-filament::button wire:click="cancelImport" color="danger" size="sm">
-                            <x-heroicon-o-x-circle class="h-4 w-4 me-1" />
                             إلغاء الاستيراد
                         </x-filament::button>
                     </div>
@@ -145,7 +137,6 @@
         <x-filament::section collapsible collapsed>
             <x-slot name="heading">
                 <div class="flex items-center gap-2">
-                    <x-heroicon-o-document-text class="h-5 w-5" />
                     <span>سجل العمليات</span>
                     <span class="text-xs text-gray-400">({{ count($this->importLog) }} سجل)</span>
                 </div>
@@ -167,7 +158,6 @@
         <x-filament::section>
             <x-slot name="heading">
                 <div class="flex items-center gap-2">
-                    <x-heroicon-o-information-circle class="h-5 w-5 text-info-500" />
                     <span>تعليمات الاستخدام</span>
                 </div>
             </x-slot>
@@ -195,7 +185,6 @@
                 <div
                     class="mt-4 p-3 bg-warning-50 dark:bg-warning-900/20 rounded-lg border border-warning-200 dark:border-warning-800">
                     <p class="text-warning-700 dark:text-warning-400 flex items-start gap-2">
-                        <x-heroicon-o-exclamation-triangle class="h-5 w-5 shrink-0 mt-0.5" />
                         <span>
                             <strong>ملاحظة:</strong>
                             قد يستغرق استيراد الكتب الكبيرة (أكثر من 500 صفحة) عدة دقائق.

@@ -35,7 +35,7 @@ class BookReaderController extends Controller
             $currentPage = Page::where('book_id', $bookId)
                 ->orderBy('page_number')
                 ->first();
-            
+
             if ($currentPage) {
                 $pageNumber = $currentPage->page_number;
             }
@@ -67,6 +67,12 @@ class BookReaderController extends Controller
 
         $currentPageNum = $pageNumber;
 
+        // Get a map of sequential page numbers to original page numbers for the TOC
+        $originalPageMap = Page::where('book_id', $bookId)
+            ->whereNotNull('original_page_number')
+            ->pluck('original_page_number', 'page_number')
+            ->toArray();
+
         return view('pages.book-preview', compact(
             'book',
             'pages',
@@ -75,7 +81,8 @@ class BookReaderController extends Controller
             'currentPageNum',
             'totalPages',
             'nextPage',
-            'previousPage'
+            'previousPage',
+            'originalPageMap'
         ));
     }
 
@@ -90,7 +97,7 @@ class BookReaderController extends Controller
         $query = $request->input('q', '');
         $offset = (int) $request->input('offset', 0);
         $limit = (int) $request->input('limit', 10);
-        
+
         if (empty($query) || strlen($query) < 2) {
             return response()->json([
                 'results' => [],
@@ -102,23 +109,23 @@ class BookReaderController extends Controller
 
         // Remove Arabic diacritics for better matching
         $cleanQuery = $this->removeArabicDiacritics($query);
-        
+
         // Build base query
         $baseQuery = Page::where('book_id', $bookId)
-            ->where(function($q) use ($query, $cleanQuery) {
+            ->where(function ($q) use ($query, $cleanQuery) {
                 // Search with original query (with diacritics)
                 $q->where('content', 'LIKE', "%{$query}%")
-                  ->orWhere('html_content', 'LIKE', "%{$query}%");
-                
+                    ->orWhere('html_content', 'LIKE', "%{$query}%");
+
                 // Also search without diacritics if different
                 if ($cleanQuery !== $query) {
                     $q->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(content, 'ً', ''), 'ٌ', ''), 'ٍ', ''), 'َ', ''), 'ُ', ''), 'ِ', ''), 'ّ', ''), 'ْ', '') LIKE ?", ["%{$cleanQuery}%"]);
                 }
             });
-        
+
         // Get total count
         $total = $baseQuery->count();
-        
+
         // Get paginated results
         $results = (clone $baseQuery)
             ->with('chapter:id,title')
@@ -129,10 +136,10 @@ class BookReaderController extends Controller
             ->get();
 
         // Format results with snippets
-        $formattedResults = $results->map(function($page) use ($query) {
+        $formattedResults = $results->map(function ($page) use ($query) {
             $content = strip_tags($page->html_content ?? $page->content);
             $snippet = $this->getSearchSnippet($content, $query, 150);
-            
+
             return [
                 'page_number' => $page->page_number,
                 'chapter' => $page->chapter?->title,
@@ -166,21 +173,21 @@ class BookReaderController extends Controller
     {
         $content = strip_tags($content);
         $position = mb_stripos($content, $query);
-        
+
         if ($position === false) {
             // Try without diacritics
             $cleanContent = $this->removeArabicDiacritics($content);
             $cleanQuery = $this->removeArabicDiacritics($query);
             $position = mb_stripos($cleanContent, $cleanQuery);
         }
-        
+
         if ($position === false) {
             return mb_substr($content, 0, $length) . '...';
         }
 
         $start = max(0, $position - 50);
         $snippet = mb_substr($content, $start, $length);
-        
+
         // Add ellipsis
         if ($start > 0) {
             $snippet = '...' . $snippet;

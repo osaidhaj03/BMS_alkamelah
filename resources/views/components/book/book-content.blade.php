@@ -19,26 +19,27 @@
                     <div class="rounded-lg shadow-lg p-2 lg:p-8 relative page-container transition-transform duration-300 hover:shadow-xl" 
                          style="background-color: var(--bg-paper); box-shadow: var(--shadow-paper); font-family: var(--font-main);"
                          data-page="{{ $currentPageNum }}">
-                        <!-- Page Header 
+                        <!-- Page Header -->
                         <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
                             <span class="text-xs text-gray-400" style="font-family: var(--font-ui);">
                                 {{ $book?->title ?? 'الكتاب' }} - {{ $book?->authors?->first()?->full_name ?? 'المؤلف' }}
                             </span>
-                            <span class="text-sm font-bold text-gray-300" style="font-family: var(--font-ui);">
-                                صفحة {{ $currentPageNum }} من {{ $totalPages }}
-                            </span>
                         </div>
--->
-                        <!-- Chapter Title if available 
+                        <!-- Chapter Title if available -->
                         @if($currentPage->chapter)
                             <h3 class="text-xl font-bold mb-4" style="color: var(--accent-color); font-family: var(--font-ui);">
                                 {{ $currentPage->chapter->title }}
                             </h3>
                         @endif
-                        -->
+                        
                         <!-- Content -->
-                        <div class="prose prose-lg max-w-none leading-loose" style="color: var(--text-main); line-height: 2;">
+                        <div class="prose prose-lg max-w-none leading-loose pb-8" style="color: var(--text-main); line-height: 2;">
                             {!! $currentPage->html_content ?? nl2br(e($currentPage->content)) !!}
+                        </div>
+
+                        <!-- Page Footer - Original Page Number -->
+                        <div class="flex justify-center items-center mt-8 pt-6 border-t border-gray-100 text-gray-400 font-bold" style="font-family: var(--font-ui);">
+                            <span class="text-lg"> {{ $currentPage->original_page_number }} </span>
                         </div>
                     </div>
                 @else

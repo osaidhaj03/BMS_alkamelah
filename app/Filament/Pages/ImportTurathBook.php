@@ -33,12 +33,12 @@ class ImportTurathBook extends FilamentPage implements HasForms
 
     public function getTitle(): string
     {
-        return 'استيراد كتاب من Turath.io';
+        return 'استيراد كتاب من تراث';
     }
 
     public static function getNavigationIcon(): ?string
     {
-        return 'heroicon-o-cloud-arrow-down';
+        return null;
     }
 
     public static function getNavigationLabel(): string
@@ -132,7 +132,7 @@ class ImportTurathBook extends FilamentPage implements HasForms
     public function previewBook(): void
     {
         $bookId = $this->extractBookId($this->bookUrl);
-
+     
         if (!$bookId) {
             Notification::make()
                 ->title('خطأ')
@@ -459,28 +459,19 @@ class ImportTurathBook extends FilamentPage implements HasForms
     protected function importPages(Book $book, int $turathBookId, array $volumeModels, TurathScraperService $scraper): void
     {
         $pages = [];
-        $batchSize = 25; // تقليل حجم الدفعة لضمان تكرار التواصل مع قاعدة البيانات
+        $batchSize = 25;
+        $pageMap = $this->bookInfo['indexes']['page_map'] ?? null;
 
-        foreach ($scraper->getAllPages($turathBookId, 1, $this->totalPages) as $pageData) {
-            // تحديد المجلد
-            $volumeId = null;
-            foreach ($volumeModels as $num => $volume) {
-                if ($volume->page_start && $volume->page_end) {
-                    if (
-                        $pageData['page_number'] >= $volume->page_start
-                        && $pageData['page_number'] <= $volume->page_end
-                    ) {
-                        $volumeId = $volume->id;
-                        break;
-                    }
-                }
-            }
-            $volumeId = $volumeId ?? reset($volumeModels)?->id;
+        foreach ($scraper->getAllPages($turathBookId, 1, $this->totalPages, $pageMap) as $pageData) {
+            // تحديد المجلد بناءً على بيانات تراث الملحقة بالصفحة
+            $volumeNumber = $pageData['volume_number'];
+            $volumeId = $volumeModels[$volumeNumber]->id ?? reset($volumeModels)?->id;
 
             $pages[] = [
                 'book_id' => $book->id,
                 'volume_id' => $volumeId,
-                'page_number' => $pageData['page_number'],
+                'page_number' => $pageData['page_number'], // التسلسلي
+                'original_page_number' => $pageData['original_page_number'], // المطبوع
                 'content' => $pageData['content'],
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -488,14 +479,14 @@ class ImportTurathBook extends FilamentPage implements HasForms
 
             $this->importedPages++;
 
-            // تحديث التقدم
-            if ($this->totalPages > 0) {
-                $this->progress = (int) (($this->importedPages / $this->totalPages) * 100);
+            // تحديث التقدم بناءً على المجموع الحقيقي (page_map أو totalPages)
+            $totalReal = ($pageMap) ? count($pageMap) : $this->totalPages;
+            if ($totalReal > 0) {
+                $this->progress = (int) (($this->importedPages / $totalReal) * 100);
             }
 
             // حفظ دفعة
             if (count($pages) >= $batchSize) {
-                // التأكد من أن الاتصال بقاعدة البيانات لا يزال قائماً
                 try {
                     DB::connection()->getPdo();
                 } catch (\Exception $e) {
@@ -504,7 +495,7 @@ class ImportTurathBook extends FilamentPage implements HasForms
 
                 Page::insert($pages);
                 $pages = [];
-                $this->addLog("📄 تم استيراد {$this->importedPages} صفحة...");
+                $this->addLog("📄 تم استيراد {$this->importedPages} جزء من الكتاب...");
             }
         }
 
@@ -564,20 +555,17 @@ class ImportTurathBook extends FilamentPage implements HasForms
         return [
             Action::make('preview')
                 ->label('معاينة')
-                ->icon('heroicon-o-eye')
                 ->action('previewBook')
                 ->disabled(fn() => $this->isImporting || empty($this->bookUrl)),
 
             Action::make('import')
                 ->label('بدء الاستيراد')
-                ->icon('heroicon-o-cloud-arrow-down')
                 ->action('startImport')
                 ->color('success')
                 ->disabled(fn() => $this->isImporting || empty($this->bookUrl)),
 
             Action::make('reset')
                 ->label('إعادة تعيين')
-                ->icon('heroicon-o-arrow-path')
                 ->action('resetForm')
                 ->color('gray')
                 ->disabled(fn() => $this->isImporting),

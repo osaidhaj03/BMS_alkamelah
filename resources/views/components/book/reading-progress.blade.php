@@ -2,6 +2,7 @@
     'currentPageNum' => 1,
     'totalPages' => 1,
     'book' => null,
+    'currentPage' => null,
     'nextPage' => null,
     'previousPage' => null
 ])
@@ -170,17 +171,27 @@
         @endif
 
         <!-- Page Counter -->
-        <div class="flex items-center text-sm gap-1" style="font-family: var(--font-ui); color: var(--text-secondary);">
-            <span>صفحة</span>
-            <input type="number" 
-                   value="{{ $currentPageNum }}" 
-                   min="1" 
-                   max="{{ $totalPages }}"
-                   id="page-input"
-                   class="w-12 text-center bg-transparent border-b border-gray-300 focus:border-green-600 focus:outline-none transition-colors"
-                   style="color: var(--text-main);"
-                   onchange="window.location.href='/book/{{ $book?->id }}/' + this.value">
-            <span id="total-pages-text">من {{ $totalPages }}</span>
+        <div class="flex flex-col text-xs gap-0" style="font-family: var(--font-ui); color: var(--text-secondary);">
+            <div class="flex items-center gap-1">
+                @if($currentPage?->original_page_number)
+                    <span>الصفحة</span>
+                    <div class="bg-primary-50 px-2 py-0.5 rounded border border-primary-100 font-bold text-primary-700">
+                        {{ $currentPage->original_page_number }}
+                    </div>
+                    <span class="text-[10px] text-gray-400 mr-1">(تسللي: {{ $currentPageNum }})</span>
+                @else
+                    <span>تسللي</span>
+                    <input type="number" 
+                           value="{{ $currentPageNum }}" 
+                           min="1" 
+                           max="{{ $totalPages }}"
+                           id="page-input"
+                           class="w-10 text-center bg-transparent border-b border-gray-300 focus:border-green-600 focus:outline-none transition-colors"
+                           style="color: var(--text-main);"
+                           onchange="window.location.href='/book/{{ $book?->id }}/' + this.value">
+                    <span id="total-pages-text">/ {{ $totalPages }}</span>
+                @endif
+            </div>
         </div>
         
         <!-- Navigation Buttons -->
