@@ -168,7 +168,11 @@ class TurathScraperService
         // إذا تم توفير page_map، نستخدم طولها كحد أقصى للطلبات
         $totalToFetch = $endPage;
         if ($pageMap && count($pageMap) > 0) {
-            $totalToFetch = count($pageMap);
+            if ($endPage !== null) {
+                $totalToFetch = min($endPage, count($pageMap));
+            } else {
+                $totalToFetch = count($pageMap);
+            }
         }
 
         while (true) {
