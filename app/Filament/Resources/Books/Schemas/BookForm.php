@@ -55,13 +55,16 @@ class BookForm
                             ->label('رابط الكتاب من المكتبة الشاملة')
                             ->default(null),
 
-                        Select::make('source')
+                        Select::make('book_source_id')
                             ->label('المصدر')
-                            ->options([
-                                'shamela' => 'الشاملة',
-                                'alkamelah' => 'الكاملة',
-                                'moswarat' => 'جامع الكتب الاسلامية',
-                                'other' => 'آخرى'
+                            ->relationship('bookSource', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                TextInput::make('name')
+                                    ->label('اسم المصدر')
+                                    ->required()
+                                    ->unique('book_sources', 'name'),
                             ])
                             ->default(null),
 
