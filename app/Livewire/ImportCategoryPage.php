@@ -433,8 +433,8 @@ class ImportCategoryPage extends Component
         // Create or find author
         $authorName = $parsedMeta['author_name'] ?? 'مؤلف غير معروف';
         $author = \App\Models\Author::firstOrCreate(
-            ['name' => $authorName],
-            ['bio' => '', 'death_year' => null]
+            ['full_name' => $authorName],
+            ['biography' => '', 'is_living' => false]
         );
 
         if ($author->wasRecentlyCreated) {
@@ -472,8 +472,8 @@ class ImportCategoryPage extends Component
         // Attach editor if exists
         if (!empty($parsedMeta['editor_name'])) {
             $editor = \App\Models\Author::firstOrCreate(
-                ['name' => $parsedMeta['editor_name']],
-                ['bio' => '', 'death_year' => null]
+                ['full_name' => $parsedMeta['editor_name']],
+                ['biography' => '', 'is_living' => false]
             );
             $newBook->authors()->attach($editor->id, ['role' => 'editor', 'display_order' => 2]);
         }
