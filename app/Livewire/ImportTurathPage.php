@@ -532,8 +532,9 @@ class ImportTurathPage extends Component
 
         $this->addLog("🚀 بدء استيراد {$this->batchTotal} كتاب...");
 
-        // Start first book
-        $this->startNextBook();
+        // DON'T start first book here! Let wire:poll handle it.
+        // This prevents the initial request from timing out.
+        $this->readyForNextBook = true;
     }
 
     /**
