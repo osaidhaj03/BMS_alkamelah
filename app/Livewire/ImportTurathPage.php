@@ -47,6 +47,14 @@ class ImportTurathPage extends Component
     public ?int $sectionId = null;
     public $sections = [];
 
+    // Batch Import Mode
+    public bool $batchMode = false;
+    public string $batchIds = '';           // IDs separated by comma or newline
+    public array $batchBooks = [];          // [{id, name, author, pages, status, message}]
+    public int $currentBatchIndex = 0;
+    public int $batchCompletedCount = 0;
+    public int $batchFailedCount = 0;
+
     public function mount()
     {
         $this->sections = \App\Models\BookSection::pluck('name', 'id')->toArray();
@@ -328,6 +336,28 @@ class ImportTurathPage extends Component
         // Cleanup sensitive/large data
         $this->pageMap = null;
         $this->bookInfo = null;
+
+        // Handle batch mode - import next book
+        if ($this->batchMode && $this->currentBatchIndex < count($this->batchBooks)) {
+            // Update current book status to done
+            if (isset($this->batchBooks[$this->currentBatchIndex - 1])) {
+                $this->batchBooks[$this->currentBatchIndex - 1]['status'] = 'done';
+                $this->batchBooks[$this->currentBatchIndex - 1]['message'] = 'تم الاستيراد';
+                $this->batchCompletedCount++;
+            }
+
+            // Start next book
+            $this->importNextFromBatch();
+        } elseif ($this->batchMode) {
+            // All done - update last book status
+            if (isset($this->batchBooks[$this->currentBatchIndex - 1])) {
+                $this->batchBooks[$this->currentBatchIndex - 1]['status'] = 'done';
+                $this->batchBooks[$this->currentBatchIndex - 1]['message'] = 'تم الاستيراد';
+                $this->batchCompletedCount++;
+            }
+            $this->addLog('🎉 اكتملت عملية الاستيراد للجميع!');
+            $this->addLog("📊 النتيجة: {$this->batchCompletedCount} نجاح، {$this->batchFailedCount} فشل");
+        }
     }
 
     protected function findOrCreateAuthor(array $authorData, array $parsedInfo): ?Author
@@ -476,6 +506,169 @@ class ImportTurathPage extends Component
 
     public function resetForm()
     {
-        $this->reset(['bookUrl', 'skipPages', 'forceReimport', 'bookInfo', 'parsedInfo', 'progress', 'importedPages', 'totalPages', 'importLog', 'statusMessage']);
+        $this->reset(['bookUrl', 'skipPages', 'forceReimport', 'bookInfo', 'parsedInfo', 'progress', 'importedPages', 'totalPages', 'importLog', 'statusMessage', 'batchMode', 'batchIds', 'batchBooks', 'currentBatchIndex', 'batchCompletedCount', 'batchFailedCount']);
+    }
+
+    /**
+     * Load books info from batch IDs
+     */
+    public function loadBatchBooks()
+    {
+        $this->batchBooks = [];
+        $this->importLog = [];
+        $this->currentBatchIndex = 0;
+        $this->batchCompletedCount = 0;
+        $this->batchFailedCount = 0;
+
+        // Parse IDs from input
+        $ids = preg_split('/[\s,\n\r]+/', $this->batchIds);
+        $ids = array_filter($ids, fn($id) => is_numeric(trim($id)));
+        $ids = array_map('trim', $ids);
+        $ids = array_unique($ids);
+
+        if (empty($ids)) {
+            $this->statusMessage = 'لم يتم العثور على IDs صالحة';
+            return;
+        }
+
+        $this->addLog("📚 تم العثور على " . count($ids) . " كتاب");
+
+        $scraper = app(TurathScraperService::class);
+        $parser = app(MetadataParserService::class);
+
+        foreach ($ids as $index => $bookId) {
+            $this->addLog("📖 جلب معلومات الكتاب {$bookId} (" . ($index + 1) . "/" . count($ids) . ")...");
+
+            try {
+                $bookInfo = $scraper->getBookInfo((int) $bookId);
+
+                if ($bookInfo) {
+                    $meta = $bookInfo['meta'] ?? [];
+                    $indexes = $bookInfo['indexes'] ?? [];
+
+                    // Extract author
+                    $parsedInfo = $parser->parseBookInfo($meta['info'] ?? '');
+                    $authorName = $parsedInfo['author_name'] ?? '؟';
+                    $authorName = mb_substr($authorName, 0, 50);
+
+                    // Calculate pages
+                    $totalPages = $scraper->getTotalPages($indexes['volume_bounds'] ?? []);
+
+                    $this->batchBooks[] = [
+                        'id' => $bookId,
+                        'name' => $meta['name'] ?? "كتاب {$bookId}",
+                        'author' => $authorName,
+                        'pages' => $totalPages ?: '؟',
+                        'status' => 'pending', // pending, importing, done, error, skipped
+                        'message' => '',
+                    ];
+
+                    $this->addLog("✅ " . ($meta['name'] ?? $bookId));
+                } else {
+                    $this->batchBooks[] = [
+                        'id' => $bookId,
+                        'name' => "كتاب {$bookId}",
+                        'author' => '؟',
+                        'pages' => '؟',
+                        'status' => 'pending',
+                        'message' => '',
+                    ];
+                    $this->addLog("⚠️ لم يتم جلب معلومات الكتاب {$bookId}");
+                }
+            } catch (\Exception $e) {
+                $this->batchBooks[] = [
+                    'id' => $bookId,
+                    'name' => "كتاب {$bookId}",
+                    'author' => '؟',
+                    'pages' => '؟',
+                    'status' => 'pending',
+                    'message' => '',
+                ];
+                $this->addLog("❌ خطأ: " . $e->getMessage());
+            }
+        }
+
+        $this->addLog("📊 تم تحميل " . count($this->batchBooks) . " كتاب");
+    }
+
+    /**
+     * Start batch import process
+     */
+    public function startBatchImport()
+    {
+        if (empty($this->batchBooks)) {
+            $this->statusMessage = 'لا توجد كتب للاستيراد';
+            return;
+        }
+
+        $this->currentBatchIndex = 0;
+        $this->batchCompletedCount = 0;
+        $this->batchFailedCount = 0;
+        $this->addLog("🚀 بدء استيراد " . count($this->batchBooks) . " كتاب...");
+
+        // Start first book
+        $this->importNextFromBatch();
+    }
+
+    /**
+     * Import next book from batch (uses existing startImport mechanism)
+     */
+    public function importNextFromBatch()
+    {
+        if ($this->currentBatchIndex >= count($this->batchBooks)) {
+            return;
+        }
+
+        $book = &$this->batchBooks[$this->currentBatchIndex];
+
+        // Check if already exists
+        $existingBook = Book::where('shamela_id', (string) $book['id'])->first();
+        if ($existingBook && !$this->forceReimport) {
+            $book['status'] = 'skipped';
+            $book['message'] = 'موجود مسبقاً';
+            $this->addLog("⏭️ تخطي: {$book['name']} (موجود مسبقاً)");
+            $this->batchCompletedCount++;
+            $this->currentBatchIndex++;
+
+            // Import next
+            if ($this->currentBatchIndex < count($this->batchBooks)) {
+                $this->importNextFromBatch();
+            } else {
+                $this->addLog('🎉 اكتملت عملية الاستيراد للجميع!');
+                $this->addLog("📊 النتيجة: {$this->batchCompletedCount} نجاح، {$this->batchFailedCount} فشل");
+            }
+            return;
+        }
+
+        // Set current book as importing
+        $book['status'] = 'importing';
+        $book['message'] = 'جاري الاستيراد...';
+        $this->currentBatchIndex++;
+
+        // Use existing import mechanism
+        $this->bookUrl = (string) $book['id'];
+        $this->bookInfo = null; // Reset to fetch fresh
+
+        try {
+            $this->startImport();
+        } catch (\Exception $e) {
+            $book['status'] = 'error';
+            $book['message'] = mb_substr($e->getMessage(), 0, 50);
+            $this->batchFailedCount++;
+            $this->addLog("❌ فشل: {$book['name']} - " . $e->getMessage());
+
+            // Continue to next
+            if ($this->currentBatchIndex < count($this->batchBooks)) {
+                $this->importNextFromBatch();
+            }
+        }
+    }
+
+    /**
+     * Reset batch import
+     */
+    public function resetBatch()
+    {
+        $this->reset(['batchIds', 'batchBooks', 'currentBatchIndex', 'batchCompletedCount', 'batchFailedCount', 'isImporting', 'progress', 'importLog', 'statusMessage']);
     }
 }
