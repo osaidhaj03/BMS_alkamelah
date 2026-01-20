@@ -47,6 +47,15 @@ class ImportTurathPage extends Component
     public ?int $sectionId = null;
     public $sections = [];
 
+    // Simple Batch Mode (Queue-based)
+    public bool $batchMode = false;
+    public string $batchIdsText = '';       // Raw text input
+    public array $pendingIds = [];          // Queue of IDs to import
+    public int $batchTotal = 0;
+    public int $batchCompleted = 0;
+    public int $batchFailed = 0;
+    public bool $readyForNextBook = false;  // Flag for poll-based transition
+
     public function mount()
     {
         $this->sections = \App\Models\BookSection::pluck('name', 'id')->toArray();
@@ -328,6 +337,22 @@ class ImportTurathPage extends Component
         // Cleanup sensitive/large data
         $this->pageMap = null;
         $this->bookInfo = null;
+
+        // Batch mode: check for more books in queue
+        if ($this->batchMode) {
+            $this->batchCompleted++;
+
+            if (!empty($this->pendingIds)) {
+                // More books to import - set flag for poll
+                $this->readyForNextBook = true;
+                $this->addLog("📚 متبقي: " . count($this->pendingIds) . " كتاب");
+            } else {
+                // All done!
+                $this->batchMode = false;
+                $this->addLog('🎉 اكتملت عملية الاستيراد للجميع!');
+                $this->addLog("📊 النتيجة: {$this->batchCompleted} نجاح، {$this->batchFailed} فشل من {$this->batchTotal}");
+            }
+        }
     }
 
     protected function findOrCreateAuthor(array $authorData, array $parsedInfo): ?Author
@@ -476,6 +501,88 @@ class ImportTurathPage extends Component
 
     public function resetForm()
     {
-        $this->reset(['bookUrl', 'skipPages', 'forceReimport', 'bookInfo', 'parsedInfo', 'progress', 'importedPages', 'totalPages', 'importLog', 'statusMessage']);
+        $this->reset(['bookUrl', 'skipPages', 'forceReimport', 'bookInfo', 'parsedInfo', 'progress', 'importedPages', 'totalPages', 'importLog', 'statusMessage', 'batchMode', 'batchIdsText', 'pendingIds', 'batchTotal', 'batchCompleted', 'batchFailed', 'readyForNextBook']);
+    }
+
+    // ========== SIMPLE BATCH METHODS ==========
+
+    /**
+     * Start batch import from IDs text
+     */
+    public function startBatchImport()
+    {
+        // Parse IDs from text
+        $ids = preg_split('/[\s,\n\r]+/', $this->batchIdsText);
+        $ids = array_filter($ids, fn($id) => is_numeric(trim($id)));
+        $ids = array_map('trim', $ids);
+        $ids = array_unique($ids);
+        $ids = array_values($ids);
+
+        if (empty($ids)) {
+            $this->statusMessage = 'لم يتم العثور على IDs صالحة';
+            return;
+        }
+
+        $this->pendingIds = $ids;
+        $this->batchTotal = count($ids);
+        $this->batchCompleted = 0;
+        $this->batchFailed = 0;
+        $this->batchMode = true;
+        $this->importLog = [];
+
+        $this->addLog("🚀 بدء استيراد {$this->batchTotal} كتاب...");
+
+        // Start first book
+        $this->startNextBook();
+    }
+
+    /**
+     * Start next book from queue
+     */
+    protected function startNextBook()
+    {
+        if (empty($this->pendingIds)) {
+            return;
+        }
+
+        // Take first ID from queue
+        $nextId = array_shift($this->pendingIds);
+        $this->bookUrl = (string) $nextId;
+        $this->bookInfo = null;
+        $this->readyForNextBook = false;
+
+        $this->addLog("📖 استيراد كتاب: {$nextId} (" . ($this->batchTotal - count($this->pendingIds)) . "/{$this->batchTotal})");
+
+        try {
+            $this->startImport();
+        } catch (\Exception $e) {
+            $this->batchFailed++;
+            $this->addLog("❌ فشل: {$nextId} - " . $e->getMessage());
+
+            // Try next book
+            if (!empty($this->pendingIds)) {
+                $this->readyForNextBook = true;
+            } else {
+                $this->batchMode = false;
+                $this->addLog('🎉 اكتملت عملية الاستيراد!');
+                $this->addLog("📊 النتيجة: {$this->batchCompleted} نجاح، {$this->batchFailed} فشل");
+            }
+        }
+    }
+
+    /**
+     * Called by wire:poll to check if ready for next book
+     */
+    public function checkBatchProgress()
+    {
+        if ($this->isImporting) {
+            $this->importBatch();
+            return;
+        }
+
+        if ($this->readyForNextBook) {
+            $this->readyForNextBook = false;
+            $this->startNextBook();
+        }
     }
 }

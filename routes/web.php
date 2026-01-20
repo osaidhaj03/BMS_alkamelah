@@ -11,6 +11,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ArticleCommentController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/import-turath', \App\Livewire\ImportTurathPage::class)->name('import.turath');
 Route::get('/category', [HomeController::class, 'categories'])->name('categories.index');
 Route::get('/authors', [HomeController::class, 'authors'])->name('authors.index');
 Route::get('/author/{id}', [HomeController::class, 'authorShow'])->name('author.show');
