@@ -1,4 +1,4 @@
-<div x-data="{ isOpen: false }" class="fixed bottom-6 right-6 z-[9999]" dir="rtl">
+<div x-data="{ isOpen: false }" class="fixed bottom-6 left-6 z-[9999]" dir="rtl">
     <!-- Chatbot Window -->
     <div x-show="isOpen" 
          x-transition:enter="transition ease-out duration-300"
@@ -7,7 +7,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
          x-transition:leave-end="opacity-0 translate-y-10 scale-95"
-         class="absolute bottom-20 right-0 w-[350px] sm:w-[400px] max-h-[600px] bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col"
+         class="absolute bottom-20 left-0 w-[350px] sm:w-[400px] max-h-[600px] bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden flex flex-col"
          x-cloak>
         
         <!-- Header -->
