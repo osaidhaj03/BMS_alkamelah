@@ -12,7 +12,7 @@
             <x-search.header />
         </div>
         
-        <!-- Persistent Maintenance Alert -->
+        <!-- Persistent Maintenance Alert 
         <div class="bg-yellow-50 border-b border-yellow-200 p-4 relative z-50">
             <div class="flex items-center justify-center">
                 <div class="flex-shrink-0">
@@ -27,6 +27,7 @@
                 </div>
             </div>
         </div>
+        -->
 
         <!-- Main Content Area (Sidebar + Preview) -->
         <div class="flex flex-1 overflow-hidden relative z-0">
