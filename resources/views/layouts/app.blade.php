@@ -61,6 +61,7 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
+    <x-layout.announcement-banner />
     @yield('content')
     
     <x-chatbot />
