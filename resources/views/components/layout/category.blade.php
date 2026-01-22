@@ -61,11 +61,8 @@
         <!-- Action Button -->
         <div class="flex justify-center">
             <a href="{{ route('categories.index') }}"
-                class="group relative px-10 py-4 bg-white border-2 border-[#2C6E4A] text-[#2C6E4A] rounded-full font-bold text-lg overflow-hidden transition-all hover:text-white">
-                <div
-                    class="absolute inset-0 bg-[#2C6E4A] translate-y-full group-hover:translate-y-0 transition-transform duration-300 -z-10">
-                </div>
-                <span>عرض جميع الأقسام</span>
+                class="bg-white text-green-800 border border-green-800 px-10 py-3 rounded-full font-bold text-lg transition-colors duration-300 hover:bg-green-800 hover:text-white">
+                عرض جميع الأقسام
             </a>
         </div>
     </section>
