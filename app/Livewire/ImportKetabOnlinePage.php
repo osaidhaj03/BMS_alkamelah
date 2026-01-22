@@ -164,7 +164,7 @@ class ImportKetabOnlinePage extends Component
         try {
             // 1. Create/Update Author
             $authorName = $this->bookData['author']['name'] ?? 'مجهول';
-            $author = Author::firstOrCreate(['name' => $authorName]);
+            $author = Author::firstOrCreate(['full_name' => $authorName], ['is_living' => false]);
 
             // 2. Create Book
             $book = Book::updateOrCreate(
@@ -191,8 +191,8 @@ class ImportKetabOnlinePage extends Component
             $this->createdVolumes = [];
             for ($i = 1; $i <= max(1, $this->bookData['total_volumes']); $i++) {
                 $vol = Volume::updateOrCreate(
-                    ['book_id' => $book->id, 'volume_number' => $i],
-                    ['name' => "المجلد {$i}"]
+                    ['book_id' => $book->id, 'number' => $i],
+                    ['title' => "المجلد {$i}"]
                 );
                 $this->createdVolumes[$i] = $vol->id;
             }
@@ -201,13 +201,14 @@ class ImportKetabOnlinePage extends Component
             // Cleanup old chapters for re-import
             Chapter::where('book_id', $book->id)->delete();
             
+            $order = 1;
             foreach ($this->bookData['chapters'] as $chap) {
                 Chapter::create([
                     'book_id' => $book->id,
                     'title' => mb_substr($chap['title'], 0, 250),
-                    'page_number' => $chap['start_page'],
+                    'page_start' => $chap['start_page'],
                     'level' => $chap['level'] ?? 1,
-                    // 'volume_id' => ... ideally link to volume
+                    'order' => $order++,
                 ]);
             }
 

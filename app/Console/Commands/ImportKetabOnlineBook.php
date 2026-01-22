@@ -80,7 +80,7 @@ class ImportKetabOnlineBook extends Command
             DB::beginTransaction();
             
             // Author
-            $author = Author::firstOrCreate(['name' => $bookData['author']['name']]);
+            $author = Author::firstOrCreate(['full_name' => $bookData['author']['name']], ['is_living' => false]);
 
             // Book
             $book = Book::updateOrCreate(
@@ -104,8 +104,8 @@ class ImportKetabOnlineBook extends Command
             $createdVolumes = [];
             for ($i = 1; $i <= max(1, $bookData['total_volumes']); $i++) {
                 $vol = Volume::updateOrCreate(
-                    ['book_id' => $book->id, 'volume_number' => $i],
-                    ['name' => "Volume {$i}"]
+                    ['book_id' => $book->id, 'number' => $i],
+                    ['title' => "Volume {$i}"]
                 );
                 $createdVolumes[$i] = $vol->id;
             }
@@ -114,12 +114,14 @@ class ImportKetabOnlineBook extends Command
             Chapter::where('book_id', $book->id)->delete();
             $this->info("🗂 Importing " . count($bookData['chapters']) . " chapters...");
             
+            $order = 1;
             foreach ($bookData['chapters'] as $chap) {
                 Chapter::create([
                     'book_id' => $book->id,
                     'title' => mb_substr($chap['title'], 0, 250),
-                    'page_number' => $chap['start_page'],
+                    'page_start' => $chap['start_page'],
                     'level' => $chap['level'] ?? 1,
+                    'order' => $order++,
                 ]);
             }
             
