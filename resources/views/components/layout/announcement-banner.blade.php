@@ -9,7 +9,10 @@
                 إصدار تجريبي
             </span>
             <p class="text-xs md:text-sm font-medium leading-relaxed">
-                أهلاً بك في الإصدار التجريبي الأول (Beta) من المكتبة الكاملة - نسعد بملاحظاتكم لتطوير التجربة.
+                أهلاً بك في الإصدار التجريبي الأول من المكتبة الكاملة - نسعد بملاحظاتكم لتطوير التجربة.
+                <a href="/feedback" class="mr-3 px-2 py-0.5 bg-white text-[#1a3a2a] rounded text-[10px] font-bold hover:bg-green-100 transition-colors">
+                    لملاحظاتكم
+                </a>
             </p>
         </div>
         
