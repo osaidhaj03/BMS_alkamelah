@@ -24,6 +24,9 @@ class BookReaderController extends Controller
             'volumes' => fn($q) => $q->orderBy('number'),
         ])->findOrFail($bookId);
 
+        // Log view
+        $book->logView();
+
         // Load current page
         $currentPage = Page::where('book_id', $bookId)
             ->where('page_number', $pageNumber)

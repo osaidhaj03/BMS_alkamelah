@@ -13,8 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Book extends Model
 {
     use HasFactory;
-    use \App\Traits\Favoritable;
-    use \App\Traits\Viewable;
+    use \App\Traits\HasSimpleStats;
 
     protected $fillable = [
         'shamela_id',

@@ -11,8 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Author extends Model
 {
     use HasFactory;
-    use \App\Traits\Favoritable;
-    use \App\Traits\Viewable;
+    use \App\Traits\HasSimpleStats;
 
     protected $fillable = [
         'first_name',
