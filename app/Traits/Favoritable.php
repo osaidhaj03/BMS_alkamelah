@@ -2,54 +2,44 @@
 
 namespace App\Traits;
 
-use App\Models\Favorite;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait Favoritable
 {
     /**
      * Get all favorites for the model.
+     * (Deprecated: Logic moved to simple counters, relationship removed)
      */
-    public function favorites(): MorphMany
-    {
-        return $this->morphMany(Favorite::class, 'favoritable');
-    }
+    // public function favorites() ... removed
 
     /**
-     * Check if the model is favorited by the given user.
+     * Check if the model is favorited by the current session.
      */
     public function isFavoritedBy(?User $user): bool
     {
-        if (!$user) {
-            return false;
-        }
-
-        return $this->favorites()
-            ->where('user_id', $user->id)
-            ->exists();
+        // Simple session check (ignoring user ID for "simple counters only" approach)
+        $key = 'favorited_' . class_basename($this) . '_' . $this->id;
+        return session()->has($key);
     }
 
     /**
-     * Toggle favorite status for the given user.
+     * Toggle favorite status.
      * Returns true if favorited, false if unfavorited.
      */
-    public function toggleFavorite(User $user): bool
+    public function toggleFavorite(?User $user): bool
     {
-        $existingFavorite = $this->favorites()
-            ->where('user_id', $user->id)
-            ->first();
+        $key = 'favorited_' . class_basename($this) . '_' . $this->id;
 
-        if ($existingFavorite) {
-            $existingFavorite->delete();
+        if (session()->has($key)) {
+            // Already favorited -> Unfavorite
             $this->decrement('favorites_count');
-            return false; // Unfavorited
+            session()->forget($key);
+            return false;
         } else {
-            $this->favorites()->create([
-                'user_id' => $user->id,
-            ]);
+            // Not favorited -> Favorite
             $this->increment('favorites_count');
-            return true; // Favorited
+            session()->put($key, true);
+            return true;
         }
     }
 }

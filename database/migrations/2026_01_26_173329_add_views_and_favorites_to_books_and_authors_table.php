@@ -12,13 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->bigInteger('views_count')->default(0)->after('status'); // Use after for cleaner schema
-            $table->bigInteger('favorites_count')->default(0)->after('views_count');
+            if (!Schema::hasColumn('books', 'views_count')) {
+                $table->bigInteger('views_count')->default(0)->after('id');
+            }
+            if (!Schema::hasColumn('books', 'favorites_count')) {
+                $table->bigInteger('favorites_count')->default(0)->after('views_count');
+            }
         });
 
         Schema::table('authors', function (Blueprint $table) {
-            $table->bigInteger('views_count')->default(0)->after('biography');
-            $table->bigInteger('favorites_count')->default(0)->after('views_count');
+            if (!Schema::hasColumn('authors', 'views_count')) {
+                $table->bigInteger('views_count')->default(0)->after('id');
+            }
+            if (!Schema::hasColumn('authors', 'favorites_count')) {
+                $table->bigInteger('favorites_count')->default(0)->after('views_count');
+            }
         });
     }
 

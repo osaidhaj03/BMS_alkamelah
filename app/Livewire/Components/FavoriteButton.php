@@ -22,14 +22,8 @@ class FavoriteButton extends Component
 
     public function toggleFavorite()
     {
-        if (!Auth::check()) {
-            // Dispatch event to handle guest favorite in frontend (AlpineJS)
-            $this->dispatch('guest-toggle-favorite', [
-                'modelType' => get_class($this->model),
-                'modelId' => $this->model->id
-            ]);
-            return;
-        }
+        // Deprecated: Guest handling is now done server-side
+        // if (!Auth::check()) { ... }
 
         /** @var User $user */
         $user = Auth::user();
