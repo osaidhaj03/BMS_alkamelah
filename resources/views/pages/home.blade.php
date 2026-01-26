@@ -6,13 +6,13 @@
 @push('schema')
 <script type="application/ld+json">
 {
-  "@@context": "https://schema.org",
-  "@@type": "WebSite",
+  "@context": "https://schema.org",
+  "@type": "WebSite",
   "name": "المكتبة الكاملة",
   "alternateName": "Al-Kamelah Library",
   "url": "https://alkamelah.com/",
   "potentialAction": {
-    "@@type": "SearchAction",
+    "@type": "SearchAction",
     "target": "https://alkamelah.com/search?q={search_term_string}",
     "query-input": "required name=search_term_string"
   }
@@ -21,10 +21,10 @@
 
 <script type="application/ld+json">
 {
-  "@@context": "https://schema.org",
-  "@@type": "BreadcrumbList",
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
   "itemListElement": [{
-    "@@type": "ListItem",
+    "@type": "ListItem",
     "position": 1,
     "name": "المكتبة الكاملة",
     "item": "https://alkamelah.com/"
@@ -40,7 +40,6 @@
     <!-- Hero Section -->
     @include('components.layout.hero')
 
-    <!-- Categories Section -->
     @include('components.layout.category')
 
     <!-- Books Section -->
