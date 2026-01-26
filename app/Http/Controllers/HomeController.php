@@ -206,6 +206,9 @@ class HomeController extends Controller
     public function authorShow($id)
     {
         $author = Author::findOrFail($id);
+    
+    // Log view
+    $author->logView();
 
         $books = $author->books()
             ->with('bookSection')
