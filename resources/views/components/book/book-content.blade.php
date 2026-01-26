@@ -60,7 +60,7 @@
             <!-- Navigation Buttons 
             <div class="flex items-center justify-between mt-8 gap-4">
                 <-- Previous Page Button ->
-                @if($previousPage) // 
+                @if($previousPage) 
                     <a href="{{ route('book.read', ['bookId' => $book?->id, 'pageNumber' => $previousPage->page_number]) }}" 
                        class="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl shadow-md hover:bg-gray-50 hover:border-green-300 transition-all"
                        style="font-family: var(--font-ui);">

@@ -1,21 +1,6 @@
 @extends('layouts.app')
 
 @section('seo_title', $author->full_name . ' | المكتبة الكاملة')
-@section('seo_description', 'تصفح كتب ' . $author->full_name . ' في المكتبة الكاملة. ' . Str::limit($author->biography, 150))
-
-@push('schema')
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "{{ $author->full_name }}",
-  "description": "{{ Str::limit(strip_tags($author->biography), 200) }}",
-  @if($author->image)"image": "{{ asset($author->image) }}",@endif
-  "deathDate": "{{ $author->death_date ? $author->death_date->format('Y-01-01') : '' }}",
-  "knowsAbout": ["{{ $author->madhhab }}", "التراث العربي", "التاريخ الإسلامي"]
-}
-</script>
-@endpush
 
 @section('content')
     <!-- Header -->
@@ -111,6 +96,24 @@
                                 @endif
                             </div>
                         @endif
+                    </div>
+                </div>
+                </div>
+                
+                <!-- Interaction Buttons & Stats -->
+                <div class="mt-8 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                    <!-- Favorite Button -->
+                    <livewire:components.favorite-button :model="$author" />
+
+                    <!-- View Counter -->
+                    <div class="flex items-center gap-2 text-gray-500 bg-gray-50 px-4 py-2 rounded-full" title="عدد المشاهدات">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <span class="font-bold text-sm">{{ number_format($author->views_count) }} مشاهدة</span>
                     </div>
                 </div>
             </div>
