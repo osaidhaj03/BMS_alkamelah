@@ -67,7 +67,8 @@
                     </button>
 
                     <!-- Settings Button (Visible only for Content Search) -->
-                    <div class="relative h-full flex items-center" x-show="searchMode === 'content'" x-cloak style="display: none;">
+                    <div class="relative h-full flex items-center" x-show="searchMode === 'content'" x-cloak
+                        style="display: none;">
                         <button @click="settingsOpen = !settingsOpen" @click.outside="settingsOpen = false"
                             class="p-2 ml-2 rounded-full hover:bg-gray-100 transition-colors"
                             :class="{'bg-gray-100': settingsOpen}" style="color: #2C6E4A;" title="إعدادات البحث">
@@ -175,7 +176,8 @@
         </div>
     </div>
 
-    <!-- Filter Modal for Books 
+    {{-- Filter Modal for Books --}}
+    {{-- COMMENTED OUT - TODO: Uncomment when ready to use
     <div x-show="filterModalOpen && searchMode === 'books'" style="display: none;"
         class="fixed inset-0 z-[9999] overflow-y-auto" aria-modal="true" x-cloak>
 
@@ -244,7 +246,7 @@
                         </ul>
                     </div>
 
-                    
+
                     <div x-show="booksFilterTab === 'authors'">
                         <div class="mb-3">
                             <input type="text" x-model="authorSearch" @input.debounce.300ms="fetchAuthorsForFilter()"
@@ -278,7 +280,7 @@
                     </div>
                 </div>
 
-                
+
                 <div class="bg-white px-6 py-3 gap-3 flex flex-row-reverse border-t border-gray-100">
                     <button @click="filterModalOpen = false"
                         class="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-500 transition-colors">تطبيق</button>
@@ -290,8 +292,9 @@
                 </div>
             </div>
         </div>
-        -->
     </div>
+    --}}
+
 
     <!-- Filter Modal for Authors -->
     <div x-show="filterModalOpen && searchMode === 'authors'" style="display: none;"
