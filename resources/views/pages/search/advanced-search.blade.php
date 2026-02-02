@@ -52,16 +52,32 @@
                 </svg>
             </button>
         </div>
-    </div>
 
-    {{-- Mobile Sidebar Overlay --}}
-    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden">
-        <div class="absolute inset-y-0 right-0 w-80 bg-white transform translate-x-full transition-transform duration-300"
-            id="mobile-sidebar-panel">
+        {{-- Mobile Sidebar Overlay --}}
+        <div x-show="$store.search.mobileSearchOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="$store.search.mobileSearchOpen = false"
+         class="fixed inset-0 bg-black/50 z-[100] lg:hidden"
+         style="display: none;">
+        <div @click.stop
+             x-show="$store.search.mobileSearchOpen"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="translate-x-full"
+             class="absolute inset-y-0 right-0 w-80 bg-white">
             <div class="h-full flex flex-col">
                 <div class="p-4 border-b flex justify-between items-center">
                     <h3 class="font-bold">نتائج البحث</h3>
-                    <button id="mobile-sidebar-close" class="p-2 text-gray-500 hover:text-red-500">
+                    <button @click="$store.search.mobileSearchOpen = false" 
+                            class="p-2 text-gray-500 hover:text-red-500 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
@@ -70,6 +86,7 @@
                 </div>
                 <div class="flex-1 overflow-hidden relative">
                     <x-search.results-sidebar />
+                </div>
                 </div>
             </div>
         </div>
