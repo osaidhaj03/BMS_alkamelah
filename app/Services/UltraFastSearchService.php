@@ -276,35 +276,26 @@ class UltraFastSearchService
 			
 			return [
 				'match' => [
-					'content.flexible' => [
-						'query' => $searchTerm,
-						'operator' => $operator,
-						'minimum_should_match' => $minimumMatch,
-						'fuzziness' => 'AUTO', // Add fuzziness for better results
-						'max_expansions' => 50 // Limit expansions to prevent slow queries
-					]
-				]
-			];
-		}
-
-		// For consecutive: slop=0 (words must be adjacent)
-		// For same_paragraph: slop=50 (words can have up to 50 words between them)
-		$slop = ($wordOrder === 'consecutive') ? 0 : 50;
-
-		return [
-			'match_phrase' => [
-				'content.flexible' => [
+				'content.advanced' => [
 					'query' => $searchTerm,
-					'slop' => $slop
+					'operator' => $operator,
+					'minimum_should_match' => $minimumMatch,
+					'analyzer' => 'arabic_search_analyzer'
 				]
 			]
 		];
 	}
 
-	/**
-	 * Get slop value based on word order
-	 * Context7 Note: This function should NOT be called for any_order
-	 */
+	// For consecutive: slop=0 (words must be adjacent)
+	// For same_paragraph: slop=50 (words can have up to 50 words between them)
+	$slop = ($wordOrder === 'consecutive') ? 0 : 50;
+
+	return [
+		'match_phrase' => [
+			'content.advanced' => [
+				'query' => $searchTerm,
+				'slop' => $slop,
+				'analyzer' => 'arabic_search_analyzer'
 	protected function getSlop(string $wordOrder): int
 	{
 		switch ($wordOrder) {
@@ -700,13 +691,7 @@ class UltraFastSearchService
 					'pre_tags' => ['<mark class="highlight">'],
 					'post_tags' => ['</mark>'],
 				],
-				'content.flexible' => [
-					'fragment_size' => 120,
-					'number_of_fragments' => 1,
-					'pre_tags' => ['<mark class="highlight">'],
-					'post_tags' => ['</mark>'],
-				],
-				'content.stemmed' => [
+				'content.advanced' => [
 					'fragment_size' => 120,
 					'number_of_fragments' => 1,
 					'pre_tags' => ['<mark class="highlight">'],
@@ -1043,8 +1028,7 @@ class UltraFastSearchService
 			
 			// Get highlight from any available field
 			$highlight = $hit['highlight']['content'][0] 
-				?? $hit['highlight']['content.flexible'][0] 
-				?? $hit['highlight']['content.stemmed'][0] 
+				?? $hit['highlight']['content.advanced'][0] 
 				?? null;
 			
 			$content = $highlight ?: $this->formatContent($source['content'] ?? '', $query);
