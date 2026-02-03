@@ -1,23 +1,32 @@
 #!/bin/bash
 
-# Deployment script for Hostinger
-echo "Starting deployment..."
+# Deployment Script for AlKamelah.com
+# Usage: ./deploy.sh
 
-# Install composer dependencies with platform requirements ignored
-composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+echo "🚀 Starting Deployment Process for AlKamelah..."
 
-# Clear and cache config
-php artisan config:clear
-php artisan cache:clear
-php artisan view:clear
-php artisan route:clear
+# 1. Install/Update Dependencies (optimize for prod)
+echo "📦 Installing Composer Dependencies..."
+composer install --optimize-autoloader --no-dev
 
-# Run migrations
-php artisan migrate --force
-
-# Cache configuration for production
+# 2. Clear & Cache Config
+echo "🧹 Clearing & Caching Config..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan event:cache
 
-echo "Deployment completed successfully!"
+# 3. Migrate Database (Force is dangerous, verify before running in prod!)
+echo "🗄️ Running Migrations..."
+php artisan migrate --force
+
+# 4. Generate Sitemap
+echo "🗺️ Generating Sitemap..."
+php artisan sitemap:generate
+
+# 5. Optimize Clear (Just to be safe)
+echo "✨ Optimizing..."
+php artisan optimize
+
+echo "✅ Deployment Completed Successfully!"
+echo "🌍 Check your site at https://alkamelah.com"

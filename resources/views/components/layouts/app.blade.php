@@ -5,14 +5,54 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ $title ?? 'المكتبة الكاملة' }}</title>
+    <title>{{ $title ?? 'المكتبة الكاملة - وقف الأقصى الشريف للمعرفة' }}</title>
+    <meta name="description" content="{{ $description ?? 'المكتبة الكاملة | وقف الأقصى الشريف للمعرفة. منصة تراثية رقمية شاملة تضم آلاف الكتب والمخطوطات والمراجع في مختلف العلوم الإسلامية والعربية.' }}">
+    <meta name="keywords" content="مكتبة, كتب, تراث, مخطوطات, المكتبة الكاملة, وقف الأقصى الشريف, كتب إسلامية, مراجع">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ url()->current() }}" />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:title" content="{{ $title ?? 'المكتبة الكاملة - وقف الأقصى الشريف للمعرفة' }}" />
+    <meta property="og:description" content="{{ $description ?? 'المكتبة الكاملة | وقف الأقصى الشريف للمعرفة. منصة تراثية رقمية شاملة تضم آلاف الكتب والمخطوطات والمراجع.' }}" />
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}" />
+    <meta property="og:site_name" content="المكتبة الكاملة" />
+    <meta property="og:locale" content="ar_AR" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="{{ url()->current() }}" />
+    <meta property="twitter:title" content="{{ $title ?? 'المكتبة الكاملة - وقف الأقصى الشريف للمعرفة' }}" />
+    <meta property="twitter:description" content="{{ $description ?? 'المكتبة الكاملة | وقف الأقصى الشريف للمعرفة. منصة تراثية رقمية شاملة.' }}" />
+    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "المكتبة الكاملة",
+        "alternateName": ["Al-Kamelah Library", "وقف الأقصى الشريف للمعرفة"],
+        "url": "https://alkamelah.com",
+        "description": "وقف الأقصى الشريف للمعرفة وهي مكتبة تراثية رقمية شاملة.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://alkamelah.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    
+    <!-- Google Search Console Verification (Placeholder) -->
+    <!-- <meta name="google-site-verification" content="YOUR_CODE_HERE" /> -->
 
     <!-- Tailwind CSS (CDN for prototype speed) -->
     <script src="https://cdn.tailwindcss.com"></script>
