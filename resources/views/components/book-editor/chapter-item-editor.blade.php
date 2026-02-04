@@ -211,23 +211,18 @@
             pageEnd: pageEnd,
             
             addSubChapter() {
-                // Call parent TOC editor's openAddModal with this chapter as parent
-                const tocEditor = document.querySelector('[x-data*="tocEditor"]').__x.$data;
-                if (tocEditor) {
-                    tocEditor.openAddModal(this.chapterId);
-                }
+                // Use Alpine store
+                Alpine.store('tocEditor').openAddModal(this.chapterId);
             },
             
             editChapter() {
-                const tocEditor = document.querySelector('[x-data*="tocEditor"]').__x.$data;
-                if (tocEditor) {
-                    tocEditor.openEditModal({
-                        id: this.chapterId,
-                        title: this.chapterTitle,
-                        page_start: this.pageStart,
-                        page_end: this.pageEnd
-                    });
-                }
+                // Use Alpine store
+                Alpine.store('tocEditor').openEditModal({
+                    id: this.chapterId,
+                    title: this.chapterTitle,
+                    page_start: this.pageStart,
+                    page_end: this.pageEnd
+                });
             },
             
             async moveUp() {

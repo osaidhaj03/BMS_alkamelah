@@ -64,13 +64,13 @@
     }
 </style>
 
-<aside class="toc-editor-sidebar" id="toc-editor-sidebar" x-data="tocEditor()">
+<aside class="toc-editor-sidebar" id="toc-editor-sidebar">
     <!-- Header -->
     <div class="toc-header">
         <h3 class="text-lg font-bold mb-3" style="color: var(--text-main); font-family: var(--font-ui);">
             📑 إدارة الفهرس
         </h3>
-        <button @click="openAddModal(null)" class="add-chapter-btn">
+        <button @click="$store.tocEditor.openAddModal(null)" class="add-chapter-btn">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -97,165 +97,4 @@
                 <p class="text-sm mt-1">ابدأ بإضافة فصل جديد</p>
             </div>
         @endif
-    </div>
-    
-    <!-- Add/Edit Chapter Modal -->
-    <div x-show="showModal" 
-         x-cloak
-         @click.self="closeModal()"
-         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" @click.stop>
-            <h3 class="text-xl font-bold mb-4" style="font-family: var(--font-ui);" x-text="modalTitle"></h3>
-            
-            <form @submit.prevent="saveChapter()">
-                <!-- Title -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2" style="font-family: var(--font-ui);">
-                        عنوان الفصل
-                    </label>
-                    <input type="text" 
-                           x-model="formData.title"
-                           required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                           style="font-family: var(--font-ui);">
-                </div>
-                
-                <!-- Parent Chapter -->
-                <div class="mb-4" x-show="!editMode">
-                    <label class="block text-sm font-medium mb-2" style="font-family: var(--font-ui);">
-                        الفصل الأب (اختياري)
-                    </label>
-                    <select x-model="formData.parent_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                            style="font-family: var(--font-ui);">
-                        <option value="">فصل رئيسي</option>
-                        @foreach($chapters as $chapter)
-                            <option value="{{ $chapter->id }}">{{ $chapter->title }}</option>
-                            @if($chapter->children && $chapter->children->count() > 0)
-                                @foreach($chapter->children as $child)
-                                    <option value="{{ $child->id }}">— {{ $child->title }}</option>
-                                @endforeach
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Page Range -->
-                <div class="mb-4 grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-sm font-medium mb-2" style="font-family: var(--font-ui);">
-                            صفحة البداية
-                        </label>
-                        <input type="number" 
-                               x-model="formData.page_start"
-                               min="1"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2" style="font-family: var(--font-ui);">
-                            صفحة النهاية
-                        </label>
-                        <input type="number" 
-                               x-model="formData.page_end"
-                               min="1"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                    </div>
-                </div>
-                
-                <!-- Buttons -->
-                <div class="flex gap-3 justify-end">
-                    <button type="button" 
-                            @click="closeModal()"
-                            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                            style="font-family: var(--font-ui);">
-                        إلغاء
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                            style="font-family: var(--font-ui);">
-                        حفظ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 </aside>
-
-<script>
-    function tocEditor() {
-        return {
-            showModal: false,
-            editMode: false,
-            modalTitle: 'إضافة فصل جديد',
-            formData: {
-                id: null,
-                title: '',
-                parent_id: '',
-                page_start: '',
-                page_end: ''
-            },
-            
-            openAddModal(parentId = null) {
-                this.editMode = false;
-                this.modalTitle = 'إضافة فصل جديد';
-                this.formData = {
-                    id: null,
-                    title: '',
-                    parent_id: parentId || '',
-                    page_start: '',
-                    page_end: ''
-                };
-                this.showModal = true;
-            },
-            
-            openEditModal(chapter) {
-                this.editMode = true;
-                this.modalTitle = 'تعديل الفصل';
-                this.formData = {
-                    id: chapter.id,
-                    title: chapter.title,
-                    parent_id: chapter.parent_id || '',
-                    page_start: chapter.page_start || '',
-                    page_end: chapter.page_end || ''
-                };
-                this.showModal = true;
-            },
-            
-            closeModal() {
-                this.showModal = false;
-            },
-            
-            async saveChapter() {
-                const bookId = {{ $book->id ?? 0 }};
-                const url = this.editMode 
-                    ? `/editBook/${bookId}/chapters/${this.formData.id}`
-                    : `/editBook/${bookId}/chapters`;
-                const method = this.editMode ? 'PUT' : 'POST';
-                
-                try {
-                    const response = await fetch(url, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(this.formData)
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        this.closeModal();
-                        // Reload page to show new chapter
-                        window.location.reload();
-                    } else {
-                        alert('خطأ: ' + (data.message || 'فشل الحفظ'));
-                    }
-                } catch (error) {
-                    alert('خطأ: ' + error.message);
-                }
-            }
-        }
-    }
-</script>
