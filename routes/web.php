@@ -4,6 +4,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BookReaderController;
+use App\Http\Controllers\BookEditorController;
 use App\Http\Controllers\NewsletterSubscriberController;
 use App\Http\Controllers\FeedbackComplaintController;
 use App\Http\Controllers\NewsController;
@@ -83,6 +84,15 @@ Route::get('/book/{bookId}/{pageNumber?}', [BookReaderController::class, 'show']
 Route::get('/book/{bookId}/search', [BookReaderController::class, 'search'])
     ->name('book.search')
     ->where(['bookId' => '[0-9]+']);
+
+// Book Editor Routes (Admin - No Auth)
+Route::get('/editBook/{bookId}/{pageNumber?}', [BookEditorController::class, 'show'])
+    ->name('book.edit')
+    ->where(['bookId' => '[0-9]+', 'pageNumber' => '[0-9]+']);
+
+Route::put('/editBook/{bookId}/page/{pageNumber}', [BookEditorController::class, 'updatePage'])
+    ->name('book.updatePage')
+    ->where(['bookId' => '[0-9]+', 'pageNumber' => '[0-9]+']);
 
 // Static Book Preview Route
 Route::get('/preview/book-static', function () {
