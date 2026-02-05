@@ -113,6 +113,54 @@
             />
         </div>
         
+        <!-- Insert Page Options Modal -->
+        <div x-show="$store.insertPage && $store.insertPage.showModal" 
+             x-cloak
+             @click.self="$store.insertPage.closeModal()"
+             style="z-index: 9999 !important;"
+             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6" @click.stop>
+                <div class="text-center mb-6">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" style="font-family: var(--font-ui);" x-text="$store.insertPage.title"></h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500" style="font-family: var(--font-ui);">
+                            سيتم إدراج صفحة جديدة وإعادة الترتيب التسلسلي لباقي الصفحات تلقائياً.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-6 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <label class="flex items-start space-x-3 space-x-reverse cursor-pointer">
+                        <input type="checkbox" x-model="$store.insertPage.renumberOriginal" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1">
+                        <span class="text-sm text-gray-700" style="font-family: var(--font-ui);">
+                            <span class="font-bold block mb-1">إعادة ترقيم الصفحات المطبوعة </span>
+                            <span class="text-xs text-gray-500">قم بتفعيل هذا الخيار إذا كنت تريد إزاحة الأرقام المطبوعة (في ترويسة الكتاب) لباقي الصفحات (+1).</span>
+                        </span>
+                    </label>
+                </div>
+                
+                <div class="flex gap-3 justify-center">
+                    <button type="button" 
+                            @click="$store.insertPage.closeModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex-1"
+                            style="font-family: var(--font-ui);">
+                        إلغاء
+                    </button>
+                    <button type="button"
+                            @click="$store.insertPage.confirmInsert()"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex-1"
+                            style="font-family: var(--font-ui);">
+                        تأكيد الإدراج
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- TOC Add/Edit Chapter Modal (Outside sidebar for proper z-index) -->
         <div x-show="$store.tocEditor && $store.tocEditor.showModal" 
              x-cloak
@@ -287,6 +335,65 @@
             });
         });
         
+        // Insert Page Store
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('insertPage', {
+                showModal: false,
+                type: 'after', // 'before' or 'after'
+                title: '',
+                renumberOriginal: false,
+                bookId: {{ $book->id ?? 0 }},
+                pageNumber: {{ $currentPageNum ?? 1 }},
+                
+                openModal(type) {
+                    this.type = type;
+                    this.title = type === 'before' 
+                        ? 'إدراج صفحة جديدة قبل الصفحة الحالية' 
+                        : 'إدراج صفحة جديدة بعد الصفحة الحالية';
+                    this.renumberOriginal = false; // Reset to false by default
+                    this.showModal = true;
+                },
+                
+                closeModal() {
+                    this.showModal = false;
+                },
+                
+                async confirmInsert() {
+                    const url = this.type === 'before'
+                        ? `/editBook/${this.bookId}/page/${this.pageNumber}/insert-before`
+                        : `/editBook/${this.bookId}/page/${this.pageNumber}/insert-after`;
+                        
+                    const newPageNumber = this.type === 'before' ? this.pageNumber : this.pageNumber + 1;
+                    
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                renumber_original: this.renumberOriginal
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            window.location.href = `/editBook/${this.bookId}/${newPageNumber}`;
+                        } else {
+                            alert('خطأ: ' + (data.message || 'فشل إدراج الصفحة'));
+                        }
+                    } catch (error) {
+                        alert('خطأ: ' + error.message);
+                    }
+                    
+                    this.closeModal();
+                }
+            });
+        });
+        
         function bookEditor() {
             return {
                 saveStatus: '',
@@ -294,8 +401,27 @@
                 isModified: false,
                 
                 async saveContent() {
-                    const contentEl = document.getElementById('content-editor');
-                    if (!contentEl) return;
+                    let content = '';
+                    let htmlContent = '';
+                    
+                    // Get data from CKEditor if available
+                    if (window.editor) {
+                        htmlContent = window.editor.getData();
+                        // Create a temporary element to strip HTML tags for plain content
+                        const tmp = document.createElement("DIV");
+                        tmp.innerHTML = htmlContent;
+                        content = tmp.textContent || tmp.innerText || "";
+                    } else {
+                        // Fallback to old method (safety check)
+                        const contentEl = document.getElementById('content-editor');
+                        if (contentEl) {
+                           content = contentEl.innerText;
+                           htmlContent = contentEl.innerHTML;
+                        } else {
+                            // If neither editor nor element exists, probably nothing to save or different page state
+                            return; 
+                        }
+                    }
                     
                     this.saveStatus = 'saving';
                     this.saveMessage = 'جاري الحفظ...';
@@ -309,8 +435,8 @@
                                 'Accept': 'application/json'
                             },
                             body: JSON.stringify({
-                                content: contentEl.innerText,
-                                html_content: contentEl.innerHTML
+                                content: content, // Plain text for search indexing
+                                html_content: htmlContent // Full HTML for display
                             })
                         });
                         
@@ -328,7 +454,6 @@
                         this.saveMessage = 'خطأ: ' + error.message;
                     }
                     
-                    // Hide message after 3 seconds
                     setTimeout(() => {
                         this.saveStatus = '';
                     }, 3000);
@@ -338,65 +463,12 @@
                     this.isModified = true;
                 },
                 
-                async insertPageBefore() {
-                    if (!confirm('هل تريد إدراج صفحة جديدة قبل الصفحة الحالية؟\n\nسيتم إعادة ترقيم جميع الصفحات التالية تلقائياً.')) {
-                        return;
-                    }
-                    
-                    const bookId = {{ $book->id ?? 0 }};
-                    const pageNumber = {{ $currentPageNum ?? 1 }};
-                    
-                    try {
-                        const response = await fetch(`/editBook/${bookId}/page/${pageNumber}/insert-before`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            // Redirect to the new page
-                            window.location.href = `/editBook/${bookId}/${pageNumber}`;
-                        } else {
-                            alert('خطأ: ' + (data.message || 'فشل إدراج الصفحة'));
-                        }
-                    } catch (error) {
-                        alert('خطأ: ' + error.message);
-                    }
+                insertPageBefore() {
+                    Alpine.store('insertPage').openModal('before');
                 },
                 
-                async insertPageAfter() {
-                    if (!confirm('هل تريد إدراج صفحة جديدة بعد الصفحة الحالية؟\n\nسيتم إعادة ترقيم جميع الصفحات التالية تلقائياً.')) {
-                        return;
-                    }
-                    
-                    const bookId = {{ $book->id ?? 0 }};
-                    const pageNumber = {{ $currentPageNum ?? 1 }};
-                    const newPageNumber = pageNumber + 1;
-                    
-                    try {
-                        const response = await fetch(`/editBook/${bookId}/page/${pageNumber}/insert-after`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json'
-                            }
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            // Redirect to the new page
-                            window.location.href = `/editBook/${bookId}/${newPageNumber}`;
-                        } else {
-                            alert('خطأ: ' + (data.message || 'فشل إدراج الصفحة'));
-                        }
-                    } catch (error) {
-                        alert('خطأ: ' + error.message);
-                    }
+                insertPageAfter() {
+                    Alpine.store('insertPage').openModal('after');
                 }
             }
         }

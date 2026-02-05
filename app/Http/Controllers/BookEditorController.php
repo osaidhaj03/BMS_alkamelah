@@ -126,11 +126,24 @@ class BookEditorController extends Controller
     public function insertPageBefore(Request $request, $bookId, $pageNumber)
     {
         $book = Book::findOrFail($bookId);
+        $shouldRenumberOriginal = $request->boolean('renumber_original', false);
         
         // 1. Increment page_number for all pages >= pageNumber
         Page::where('book_id', $bookId)
             ->where('page_number', '>=', $pageNumber)
             ->increment('page_number');
+            
+        // 1.1 Optional: Increment original_page_number for all pages >= pageNumber (if they have one)
+        if ($shouldRenumberOriginal) {
+            // Get current page to find its original number basis
+            $currentPage = Page::where('book_id', $bookId)->where('page_number', $pageNumber + 1)->first();
+            if ($currentPage && $currentPage->original_page_number) {
+                 Page::where('book_id', $bookId)
+                    ->where('page_number', '>=', $pageNumber + 1) // Start from the shifted page
+                    ->whereNotNull('original_page_number')
+                    ->increment('original_page_number');
+            }
+        }
         
         // 2. Update chapter ranges
         Chapter::where('book_id', $bookId)
@@ -142,9 +155,22 @@ class BookEditorController extends Controller
             ->increment('page_end');
         
         // 3. Create new blank page at pageNumber
+        // If renumbering, we try to guess the original number (it takes the slot of the shifted page)
+        $newOriginalNumber = null;
+        if ($shouldRenumberOriginal) {
+            $shiftedPage = Page::where('book_id', $bookId)->where('page_number', $pageNumber + 1)->first();
+            // The new page takes the original number of the page that was just shifted
+            // The shifted page has already been incremented above
+            // So we need to calculate: (shifted page original number) - 1
+            if ($shiftedPage && $shiftedPage->original_page_number) {
+                $newOriginalNumber = $shiftedPage->original_page_number - 1;
+            }
+        }
+
         $newPage = Page::create([
             'book_id' => $bookId,
             'page_number' => $pageNumber,
+            'original_page_number' => $newOriginalNumber,
             'content' => '',
             'html_content' => '<p></p>',
         ]);
@@ -172,11 +198,20 @@ class BookEditorController extends Controller
     {
         $book = Book::findOrFail($bookId);
         $newPageNumber = $pageNumber + 1;
+        $shouldRenumberOriginal = $request->boolean('renumber_original', false);
         
         // 1. Increment page_number for all pages > pageNumber
         Page::where('book_id', $bookId)
             ->where('page_number', '>=', $newPageNumber)
             ->increment('page_number');
+            
+        // 1.1 Optional: Increment original_page_number
+        if ($shouldRenumberOriginal) {
+             Page::where('book_id', $bookId)
+                ->where('page_number', '>=', $newPageNumber + 1) // Start from the page AFTER the new one (which was shifted)
+                ->whereNotNull('original_page_number')
+                ->increment('original_page_number');
+        }
         
         // 2. Update chapter ranges
         Chapter::where('book_id', $bookId)
@@ -188,9 +223,19 @@ class BookEditorController extends Controller
             ->increment('page_end');
         
         // 3. Create new blank page at newPageNumber
+        $newOriginalNumber = null;
+        if ($shouldRenumberOriginal) {
+            // Get the current page (pre-insertion)
+            $currentPage = Page::where('book_id', $bookId)->where('page_number', $pageNumber)->first();
+            if ($currentPage && $currentPage->original_page_number) {
+                $newOriginalNumber = $currentPage->original_page_number + 1;
+            }
+        }
+
         $newPage = Page::create([
             'book_id' => $bookId,
             'page_number' => $newPageNumber,
+            'original_page_number' => $newOriginalNumber,
             'content' => '',
             'html_content' => '<p></p>',
         ]);
