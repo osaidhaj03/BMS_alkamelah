@@ -9,6 +9,7 @@ use App\Http\Controllers\FeedbackComplaintController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ArticleCommentController;
+use App\Http\Controllers\BookEditorController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/import-turath', \App\Livewire\ImportTurathPage::class)->name('import.turath');
@@ -83,6 +84,14 @@ Route::get('/book/{bookId}/{pageNumber?}', [BookReaderController::class, 'show']
 Route::get('/book/{bookId}/search', [BookReaderController::class, 'search'])
     ->name('book.search')
     ->where(['bookId' => '[0-9]+']);
+
+// Book Editor Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/editBook/{bookId}/{pageNumber?}', [BookEditorController::class, 'show'])->name('book-editor.show');
+    Route::post('/editBook/{bookId}/{pageNumber}/update', [BookEditorController::class, 'updatePage'])->name('book-editor.update-page');
+    Route::post('/editBook/{bookId}/{pageNumber}/insert-before', [BookEditorController::class, 'insertPageBefore'])->name('book-editor.insert-page-before');
+    Route::post('/editBook/{bookId}/{pageNumber}/insert-after', [BookEditorController::class, 'insertPageAfter'])->name('book-editor.insert-page-after');
+});
 
 // Static Book Preview Route
 Route::get('/preview/book-static', function () {
