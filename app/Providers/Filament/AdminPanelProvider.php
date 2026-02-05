@@ -4,7 +4,7 @@ namespace App\Providers\Filament;
 
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Caresome\FilamentNeobrutalism\NeobrutalismeTheme;
+//use Caresome\FilamentNeobrutalism\NeobrutalismeTheme;
 use Caresome\FilamentAuthDesigner\AuthDesignerPlugin;
 use Caresome\FilamentAuthDesigner\Data\AuthPageConfig;
 use Caresome\FilamentAuthDesigner\Enums\MediaPosition;
@@ -76,14 +76,7 @@ class AdminPanelProvider extends PanelProvider
                         ->mediaPosition(MediaPosition::Cover)
                         ->blur(0)
                     ),
-                NeobrutalismeTheme::make()
-                    ->customize([
-                        'border-width' => '3px',
-                        'border-width-thick' => '4px',
-                        'radius-md' => '0.75rem',
-                        'shadow-offset-md' => '4px',
-                        '--primary-color' => '#1A3A2A',
-                    ]),
+
             ])
             ->authMiddleware([
                 Authenticate::class,
