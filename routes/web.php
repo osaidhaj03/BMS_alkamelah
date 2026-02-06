@@ -12,6 +12,25 @@ use App\Http\Controllers\ArticleCommentController;
 use App\Http\Controllers\BookEditorController;
 use App\Http\Controllers\ChapterController;
 
+
+// Sitemap Route for Google Search Console
+Route::get('/sitemap.xml', function () {
+    $articles = \App\Models\Article::select('slug', 'updated_at')->get();
+    $news = \App\Models\News::select('slug', 'updated_at')->get();
+    $categories = \App\Models\Category::select('slug', 'updated_at')->get();
+    $authors = \App\Models\Author::select('id', 'updated_at')->get();
+    $books = \App\Models\Book::select('id', 'updated_at')->get();
+    $chapters = \App\Models\Chapter::select('id', 'book_id', 'updated_at')->get();
+    
+    return response()->view('sitemap', [
+        'articles' => $articles,
+        'news' => $news,
+        'categories' => $categories,
+        'authors' => $authors,
+        'books' => $books,
+        'chapters' => $chapters
+    ])->header('Content-Type', 'application/xml');
+});
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/import-turath', \App\Livewire\ImportTurathPage::class)->name('import.turath');
 // Route::get('/import-categories', \App\Livewire\ImportCategoryPage::class)->name('import.categories');

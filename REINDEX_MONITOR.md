@@ -136,3 +136,9 @@ protected string $index = 'pages_search';
 - **Time:** 5,041,518 / 371 = ~13,590 seconds ≈ **3.8 hours**
 
 سيكون جاهزاً تقريباً في: **02:00 صباحاً** (5 فبراير 2026)
+
+<?php
+// Add this route
+Route::get('/sitemap.xml', function () {
+    return response()->view('sitemap');
+});
