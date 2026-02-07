@@ -312,34 +312,18 @@ class UltraFastSearchService
 	/**
 	 * Build morphological query - root-based search with derivatives
 	 * Context7 Best Practice: Apply word_order logic to morphological search too
+	 * TEMPORARY FIX: Using query_string instead of match due to analyzer issues
 	 */
 	protected function buildMorphologicalQuery(string $searchTerm, string $wordOrder = 'any_order'): array
 	{
-		// For any_order: use match with operator=and
+		// For any_order: use query_string with AND operator
 		if ($wordOrder === 'any_order') {
 			return [
-				'bool' => [
-					'should' => [
-						[
-							'match' => [
-								'content.stemmed' => [
-									'query' => $searchTerm,
-									'boost' => 2.0,
-									'operator' => 'and'
-								]
-							]
-						],
-						[
-							'match' => [
-								'content.flexible' => [
-									'query' => $searchTerm,
-									'boost' => 1.0,
-									'operator' => 'and'
-								]
-							]
-						]
-					],
-					'minimum_should_match' => 1
+				'query_string' => [
+					'query' => $searchTerm,
+					'default_field' => 'content',
+					'default_operator' => 'AND',
+					'analyze_wildcard' => false
 				]
 			];
 		}

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار البحث - pages_v3</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .stats {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .stats span {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        .quick-searches {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .quick-search-btn {
+            padding: 8px 16px;
+            background: #e0e7ff;
+            color: #667eea;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .quick-search-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .result-item {
+            background: #f9fafb;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-right: 4px solid #667eea;
+        }
+        .result-title {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .result-content {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+        .result-meta {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1em;
+        }
+        .result-count {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 اختبار البحث - pages_v3</h1>
+        
+        <div class="stats">
+            <div>📊 عدد الصفحات المفهرسة: <span id="docCount">جاري التحميل...</span></div>
+            <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                الفهرسة مستمرة تلقائياً في الخلفية
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="ابحث عن أي شيء..." value="محمد">
+            <button onclick="search()">بحث</button>
+        </div>
+
+        <div class="quick-searches">
+            <div style="width: 100%; margin-bottom: 10px; font-weight: bold; color: #667eea;">بحوثات سريعة:</div>
+            <button class="quick-search-btn" onclick="quickSearch('محمد')">محمد</button>
+            <button class="quick-search-btn" onclick="quickSearch('الصلاة')">الصلاة</button>
+            <button class="quick-search-btn" onclick="quickSearch('القرآن')">القرآن</button>
+            <button class="quick-search-btn" onclick="quickSearch('الفقه')">الفقه</button>
+            <button class="quick-search-btn" onclick="quickSearch('الحديث')">الحديث</button>
+            <button class="quick-search-btn" onclick="quickSearch('أبو حنيفة')">أبو حنيفة</button>
+            <button class="quick-search-btn" onclick="quickSearch('الشافعي')">الشافعي</button>
+            <button class="quick-search-btn" onclick="quickSearch('مالك')">مالك</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Load document count
+        async function loadDocCount() {
+            try {
+                const response = await fetch('http://145.223.98.97:9201/pages_v3/_count');
+                const data = await response.json();
+                document.getElementById('docCount').textContent = data.count.toLocaleString('ar-EG');
+            } catch (error) {
+                document.getElementById('docCount').textContent = 'خطأ في التحميل';
+            }
+        }
+
+        function quickSearch(term) {
+            document.getElementById('searchInput').value = term;
+            search();
+        }
+
+        async function search() {
+            const query = document.getElementById('searchInput').value.trim();
+            const resultsDiv = document.getElementById('results');
+            
+            if (!query) {
+                resultsDiv.innerHTML = '<div class="no-results">الرجاء إدخال كلمة بحث</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading">⏳ جاري البحث...</div>';
+
+            try {
+                const searchBody = {
+                    size: 10,
+                    query: {
+                        query_string: {
+                            query: query,
+                            default_field: "content",
+                            default_operator: "AND"
+                        }
+                    },
+                    highlight: {
+                        fields: {
+                            content: {
+                                fragment_size: 200,
+                                number_of_fragments: 1
+                            }
+                        }
+                    },
+                    _source: ["id", "content", "page_number", "book_id", "book_title", "book_author", "book_section"]
+                };
+
+                const response = await fetch('http://145.223.98.97:9201/pages_v3/_search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(searchBody)
+                });
+
+                const data = await response.json();
+                displayResults(data, query);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">خطأ: ${error.message}</div>`;
+            }
+        }
+
+        function displayResults(data, query) {
+            const resultsDiv = document.getElementById('results');
+            const total = data.hits.total.value;
+
+            if (total === 0) {
+                resultsDiv.innerHTML = `<div class="no-results">لا توجد نتائج للبحث عن "${query}"</div>`;
+                return;
+            }
+
+            let html = `<div class="result-count">🎯 تم العثور على ${total.toLocaleString('ar-EG')} نتيجة</div>`;
+
+            data.hits.hits.forEach((hit, index) => {
+                const source = hit._source;
+                const highlight = hit.highlight?.content?.[0] || source.content.substring(0, 200);
+                
+                html += `
+                    <div class="result-item">
+                        <div class="result-title">
+                            ${source.book_title || 'بدون عنوان'} - صفحة ${source.page_number}
+                        </div>
+                        <div class="result-content">
+                            ...${highlight}...
+                        </div>
+                        <div class="result-meta">
+                            📚 القسم: ${source.book_section || 'غير محدد'} | 
+                            ✍️ المؤلف: ${source.book_author || 'غير محدد'} |
+                            🆔 ID: ${source.id}
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Auto-search on Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                search();
+            }
+        });
+
+        // Load count on page load
+        loadDocCount();
+
+        // Auto search on load
+        search();
+
+        // Refresh count every 30 seconds
+        setInterval(loadDocCount, 30000);
+    </script>
+</body>
+</html>
