@@ -262,7 +262,7 @@ class UltraFastSearchService
 	 * Build flexible match query - allows prefixes without stemming
 	 * Supports word_match: 'all_words' (AND) or 'some_words' (OR)
 	 */
-	protected function buildFlexibleMatchQuery(string $searchTerm, string $wordOrder = 'any_order', string $wordMatch = 'all_words'): array
+	protected function buildFlexibleMatchQuery(string $searchTerm, string $wordOrder = 'any_order', string $wordMatch = 'some_words'): array
 	{
 		// Determine operator based on word_match
 		$operator = ($wordMatch === 'some_words') ? 'or' : 'and';
@@ -314,15 +314,18 @@ class UltraFastSearchService
 	 * Context7 Best Practice: Apply word_order logic to morphological search too
 	 * TEMPORARY FIX: Using query_string instead of match due to analyzer issues
 	 */
-	protected function buildMorphologicalQuery(string $searchTerm, string $wordOrder = 'any_order'): array
+	protected function buildMorphologicalQuery(string $searchTerm, string $wordOrder = 'any_order', string $wordMatch = 'some_words'): array
 	{
-		// For any_order: use query_string with AND operator
+		// For any_order: use query_string with configurable operator
 		if ($wordOrder === 'any_order') {
+			// Determine operator based on word_match setting
+			$operator = ($wordMatch === 'all_words') ? 'AND' : 'OR';
+			
 			return [
 				'query_string' => [
 					'query' => $searchTerm,
 					'default_field' => 'content',
-					'default_operator' => 'AND',
+					'default_operator' => $operator,
 					'analyze_wildcard' => false
 				]
 			];
@@ -473,7 +476,7 @@ class UltraFastSearchService
 			// Get search type from filters (new system)
 			$searchType = $filters['search_type'] ?? self::SEARCH_TYPE_FLEXIBLE;
 			$wordOrder = $filters['word_order'] ?? 'any_order';
-			$wordMatch = $filters['word_match'] ?? 'all_words'; // all_words or some_words
+			$wordMatch = $filters['word_match'] ?? 'some_words'; // all_words or some_words
 
 			switch ($searchType) {
 				case self::SEARCH_TYPE_EXACT:
@@ -481,7 +484,7 @@ class UltraFastSearchService
 					break;
 
 				case self::SEARCH_TYPE_MORPHOLOGICAL:
-					$boolQuery['bool']['must'][] = $this->buildMorphologicalQuery($query, $wordOrder);
+					$boolQuery['bool']['must'][] = $this->buildMorphologicalQuery($query, $wordOrder, $wordMatch);
 					break;
 
 				case self::SEARCH_TYPE_FUZZY:

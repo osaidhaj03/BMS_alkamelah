@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار البحث مع التحكم في مطابقة الكلمات</title>
+    <style>
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #667eea;
+            margin-top: 0;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .query-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .option-group {
+            flex: 1;
+        }
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .radio-group {
+            display: flex;
+            gap: 15px;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .radio-group input[type="radio"] {
+            margin-left: 5px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .result-item {
+            padding: 15px;
+            background: white;
+            margin-bottom: 10px;
+            border-right: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        .result-meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .result-content {
+            line-height: 1.6;
+        }
+        .highlight {
+            background: #fff59d;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .stats {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .comparison-side {
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .comparison-side.or {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+        .comparison-side.and {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+        }
+        .comparison-side h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge.default {
+            background: #4caf50;
+            color: white;
+        }
+        .badge.strict {
+            background: #ff9800;
+            color: white;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 6px;
+            border-right: 4px solid #c62828;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .preset-queries {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .preset-btn {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 اختبار البحث المحسّن</h1>
+        <p>اختبار التحكم في مطابقة الكلمات: OR (مرن) vs AND (مشدد)</p>
+    </div>
+
+    <!-- Test Section 1: Single Search -->
+    <div class="test-section">
+        <h2>📝 اختبار بحث فردي</h2>
+        
+        <div class="preset-queries">
+            <button class="preset-btn" onclick="setQuery('المكتبة')">المكتبة</button>
+            <button class="preset-btn" onclick="setQuery('الحمدلله')">الحمدلله</button>
+            <button class="preset-btn" onclick="setQuery('رب العالمين')">رب العالمين</button>
+            <button class="preset-btn" onclick="setQuery('حمد')">حمد</button>
+            <button class="preset-btn" onclick="setQuery('حدثنا أحمد بن إبراهيم قال')">حدثنا أحمد بن إبراهيم قال</button>
+        </div>
+
+        <input type="text" id="searchQuery" class="query-input" placeholder="ادخل كلمة البحث..." value="المكتبة">
+        
+        <div class="options">
+            <div class="option-group">
+                <label>نوع البحث:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="searchType" value="flexible" checked> مرن (Flexible)</label>
+                    <label><input type="radio" name="searchType" value="morphological"> صرفي (Morphological)</label>
+                </div>
+            </div>
+            
+            <div class="option-group">
+                <label>مطابقة الكلمات:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="wordMatch" value="some_words" checked> بعض الكلمات (OR)</label>
+                    <label><input type="radio" name="wordMatch" value="all_words"> كل الكلمات (AND)</label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="performSearch()">🔍 بحث</button>
+        
+        <div id="singleResults"></div>
+    </div>
+
+    <!-- Test Section 2: Comparison -->
+    <div class="test-section">
+        <h2>⚖️ مقارنة بين OR و AND</h2>
+        
+        <input type="text" id="comparisonQuery" class="query-input" placeholder="ادخل كلمة البحث..." value="رب العالمين">
+        
+        <button class="btn" onclick="performComparison()">🔍 مقارنة</button>
+        
+        <div class="comparison" id="comparisonResults"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://alkamelah1.anwaralolmaa.com/api/ultra-search';
+        
+        function setQuery(query) {
+            document.getElementById('searchQuery').value = query;
+            document.getElementById('comparisonQuery').value = query;
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('searchQuery').value;
+            const searchType = document.querySelector('input[name="searchType"]:checked').value;
+            const wordMatch = document.querySelector('input[name="wordMatch"]:checked').value;
+            const resultsDiv = document.getElementById('singleResults');
+            
+            if (!query.trim()) {
+                resultsDiv.innerHTML = '<div class="error">⚠️ الرجاء إدخال كلمة البحث</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>جاري البحث...</div>';
+            
+            try {
+                const url = `${API_URL}?q=${encodeURIComponent(query)}&search_type=${searchType}&word_match=${wordMatch}&per_page=10`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                displayResults(data, resultsDiv, wordMatch);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ خطأ: ${error.message}</div>`;
+            }
+        }
+
+        async function performComparison() {
+            const query = document.getElementById('comparisonQuery').value;
+            const resultsDiv = document.getElementById('comparisonResults');
+            
+            if (!query.trim()) {
+                resultsDiv.innerHTML = '<div class="error">⚠️ الرجاء إدخال كلمة البحث</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>جاري المقارنة...</div>';
+            
+            try {
+                // Search with OR (some_words)
+                const urlOR = `${API_URL}?q=${encodeURIComponent(query)}&search_type=flexible&word_match=some_words&per_page=5`;
+                const responseOR = await fetch(urlOR);
+                const dataOR = await responseOR.json();
+                
+                // Search with AND (all_words)
+                const urlAND = `${API_URL}?q=${encodeURIComponent(query)}&search_type=flexible&word_match=all_words&per_page=5`;
+                const responseAND = await fetch(urlAND);
+                const dataAND = await responseAND.json();
+                
+                displayComparison(dataOR, dataAND, resultsDiv);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ خطأ: ${error.message}</div>`;
+            }
+        }
+
+        function displayResults(data, container, wordMatch) {
+            const total = data.total || 0;
+            const results = data.data || [];
+            const took = data.took || 0;
+            
+            const matchType = wordMatch === 'some_words' ? 'OR (مرن)' : 'AND (مشدد)';
+            const badgeClass = wordMatch === 'some_words' ? 'default' : 'strict';
+            
+            let html = `
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${total.toLocaleString()}</div>
+                        <div class="stat-label">إجمالي النتائج</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${took}ms</div>
+                        <div class="stat-label">وقت البحث</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${results.length}</div>
+                        <div class="stat-label">النتائج المعروضة</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <span class="badge ${badgeClass}">${matchType}</span>
+                </div>
+            `;
+            
+            if (results.length === 0) {
+                html += '<div class="error">😔 لا توجد نتائج</div>';
+            } else {
+                html += '<div class="results">';
+                results.forEach((result, index) => {
+                    const snippet = result.content ? result.content.substring(0, 200) + '...' : 'لا يوجد محتوى';
+                    html += `
+                        <div class="result-item">
+                            <div class="result-meta">
+                                <strong>#${index + 1}</strong> | 
+                                كتاب: ${result.book_title || 'غير محدد'} | 
+                                مؤلف: ${result.book_author || 'غير محدد'} | 
+                                صفحة: ${result.page_number || '-'}
+                            </div>
+                            <div class="result-content">${snippet}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function displayComparison(dataOR, dataAND, container) {
+            const totalOR = dataOR.total || 0;
+            const totalAND = dataAND.total || 0;
+            const resultsOR = dataOR.data || [];
+            const resultsAND = dataAND.data || [];
+            
+            let html = `
+                <div class="comparison-side or">
+                    <h3>
+                        <span>OR - بعض الكلمات</span>
+                        <span class="badge default">افتراضي</span>
+                    </h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${totalOR.toLocaleString()}</div>
+                            <div class="stat-label">إجمالي النتائج</div>
+                        </div>
+                    </div>
+                    ${resultsOR.length === 0 ? '<div class="error">لا توجد نتائج</div>' : ''}
+                    ${resultsOR.map((r, i) => `
+                        <div class="result-item">
+                            <div class="result-meta"><strong>#${i + 1}</strong> | ${r.book_title || 'غير محدد'}</div>
+                            <div class="result-content">${(r.content || '').substring(0, 150)}...</div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="comparison-side and">
+                    <h3>
+                        <span>AND - كل الكلمات</span>
+                        <span class="badge strict">مشدد</span>
+                    </h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${totalAND.toLocaleString()}</div>
+                            <div class="stat-label">إجمالي النتائج</div>
+                        </div>
+                    </div>
+                    ${resultsAND.length === 0 ? '<div class="error">لا توجد نتائج</div>' : ''}
+                    ${resultsAND.map((r, i) => `
+                        <div class="result-item">
+                            <div class="result-meta"><strong>#${i + 1}</strong> | ${r.book_title || 'غير محدد'}</div>
+                            <div class="result-content">${(r.content || '').substring(0, 150)}...</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Auto-run first test on load
+        window.addEventListener('load', () => {
+            setTimeout(performComparison, 500);
+        });
+    </script>
+</body>
+</html>

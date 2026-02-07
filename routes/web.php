@@ -246,6 +246,7 @@ Route::prefix('api')->name('api.')->group(function () {
             $filters = [
                 'search_type' => $request->input('search_type', 'flexible_match'),
                 'word_order' => $request->input('word_order', 'any_order'),
+                'word_match' => $request->input('word_match', 'some_words'), // NEW: all_words or some_words
             ];
 
             // Add optional filters
@@ -320,6 +321,7 @@ Route::prefix('api')->name('api.')->group(function () {
             $filters = [
                 'search_type' => $request->input('search_type', 'flexible_match'),
                 'word_order' => $request->input('word_order', 'any_order'),
+                'word_match' => $request->input('word_match', 'some_words'), // NEW: all_words or some_words
             ];
 
             // Add optional filters
