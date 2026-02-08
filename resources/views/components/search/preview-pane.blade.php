@@ -1,5 +1,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <div x-data="{
     settingsOpen: false,
@@ -174,6 +175,35 @@
         footerInfo.style.color = '#888';
         footerInfo.innerHTML = 'المكتبة الكاملة - مكتبة تكاملت موضوعاتها وكتبها';
         wrapper.appendChild(footerInfo);
+
+        // QR Code في الزاوية اليسرى السفلية
+        const qrContainer = document.createElement('div');
+        // انتظار تحميل QR code
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        qrContainer.id = 'qr-container-temp';
+        qrContainer.style.position = 'absolute';
+        qrContainer.style.bottom = '20px';
+        qrContainer.style.left = '20px';
+        qrContainer.style.backgroundColor = 'white';
+        qrContainer.style.padding = '8px';
+        qrContainer.style.borderRadius = '8px';
+        qrContainer.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        
+        // رابط الصفحة الكامل
+        const pageUrl = window.location.origin + '/book/' + this.result.book_id + '/' + this.result.page_number;
+        
+        // إنشاء QR code
+        new QRCode(qrContainer, {
+            text: pageUrl,
+            width: 80,
+            height: 80,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        wrapper.appendChild(qrContainer);
 
         document.body.appendChild(wrapper);
 
@@ -419,7 +449,7 @@ class="h-full w-full flex flex-col bg-white">
                     </div>
                     
                     <div class="p-6 space-y-3">
-                        <p class="text-sm text-gray-500 mb-4 text-center">اختر الصيغة المناسبة لتنزيل الصفحة الحالية مع التظليل:</p>
+                        <p class="text-sm text-gray-500 mb-4 text-center">لتنزيل الصفحة الحالية مع التظليل:</p>
                         
                         <button @click="downloadPage('image')" 
                                 :disabled="isDownloading"
