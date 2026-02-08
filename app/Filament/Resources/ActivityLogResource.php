@@ -32,7 +32,7 @@ class ActivityLogResource extends Resource
             ->components([
                 Section::make('تفاصيل النشاط')
                     ->schema([
-                        \Filament\Forms\Components\Grid::make(2)
+                        \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
                                 KeyValue::make('properties.old')
                                     ->label('البيانات القديمة')
