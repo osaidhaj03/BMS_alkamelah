@@ -60,22 +60,33 @@
         
         try {
             const response = await fetch(`/api/page/${this.result.book_id}/${pageNumber}/full-content`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
             if (data.success && data.page) {
                 // تحديث النتيجة في $store
                 $store.search.selectedResult = {
                     ...this.result,
+                    id: data.page.id,
                     page_number: data.page.page_number,
+                    original_page_number: data.page.original_page_number,
                     content: data.page.full_content,
-                    highlighted_content: data.page.full_content
+                    highlighted_content: data.page.full_content,
+                    book_id: data.page.book_id,
+                    book_title: data.page.book_title,
+                    volume_title: data.page.volume_title,
+                    chapter_title: data.page.chapter_title
                 };
             } else {
-                alert('فشل في تحميل الصفحة');
+                alert(data.error || 'فشل في تحميل الصفحة');
             }
         } catch (error) {
             console.error('Error loading page:', error);
-            alert('حدث خطأ أثناء تحميل الصنحة');
+            alert('حدث خطأ أثناء تحميل الصفحة: ' + error.message);
         } finally {
             this.isNavigating = false;
         }
