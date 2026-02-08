@@ -9,6 +9,7 @@
     harakatEnabled: true,
     originalContent: '',
     isDownloading: false,
+    isNavigating: false,
     
     get result() {
         return $store.search.selectedResult;
@@ -19,10 +20,17 @@
         this.$watch('result', (newResult) => {
             if (newResult) {
                 this.$nextTick(() => {
+                    // حفظ المحتوى الأصلي مباشرة من result
+                    this.originalContent = newResult.highlighted_content || newResult.content || '';
+                    this.harakatEnabled = true;
+                    
+                    // تحديث العرض
                     const content = this.$refs.bookContent;
                     if (content) {
-                        this.originalContent = content.innerHTML;
-                        this.harakatEnabled = true; // Reset harakat state
+                        const contentDiv = content.querySelector('.prose');
+                        if (contentDiv) {
+                            contentDiv.querySelector('div').innerHTML = this.originalContent;
+                        }
                     }
                 });
             }
@@ -34,12 +42,58 @@
         const content = this.$refs.bookContent;
         if (!content) return;
 
+        const contentDiv = content.querySelector('.prose div');
+        if (!contentDiv) return;
+
         if (this.harakatEnabled) {
-            content.innerHTML = this.originalContent;
+            contentDiv.innerHTML = this.originalContent;
         } else {
             const harakatPattern = /[\u064B-\u065F\u0670]/g;
-            content.innerHTML = this.originalContent.replace(harakatPattern, '');
+            contentDiv.innerHTML = this.originalContent.replace(harakatPattern, '');
         }
+    },
+
+    async goToPage(pageNumber) {
+        if (!this.result || pageNumber < 1 || this.isNavigating) return;
+        
+        this.isNavigating = true;
+        
+        try {
+            const response = await fetch(`/api/page/${this.result.book_id}/${pageNumber}/full-content`);
+            const data = await response.json();
+            
+            if (data.success && data.page) {
+                // تحديث النتيجة في $store
+                $store.search.selectedResult = {
+                    ...this.result,
+                    page_number: data.page.page_number,
+                    content: data.page.full_content,
+                    highlighted_content: data.page.full_content
+                };
+            } else {
+                alert('فشل في تحميل الصفحة');
+            }
+        } catch (error) {
+            console.error('Error loading page:', error);
+            alert('حدث خطأ أثناء تحميل الصنحة');
+        } finally {
+            this.isNavigating = false;
+        }
+    },
+
+    goToPreviousPage() {
+        if (!this.result) return;
+        this.goToPage(this.result.page_number - 1);
+    },
+
+    goToNextPage() {
+        if (!this.result) return;
+        this.goToPage(this.result.page_number + 1);
+    },
+
+    jumpPages(delta) {
+        if (!this.result) return;
+        this.goToPage(this.result.page_number + delta);
     },
 
     changeFontSize(delta) {
@@ -160,12 +214,24 @@ class="h-full w-full flex flex-col bg-white">
         <div class="h-full flex flex-col">
             <!-- Breadcrumbs / Info Bar -->
             <div class="flex-none px-6 py-3 border-b border-gray-100 flex justify-between items-center bg-white z-10">
-                <div class="flex items-baseline gap-2 text-sm text-gray-500">
+                <div class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
                     <span @click="bookInfoOpen = true" 
                           class="font-bold text-gray-800 text-[1rem] leading-[1.35rem] cursor-pointer hover:text-green-600 transition-colors underline decoration-dotted decoration-gray-300 hover:decoration-green-600" 
                           x-text="result.book_title || 'بدون عنوان'"></span>
-                    <span class="text-gray-300">/</span>
-                    <span x-text="result.author_name || ''"></span>
+                    
+                    <template x-if="result.volume_title">
+                        <span class="flex items-center gap-2">
+                            <span class="text-gray-300">/</span>
+                            <span class="text-gray-600 font-medium" x-text="result.volume_title"></span>
+                        </span>
+                    </template>
+                    
+                    <template x-if="result.chapter_title">
+                        <span class="flex items-center gap-2">
+                            <span class="text-gray-300">/</span>
+                            <span class="text-gray-600" x-text="result.chapter_title"></span>
+                        </span>
+                    </template>
                 </div>
                 <div class="flex items-center gap-2">
                     <a :href="'/book/' + result.book_id + '/' + result.page_number" 
@@ -202,10 +268,57 @@ class="h-full w-full flex flex-col bg-white">
 
             <!-- Footer with Controls -->
             <div class="flex-none px-6 py-3 border-t border-gray-200 bg-white flex justify-between items-center relative z-10">
-                <div class="flex items-center gap-4">
-                    <span class="text-sm font-medium text-gray-600">
-                        صفحة <span x-text="result.page_number || '-'"></span>
-                    </span>
+                <!-- أزرار التنقل -->
+                <div class="flex items-center gap-2">
+                    <!-- القفز -10 صفحات -->
+                    <button @click="jumpPages(-10)" 
+                            :disabled="isNavigating || !result || result.page_number <= 10"
+                            class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed" 
+                            title="الرجوع 10 صفحات">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+                    </button>
+                    
+                    <!-- الصفحة السابقة -->
+                    <button @click="goToPreviousPage()" 
+                            :disabled="isNavigating || !result || result.page_number <= 1"
+                            class="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-medium" 
+                            title="الصفحة السابقة">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <span>السابقة</span>
+                    </button>
+                    
+                    <!-- رقم الصفحة -->
+                    <div class="px-4 py-2 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-bold text-gray-700">
+                            صفحة <span x-text="result.page_number || '-'"></span>
+                        </span>
+                    </div>
+                    
+                    <!-- الصفحة التالية -->
+                    <button @click="goToNextPage()" 
+                            :disabled="isNavigating"
+                            class="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-medium" 
+                            title="الصفحة التالية">
+                        <span>التالية</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                    
+                    <!-- القفز +10 صفحات -->
+                    <button @click="jumpPages(10)" 
+                            :disabled="isNavigating"
+                            class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed" 
+                            title="التقدم 10 صفحات">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                    </button>
+                    
+                    <!-- Loading Indicator -->
+                    <div x-show="isNavigating" class="flex items-center gap-2 text-sm text-green-600">
+                        <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>جاري التحميل...</span>
+                    </div>
                 </div>
 
                 <div class="flex gap-2">
