@@ -238,7 +238,7 @@ class BookForm
                                         'co_author' => 'مؤلف مشارك',
                                         'editor' => 'محقق',
                                         'translator' => 'مترجم',
-                                        'reviewer' => 'مراجع',
+                                        'reviewer' => 'المعتني بالكتاب',
                                         'commentator' => 'معلق',
                                     ])
                                     ->default('author')

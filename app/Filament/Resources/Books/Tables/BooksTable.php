@@ -12,7 +12,9 @@ use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\DatePicker;
 
 class BooksTable
 {
@@ -102,6 +104,43 @@ class BooksTable
                     ->relationship('bookSection', 'name')
                     ->searchable()
                     ->preload(),
+
+                SelectFilter::make('reviewed_by')
+                    ->label('اسم المراجع')
+                    ->options(fn () => \App\Models\Book::whereNotNull('reviewed_by')
+                        ->distinct()
+                        ->pluck('reviewed_by', 'reviewed_by')
+                        ->toArray())
+                    ->searchable(),
+
+                Filter::make('created_at')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->label('تاريخ الإضافة من'),
+                        DatePicker::make('created_until')
+                            ->label('تاريخ الإضافة إلى'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['created_from'] ?? null) {
+                            $indicators[] = 'من: ' . \Carbon\Carbon::parse($data['created_from'])->toFormattedDateString();
+                        }
+                        if ($data['created_until'] ?? null) {
+                            $indicators[] = 'إلى: ' . \Carbon\Carbon::parse($data['created_until'])->toFormattedDateString();
+                        }
+                        return $indicators;
+                    }),
 
                 SelectFilter::make('visibility')
                     ->label('الظهور')
