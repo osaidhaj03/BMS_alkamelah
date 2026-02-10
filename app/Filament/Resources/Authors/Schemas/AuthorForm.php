@@ -29,6 +29,14 @@ class AuthorForm
                             ->maxLength(255)
                             ->placeholder('مثال: النعمان بن ثابت التيمي الكوفي')
                             ->columnSpanFull(),
+                        
+                        TextInput::make('famous_name')
+                            ->label('الاسم المشهور')
+                            ->maxLength(255)
+                            ->placeholder('مثال: أبو حنيفة النعمان، ابن تيمية، الغزالي')
+                            ->helperText('الاسم الذي اشتهر به المؤلف بين الناس')
+                            ->columnSpanFull(),
+                        
                         Grid::make(3)
                             ->schema([
                                 TextInput::make('first_name')

@@ -27,6 +27,7 @@ class Author extends Model
         'middle_name',
         'last_name',
         'full_name',
+        'famous_name',
         'laqab',
         'kunyah',
         'biography',
