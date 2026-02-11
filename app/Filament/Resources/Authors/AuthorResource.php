@@ -8,6 +8,7 @@ use App\Filament\Resources\Authors\Pages\ListAuthors;
 use App\Filament\Resources\Authors\Schemas\AuthorForm;
 use App\Filament\Resources\Authors\Schemas\AuthorInfolist;
 use App\Filament\Resources\Authors\Tables\AuthorsTable;
+use App\Filament\Resources\Authors\Widgets;
 use App\Models\Author;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -68,6 +69,17 @@ class AuthorResource extends Resource
             'index' => ListAuthors::route('/'),
             'create' => CreateAuthor::route('/create'),
             'edit' => EditAuthor::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            Widgets\AuthorsStatsWidget::class,
+            Widgets\HanafiAuthorsWidget::class,
+            Widgets\ShafiAuthorsWidget::class,
+            Widgets\HanbaliAuthorsWidget::class,
+            Widgets\MalikiAuthorsWidget::class,
         ];
     }
 }

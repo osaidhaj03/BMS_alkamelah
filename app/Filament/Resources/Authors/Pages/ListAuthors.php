@@ -16,4 +16,21 @@ class ListAuthors extends ListRecords
             CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            AuthorResource::getWidgets()[0], // AuthorsStatsWidget
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            AuthorResource::getWidgets()[1], // HanafiAuthorsWidget
+            AuthorResource::getWidgets()[2], // ShafiAuthorsWidget
+            AuthorResource::getWidgets()[3], // HanbaliAuthorsWidget
+            AuthorResource::getWidgets()[4], // MalikiAuthorsWidget
+        ];
+    }
 }

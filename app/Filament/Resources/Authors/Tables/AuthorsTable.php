@@ -60,6 +60,13 @@ class AuthorsTable
                     ->label('على قيد الحياة')
                     ->toggleable()
                     ->boolean(),
+                TextColumn::make('views_count')
+                    ->label('عدد المشاهدات')
+                    ->sortable()
+                    ->toggleable()
+                    ->default(0)
+                    ->badge()
+                    ->color('info'),
                 TextColumn::make('birth_date')
                     ->label('تاريخ الولادة')
                     ->toggleable()
