@@ -3,6 +3,11 @@
 namespace App\Filament\Resources\Authors\Pages;
 
 use App\Filament\Resources\Authors\AuthorResource;
+use App\Filament\Resources\Authors\Widgets\AuthorsStatsWidget;
+use App\Filament\Resources\Authors\Widgets\HanafiAuthorsWidget;
+use App\Filament\Resources\Authors\Widgets\ShafiAuthorsWidget;
+use App\Filament\Resources\Authors\Widgets\HanbaliAuthorsWidget;
+use App\Filament\Resources\Authors\Widgets\MalikiAuthorsWidget;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -20,17 +25,17 @@ class ListAuthors extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            AuthorResource::getWidgets()[0], // AuthorsStatsWidget
+            AuthorsStatsWidget::class,
         ];
     }
 
     protected function getFooterWidgets(): array
     {
         return [
-            AuthorResource::getWidgets()[1], // HanafiAuthorsWidget
-            AuthorResource::getWidgets()[2], // ShafiAuthorsWidget
-            AuthorResource::getWidgets()[3], // HanbaliAuthorsWidget
-            AuthorResource::getWidgets()[4], // MalikiAuthorsWidget
+            HanafiAuthorsWidget::class,
+            ShafiAuthorsWidget::class,
+            HanbaliAuthorsWidget::class,
+            MalikiAuthorsWidget::class,
         ];
     }
 }
