@@ -15,6 +15,11 @@ class VisitorSessionsTable extends BaseWidget
 
     protected static ?string $heading = 'جلسات الزوار الأخيرة';
 
+    protected function getTableRecordKey($record): string
+    {
+        return $record->session_id ?? uniqid();
+    }
+
     public function table(Table $table): Table
     {
         return $table
