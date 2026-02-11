@@ -46,6 +46,12 @@
     </url>
     
     <url>
+        <loc>{{ url('/search') }}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
         <loc>{{ url('/feedback') }}</loc>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
