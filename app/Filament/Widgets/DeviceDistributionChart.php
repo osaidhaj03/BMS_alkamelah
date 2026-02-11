@@ -7,8 +7,15 @@ use Filament\Widgets\ChartWidget;
 
 class DeviceDistributionChart extends ChartWidget
 {
-    protected ?string $heading = 'توزيع الأجهزة';
-    protected static ?int $sort = 21;
+    public function getHeading(): ?string
+    {
+        return 'توزيع الأجهزة';
+    }
+
+    public static function getSort(): int
+    {
+        return 21;
+    }
 
     protected function getData(): array
     {

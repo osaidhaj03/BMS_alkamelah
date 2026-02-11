@@ -8,8 +8,15 @@ use Illuminate\Support\Carbon;
 
 class VisitsLineChart extends ChartWidget
 {
-    protected static ?string $heading = 'الزيارات اليومية (آخر 30 يوم)';
-    protected static ?int $sort = 20;
+    public function getHeading(): ?string
+    {
+        return 'الزيارات اليومية (آخر 30 يوم)';
+    }
+
+    public static function getSort(): int
+    {
+        return 20;
+    }
 
     protected function getData(): array
     {

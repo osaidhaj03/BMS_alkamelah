@@ -7,8 +7,15 @@ use Filament\Widgets\ChartWidget;
 
 class TopPagesChart extends ChartWidget
 {
-    protected static ?string $heading = 'أكثر الصفحات زيارة (Top 10)';
-    protected static ?int $sort = 22;
+    public function getHeading(): ?string
+    {
+        return 'أكثر الصفحات زيارة (Top 10)';
+    }
+
+    public static function getSort(): int
+    {
+        return 22;
+    }
 
     protected function getData(): array
     {
