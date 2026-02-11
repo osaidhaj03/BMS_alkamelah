@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @if(isset($_visit_id))
+    <meta name="visit-id" content="{{ $_visit_id }}">
+    @endif
 
     <!-- Primary Meta Tags -->
     <title>@yield('seo_title', 'المكتبة الكاملة | أكبر مشروع لرقمنة التراث العلمي والأدبي')</title>
@@ -94,5 +97,6 @@
     <x-chatbot />
 
     @stack('scripts')
+    <script src="{{ asset('js/visit-tracker.js') }}"></script>
 </body>
 </html>

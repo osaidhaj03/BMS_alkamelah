@@ -13,6 +13,24 @@ use App\Http\Controllers\BookEditorController;
 use App\Http\Controllers\ChapterController;
 
 
+// Visit Duration API (receives duration from JS tracker via sendBeacon)
+Route::post('/visit-duration', function (\Illuminate\Http\Request $request) {
+    try {
+        $visitId = $request->input('visit_id');
+        $duration = (int) $request->input('duration');
+
+        if ($visitId && $duration > 0 && $duration <= 1800) {
+            \App\Models\PageVisit::where('id', $visitId)
+                ->whereNull('duration_seconds')
+                ->update(['duration_seconds' => $duration]);
+        }
+    } catch (\Exception $e) {
+        // تجاهل الأخطاء
+    }
+
+    return response()->noContent();
+})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
 // Sitemap Route for Google Search Console
 Route::get('/sitemap.xml', function () {
     $articles = \App\Models\Article::select('slug', 'updated_at')->get();

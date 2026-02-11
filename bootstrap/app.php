@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
+        $middleware->web(append: [
+            \App\Http\Middleware\TrackPageVisits::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
