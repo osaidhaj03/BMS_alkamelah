@@ -6,7 +6,7 @@
     <!-- Header -->
     @include('components.layout.header')
 
-    <div class="min-h-screen bg-[#fafafa] relative overflow-hidden">
+    <div class="bg-[#fafafa] relative overflow-hidden" style="min-height: 60vh;">
         <!-- Section Background Pattern -->
         <div class="absolute inset-0 pointer-events-none"
             style="background-image: url('{{ asset('assets/Frame 1321314420.png') }}'); background-repeat: repeat; background-size: 800px; background-attachment: fixed;">
@@ -16,7 +16,7 @@
 
             <!-- Author Header Card -->
             <div
-                class="bg-white rounded-[2rem] shadow-xl shadow-green-900/5 overflow-hidden border border-gray-100 p-8 md:p-12 mb-4">
+                class="bg-white rounded-[2rem] shadow-xl shadow-green-900/5 overflow-hidden border border-gray-100 p-8 md:p-12 mb-0">
                 <div class="flex flex-col md:flex-row gap-8 items-start">
 
                     <!-- Author Image -->
@@ -121,7 +121,7 @@
             <!-- Biography Card -->
             @if($author->biography)
                 <div
-                    class="bg-white rounded-[2rem] shadow-xl shadow-green-900/5 overflow-hidden border border-gray-100 p-8 md:p-12 mb-4">
+                    class="bg-white rounded-[2rem] shadow-xl shadow-green-900/5 overflow-hidden border border-gray-100 p-8 md:p-12 mt-6 mb-4">
                     <div class="flex items-center gap-4 mb-6">
                         <div class="w-10 h-10 flex items-center justify-center bg-[#e8f5e9] rounded-xl">
                             <svg class="w-5 h-5 text-[#2C6E4A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -336,14 +336,21 @@
                         </div>
 
                         {{-- List Area --}}
-                        <div class="flex-1 overflow-y-auto p-4 max-h-64">
+                        <div class="flex-1 overflow-y-auto p-4 max-h-64 relative">
+                            <div wire:loading.flex wire:target="toggleSectionFilter,toggleAuthorFilter,loadMoreAuthors,filterSearch" 
+                                 class="absolute inset-0 bg-white bg-opacity-75 items-center justify-center z-10 hidden">
+                                <svg class="animate-spin h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
                             <ul class="space-y-1">
                                 @if($activeFilterTab === 'sections')
                                     @forelse($sections as $sec)
-                                        <li class="relative flex items-start py-2 px-4 hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
-                                            wire:click="toggleSectionFilter({{ $sec->id }})">
+                                        <li wire:key="section-{{ $sec->id }}" class="relative flex items-start py-2 px-4 hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
+                                            wire:click.prevent="toggleSectionFilter({{ $sec->id }})">
                                             <div class="min-w-0 flex-1 text-sm">
-                                                <label class="select-none font-medium text-gray-900 cursor-pointer">{{ $sec->name }}</label>
+                                                <span class="select-none font-medium text-gray-900">{{ $sec->name }}</span>
                                             </div>
                                             <div class="mr-3 flex h-6 items-center">
                                                 <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors {{ in_array($sec->id, $sectionFilters) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300' }}">
@@ -358,10 +365,12 @@
                                     @endforelse
                                 @else
                                     @forelse($authors as $auth)
-                                        <li class="relative flex items-start py-2 px-4 hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
-                                            wire:click="toggleAuthorFilter({{ $auth->id }})">
+                                        <li wire:key="author-{{ $auth->id }}" class="relative flex items-start py-2 px-4 hover:bg-white hover:shadow-sm rounded-lg transition-all cursor-pointer"
+                                            wire:click.prevent="toggleAuthorFilter({{ $auth->id }})">
                                             <div class="min-w-0 flex-1 text-sm">
-                                                <label class="select-none font-medium text-gray-900 cursor-pointer">{{ $auth->full_name }}</label>
+                                                <span class="select-none font-medium text-gray-900">
+                                                    {{ $auth->full_name ?: ($auth->famous_name ?: 'مؤلف #' . $auth->id) }}
+                                                </span>
                                             </div>
                                             <div class="mr-3 flex h-6 items-center">
                                                 <div class="relative flex items-center justify-center w-5 h-5 border rounded transition-colors {{ in_array($auth->id, $authorFilters) ? 'bg-green-600 border-green-600' : 'bg-white border-gray-300' }}">

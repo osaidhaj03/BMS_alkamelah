@@ -142,20 +142,22 @@ class BooksTable extends Component
 
     public function toggleSectionFilter($sectionId)
     {
-        if (in_array($sectionId, $this->sectionFilters)) {
-            $this->sectionFilters = array_values(array_diff($this->sectionFilters, [$sectionId]));
+        $id = (int) $sectionId;
+        if (in_array($id, $this->sectionFilters)) {
+            $this->sectionFilters = array_values(array_diff($this->sectionFilters, [$id]));
         } else {
-            $this->sectionFilters[] = $sectionId;
+            $this->sectionFilters[] = $id;
         }
         $this->resetPage();
     }
 
     public function toggleAuthorFilter($authorId)
     {
-        if (in_array($authorId, $this->authorFilters)) {
-            $this->authorFilters = array_values(array_diff($this->authorFilters, [$authorId]));
+        $id = (int) $authorId;
+        if (in_array($id, $this->authorFilters)) {
+            $this->authorFilters = array_values(array_diff($this->authorFilters, [$id]));
         } else {
-            $this->authorFilters[] = $authorId;
+            $this->authorFilters[] = $id;
         }
         $this->resetPage();
     }

@@ -243,7 +243,7 @@ Route::prefix('api')->name('api.')->group(function () {
             });
         }
 
-        $results = $query->select('id', 'first_name', 'last_name', 'laqab', 'kunyah')
+        $results = $query->select('id', 'first_name', 'last_name', 'laqab', 'kunyah', 'full_name')
             ->orderBy('first_name')
             ->paginate(50);
 
@@ -251,9 +251,7 @@ Route::prefix('api')->name('api.')->group(function () {
         $results->getCollection()->transform(function ($author) {
             return [
                 'id' => $author->id,
-                'name' => trim(implode(' ', array_filter([
-                    $author->laqab,
-                    $author->kunyah,
+                'name' => $author->full_name ?: trim(implode(' ', array_filter([
                     $author->first_name,
                     $author->last_name,
                 ])))

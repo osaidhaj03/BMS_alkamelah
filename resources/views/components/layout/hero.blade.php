@@ -50,85 +50,7 @@
                     :placeholder="placeholderText" dir="rtl">
 
                 <!-- Actions (Left) -->
-                <div class="flex items-center pl-2 gap-1 h-full">
-
-                    <!-- Filter Button -->
-                    <button @click="filterModalOpen = true"
-                        class="p-2 mr-1 rounded-full hover:bg-gray-100 transition-colors" style="color: #2C6E4A;"
-                        title="تصفية النتائج">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
-                            </path>
-                        </svg>
-                        <span x-show="getActiveFiltersCount() > 0"
-                            class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"
-                            x-text="getActiveFiltersCount()"></span>
-                    </button>
-
-                    <!-- Settings Button (Visible only for Content Search) -->
-                    <div class="relative h-full flex items-center" x-show="searchMode === 'content'" x-cloak
-                        style="display: none;">
-                        <button @click="settingsOpen = !settingsOpen" @click.outside="settingsOpen = false"
-                            class="p-2 ml-2 rounded-full hover:bg-gray-100 transition-colors"
-                            :class="{'bg-gray-100': settingsOpen}" style="color: #2C6E4A;" title="إعدادات البحث">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                </path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </button>
-
-                        <!-- Settings Dropdown -->
-                        <div x-show="settingsOpen" x-transition x-cloak style="display: none;"
-                            class="absolute top-full left-0 mt-4 w-[300px] sm:w-[400px] bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden text-right">
-                            <div class="p-4 grid grid-cols-1 gap-4 text-right">
-                                <!-- Search Type -->
-                                <div class="space-y-2">
-                                    <h4
-                                        class="font-bold text-gray-700 text-xs uppercase tracking-wider border-b border-gray-100 pb-2">
-                                        نوع البحث</h4>
-                                    <div class="flex flex-col gap-1">
-                                        <label
-                                            class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                            <input type="radio" name="searchType" value="exact" x-model="searchType"
-                                                class="h-4 w-4" style="color: #2C6E4A;">
-                                            <span class="text-sm font-medium">البحث المطابق</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                            <input type="radio" name="searchType" value="flexible" x-model="searchType"
-                                                class="h-4 w-4" style="color: #2C6E4A;">
-                                            <span class="text-sm font-medium">البحث الغير مطابق</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <!-- Word Order -->
-                                <div class="space-y-2">
-                                    <h4
-                                        class="font-bold text-gray-700 text-xs uppercase tracking-wider border-b border-gray-100 pb-2">
-                                        ترتيب الكلمات</h4>
-                                    <div class="flex flex-col gap-1">
-                                        <label
-                                            class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                            <input type="radio" name="wordOrder" value="consecutive" x-model="wordOrder"
-                                                class="h-4 w-4" style="color: #2C6E4A;">
-                                            <span class="text-sm font-medium">كلمات متتالية</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                            <input type="radio" name="wordOrder" value="any" x-model="wordOrder"
-                                                class="h-4 w-4" style="color: #2C6E4A;">
-                                            <span class="text-sm font-medium">أي ترتيب</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
 
             <!-- Suggestions Dropdown -->
@@ -177,7 +99,6 @@
     </div>
 
     {{-- Filter Modal for Books --}}
-    {{-- COMMENTED OUT - TODO: Uncomment when ready to use
     <div x-show="filterModalOpen && searchMode === 'books'" style="display: none;"
         class="fixed inset-0 z-[9999] overflow-y-auto" aria-modal="true" x-cloak>
 
@@ -293,11 +214,9 @@
             </div>
         </div>
     </div>
-    --}}
 
 
-    {{-- Filter Modal for Authors - INCOMPLETE, TODO: Add header and content sections --}}
-    {{--
+    {{-- Filter Modal for Authors --}}
     <div x-show="filterModalOpen && searchMode === 'authors'" style="display: none;"
         class="fixed inset-0 z-[9999] overflow-y-auto" aria-modal="true" x-cloak>
 
@@ -307,6 +226,91 @@
             <div x-transition
                 class="relative transform overflow-hidden rounded-xl bg-white text-right shadow-xl w-full max-w-lg flex flex-col max-h-[80vh]">
 
+                <div class="bg-white px-6 pt-5 pb-4 border-b border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-gray-900">تصفية المؤلفين</h3>
+                        <button @click="filterModalOpen = false" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="flex border-b border-gray-200">
+                        <button @click="authorsFilterTab = 'madhhab'"
+                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors"
+                            :class="authorsFilterTab === 'madhhab' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500'">
+                            المذهب
+                            <span x-show="madhhabFilters.length > 0"
+                                class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full"
+                                x-text="madhhabFilters.length"></span>
+                        </button>
+                        <button @click="authorsFilterTab = 'century'"
+                            class="flex-1 pb-3 text-sm font-bold text-center border-b-2 transition-colors"
+                            :class="authorsFilterTab === 'century' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500'">
+                            العصر / الوفاة
+                            <span x-show="centuryFilters.length > 0 || deathDateFrom || deathDateTo"
+                                class="mr-1 text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full"
+                                x-text="centuryFilters.length + (deathDateFrom || deathDateTo ? 1 : 0)"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 bg-gray-50 max-h-72">
+                    <!-- Madhhab Tab -->
+                    <div x-show="authorsFilterTab === 'madhhab'">
+                        <ul class="space-y-1">
+                            <template x-for="madhhab in availableMadhhabs" :key="madhhab">
+                                <li class="flex items-center py-2 px-4 hover:bg-white rounded-lg cursor-pointer"
+                                    @click="toggleMadhhabFilter(madhhab)">
+                                    <div class="flex-1 font-medium text-right" x-text="madhhab"
+                                        style="font-size: 1rem;"></div>
+                                    <div class="w-5 h-5 border rounded flex items-center justify-center mr-3"
+                                        :class="madhhabFilters.includes(madhhab) ? 'bg-green-600 border-green-600' : 'border-gray-300'">
+                                        <svg x-show="madhhabFilters.includes(madhhab)" class="w-3.5 h-3.5 text-white"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+
+                    <!-- Century/Date Tab -->
+                    <div x-show="authorsFilterTab === 'century'">
+                        <div class="mb-4 bg-white p-3 rounded-lg border border-gray-200">
+                            <h4 class="font-bold text-gray-700 text-sm mb-2">سنة الوفاة (هجري)</h4>
+                            <div class="flex gap-2">
+                                <input type="number" x-model="deathDateTo" placeholder="إلى"
+                                    class="w-full rounded-md border-gray-300 text-sm focus:ring-green-500 focus:border-green-500 text-right">
+                                <input type="number" x-model="deathDateFrom" placeholder="من"
+                                    class="w-full rounded-md border-gray-300 text-sm focus:ring-green-500 focus:border-green-500 text-right">
+                            </div>
+                        </div>
+
+                        <h4 class="font-bold text-gray-700 text-sm mb-2 px-1">القرون</h4>
+                        <ul class="space-y-1">
+                            <template x-for="(label, key) in availableCenturies" :key="key">
+                                <li class="flex items-center py-2 px-4 hover:bg-white rounded-lg cursor-pointer"
+                                    @click="toggleCenturyFilter(key)">
+                                    <div class="flex-1 font-medium text-right" x-text="label"
+                                        style="font-size: 1rem;"></div>
+                                    <div class="w-5 h-5 border rounded flex items-center justify-center mr-3"
+                                        :class="centuryFilters.includes(key) ? 'bg-green-600 border-green-600' : 'border-gray-300'">
+                                        <svg x-show="centuryFilters.includes(key)" class="w-3.5 h-3.5 text-white"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
 
                 <!-- Footer -->
                 <div class="bg-white px-6 py-3 gap-3 flex flex-row-reverse border-t border-gray-100">
@@ -321,7 +325,6 @@
             </div>
         </div>
    </div>
-    --}}
 </div>
 
 <script>

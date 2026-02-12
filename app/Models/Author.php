@@ -165,6 +165,7 @@ class Author extends Model
             $this->last_name,
         ]);
 
-        return implode(' ', $nameParts);
+        $full = implode(' ', $nameParts);
+        return !empty(trim($full)) ? $full : ($this->famous_name ?? 'مؤلف غير معروف');
     }
 }
