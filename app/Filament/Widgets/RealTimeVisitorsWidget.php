@@ -7,11 +7,11 @@ use Filament\Widgets\Widget;
 
 class RealTimeVisitorsWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.real-time-visitors';
+    protected string $view = 'filament.widgets.real-time-visitors';
     protected int|string|array $columnSpan = 'full';
 
     // تحديث كل 10 ثواني
-    protected static ?string $pollingInterval = '10s';
+    protected ?string $pollingInterval = '10s';
 
     public static function getSort(): int
     {

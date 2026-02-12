@@ -2,17 +2,15 @@
 
 namespace App\Services;
 
-use GeoIp2\Database\Reader;
-
 class GeoIPService
 {
-    protected ?Reader $reader = null;
+    protected $reader = null;
 
     public function __construct()
     {
         $dbPath = storage_path('app/geoip/GeoLite2-City.mmdb');
-        if (file_exists($dbPath)) {
-            $this->reader = new Reader($dbPath);
+        if (file_exists($dbPath) && class_exists(\GeoIp2\Database\Reader::class)) {
+            $this->reader = new \GeoIp2\Database\Reader($dbPath);
         }
     }
 
