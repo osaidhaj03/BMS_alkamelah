@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use App\Models\PageVisit;
 use App\Services\UserAgentParser;
+use App\Services\GeoIPService;
+use App\Services\ReferrerParser;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -59,20 +61,34 @@ class TrackPageVisits
             [$isBot, $botName] = $this->detectBot($request);
             $deviceInfo = UserAgentParser::parse($request->userAgent());
 
+            // GeoIP lookup
+            $geoService = new GeoIPService();
+            $geoData = $geoService->lookup($request->ip());
+
+            // Referrer source classification
+            $sourceType = ReferrerParser::parse(
+                $request->header('referer'),
+                $request->getHost()
+            );
+
             $visit = PageVisit::create([
-                'session_id'  => session()->getId(),
-                'ip_address'  => $request->ip(),
-                'url'         => $this->truncate($request->fullUrl(), 2048),
-                'route_name'  => $request->route()?->getName(),
-                'page_title'  => $this->getPageTitle($request),
-                'is_bot'      => $isBot,
-                'bot_name'    => $botName,
-                'referer'     => $this->truncate($request->header('referer'), 2048),
-                'user_agent'  => $this->truncate($request->userAgent(), 512),
-                'device_type' => $deviceInfo['device_type'],
-                'browser'     => $deviceInfo['browser'],
-                'os'          => $deviceInfo['os'],
-                'visited_at'  => now(),
+                'session_id'   => session()->getId(),
+                'ip_address'   => $request->ip(),
+                'url'          => $this->truncate($request->fullUrl(), 2048),
+                'route_name'   => $request->route()?->getName(),
+                'page_title'   => $this->getPageTitle($request),
+                'is_bot'       => $isBot,
+                'bot_name'     => $botName,
+                'referer'      => $this->truncate($request->header('referer'), 2048),
+                'user_agent'   => $this->truncate($request->userAgent(), 512),
+                'device_type'  => $deviceInfo['device_type'],
+                'browser'      => $deviceInfo['browser'],
+                'os'           => $deviceInfo['os'],
+                'country'      => $geoData['country'],
+                'city'         => $geoData['city'],
+                'country_code' => $geoData['country_code'],
+                'source_type'  => $sourceType,
+                'visited_at'   => now(),
             ]);
 
             // نمرر visit_id للصفحة عبر shared view data

@@ -137,6 +137,11 @@ class PageVisitResource extends Resource
                     }),
             ])
             ->actions([
+                \Filament\Actions\Action::make('journey')
+                    ->label('رحلة الزائر')
+                    ->icon('heroicon-o-arrow-trending-up')
+                    ->url(fn ($record) => static::getUrl('journey', ['session' => $record->session_id]))
+                    ->visible(fn ($record) => $record->session_id !== null),
                 \Filament\Actions\ViewAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])
@@ -152,11 +157,14 @@ class PageVisitResource extends Resource
     public static function getWidgets(): array
     {
         return [
+            \App\Filament\Widgets\RealTimeVisitorsWidget::class,
             \App\Filament\Widgets\VisitorStatsOverview::class,
             \App\Filament\Widgets\VisitsLineChart::class,
             \App\Filament\Widgets\HourlyVisitsChart::class,
             \App\Filament\Widgets\TopPagesChart::class,
             \App\Filament\Widgets\DeviceDistributionChart::class,
+            \App\Filament\Widgets\VisitorCountriesChart::class,
+            \App\Filament\Widgets\TrafficSourcesChart::class,
         ];
     }
 
@@ -168,7 +176,8 @@ class PageVisitResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPageVisits::route('/'),
+            'index'   => Pages\ListPageVisits::route('/'),
+            'journey' => Pages\ViewVisitorJourney::route('/journey'),
         ];
     }
 

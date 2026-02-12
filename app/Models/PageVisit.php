@@ -21,6 +21,10 @@ class PageVisit extends Model
         'device_type',
         'browser',
         'os',
+        'country',
+        'city',
+        'country_code',
+        'source_type',
         'visited_at',
     ];
 
