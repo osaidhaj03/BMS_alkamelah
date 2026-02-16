@@ -622,6 +622,7 @@ Route::get('/api/search', function () {
 
 // ===================================================================
 // TEST ROUTES FOR ERROR PAGES (DELETE IN PRODUCTION)
+//https://alkamelah1.anwaralolmaa.com/?access_staging=secret123
 // ===================================================================
 Route::get('/page-404', function () { return view('errors.404'); });
 Route::get('/page-403', function () { return view('errors.403'); });

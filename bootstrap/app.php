@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
         $middleware->web(append: [
             \App\Http\Middleware\TrackPageVisits::class,
+            \App\Http\Middleware\RedirectStagingTraffic::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
