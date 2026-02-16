@@ -1,9 +1,9 @@
-
+@extends('layouts.app')
 
 @section('seo_title', 'منصة التطوير | المكتبة الكاملة')
 @section('seo_description', 'هذه البيئة مخصصة لأغراض التطوير والاختبار.')
 
-
+@section('content')
    
     <!-- Staging Interstitial Content -->
     <div class="min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 bg-gray-50" dir="rtl">
