@@ -618,3 +618,14 @@ Route::get('/api/search', function () {
         ], 500);
     }
 })->name('api.search');
+
+
+// ===================================================================
+// TEST ROUTES FOR ERROR PAGES (DELETE IN PRODUCTION)
+// ===================================================================
+Route::get('/test-404', function () { return view('errors.404'); });
+Route::get('/test-403', function () { return view('errors.403'); });
+Route::get('/test-401', function () { return view('errors.401'); });
+Route::get('/test-419', function () { return view('errors.419'); });
+Route::get('/test-500', function () { return view('errors.500'); });
+Route::get('/test-503', function () { return view('errors.503'); });
