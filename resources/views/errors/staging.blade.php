@@ -1,14 +1,14 @@
-@extends('layouts.app')
+
 
 @section('seo_title', 'منصة التطوير | المكتبة الكاملة')
 @section('seo_description', 'هذه البيئة مخصصة لأغراض التطوير والاختبار.')
 
-@section('content')
+
    
     <!-- Staging Interstitial Content -->
     <div class="min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 bg-gray-50" dir="rtl">
         <div class="space-y-8 max-w-lg mx-auto">
-            <!-- Icon -->
+            <!-- Icon 
             <div class="flex justify-center">
                 <div class="p-4 bg-amber-100 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -16,16 +16,20 @@
                     </svg>
                 </div>
             </div>
-            
+            -->
             <!-- Message -->
             <div class="space-y-4">
                 <h1 class="text-3xl font-bold text-gray-900 font-serif">
-                   بيئة التطوير والاختبار
+                  هذه النسخة من الموقع قيد التطوير والاختبار
                 </h1>
                 <div class="space-y-2 text-gray-600 text-lg leading-relaxed">
                     <p>
-                        أهلاً بك. أنت تتصفح حالياً النسخة التجريبية المخصصة للمطورين وفرق الاختبار.
+                        أهلاً بك. أنت تتصفح حالياً النسخة التجريبية المخصصة للمطورين .
                     </p>
+                    <p>
+يعمل فريقنا على تطوير الموقع باستمرار لتقديم أفضل تجربة ممكنة.
+                </p>
+<!--
                     <p class="text-sm text-gray-500">
                         البيانات والمحتوى هنا قد لا تكون محدثة أو نهائية.
                     </p>
@@ -45,7 +49,7 @@
                 {{-- Only show this linking if we are dev, but user won't see this unless they know the secret URL anyway --}}
             </div>
              <p class="text-xs text-gray-400 mt-8">
-                BMS Al-Kamelah Staging Environment
+developed by osaid salah 
             </p>
         </div>
     </div>
