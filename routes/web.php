@@ -623,9 +623,11 @@ Route::get('/api/search', function () {
 // ===================================================================
 // TEST ROUTES FOR ERROR PAGES (DELETE IN PRODUCTION)
 // ===================================================================
-Route::get('/test-404', function () { return view('errors.404'); });
-Route::get('/test-403', function () { return view('errors.403'); });
-Route::get('/test-401', function () { return view('errors.401'); });
-Route::get('/test-419', function () { return view('errors.419'); });
-Route::get('/test-500', function () { return view('errors.500'); });
-Route::get('/test-503', function () { return view('errors.503'); });
+Route::get('/page-404', function () { return view('errors.404'); });
+Route::get('/page-403', function () { return view('errors.403'); });
+Route::get('/page-401', function () { return view('errors.401'); });
+Route::get('/page-419', function () { return view('errors.419'); });
+Route::get('/page-500', function () { return view('errors.500'); });
+Route::get('/page-503', function () { return view('errors.503'); });
+Route::get('/page-504', function () { return view('errors.504'); });
+Route::get('/page-429', function () { return view('errors.429'); });
